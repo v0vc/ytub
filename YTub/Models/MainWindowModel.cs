@@ -24,20 +24,24 @@ namespace YTub.Models
 
         public void OpenSettings(object obj)
         {
-            string path;
+            string savepath;
+            var mpcpath = string.Empty;
+            var synconstart = 0;
             var fn = new FileInfo(Subscribe.ChanelDb);
             if (fn.Exists)
             {
-                path = Sqllite.GetDownloadPath(fn.FullName);
+                savepath = Sqllite.GetSettingsValue(fn.FullName, "savepath");
+                mpcpath = Sqllite.GetSettingsValue(fn.FullName, "pathtompc");
+                synconstart = Sqllite.GetSettingsIntValue(fn.FullName, "synconstart");
             }
             else
             {
-                path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                savepath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             }
 
             try
             {
-                var settingsModel = new SettingsModel(path);
+                var settingsModel = new SettingsModel(savepath, mpcpath, synconstart);
                 var settingslView = new SettingsView
                 {
                     Owner = Application.Current.MainWindow,

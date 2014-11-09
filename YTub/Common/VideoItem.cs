@@ -2,10 +2,14 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.Common;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -15,9 +19,21 @@ namespace YTub.Common
     {
         private bool _isSynced;
 
+        private bool _isHasFile;
+
+        private double _minProgress;
+
+        private double _maxProgress;
+
+        private double _percentDownloaded;
+
+        private bool _isDownloading;
+        
         public int Num { get; set; }
 
         public string Title { get; set; }
+
+        public string ClearTitle { get; set; }
 
         public string VideoID { get; set; }
 
@@ -27,11 +43,43 @@ namespace YTub.Common
 
         public string VideoLink { get; set; }
 
+        public string FilePath { get; set; }
+
         //public DateTime Updated { get; set; }
 
         public string Description { get; set; }
 
         public DateTime Published { get; set; }
+
+        public double MinProgress
+        {
+            get { return _minProgress; }
+            set
+            {
+                _minProgress = value;
+                OnPropertyChanged("MinProgress");
+            }
+        }
+
+        public double MaxProgress
+        {
+            get { return _maxProgress; }
+            set
+            {
+                _maxProgress = value;
+                OnPropertyChanged("MaxProgress");
+            }
+        }
+
+        public double PercentDownloaded
+        {
+            get { return _percentDownloaded; }
+            set
+            {
+                _percentDownloaded = value;
+                OnPropertyChanged("PercentDownloaded");
+            }
+        }
 
         public bool IsSynced
         {
@@ -43,9 +91,32 @@ namespace YTub.Common
             }
         }
 
+        public bool IsHasFile
+        {
+            get { return _isHasFile; }
+            set
+            {
+                _isHasFile = value;
+                OnPropertyChanged("IsHasFile");
+            }
+        }
+
+        public bool IsDownLoading
+        {
+            get { return _isDownloading; }
+            set
+            {
+                _isDownloading = value;
+                OnPropertyChanged("IsDownLoading");
+            }
+        }
+
         public VideoItem(JToken pair)
         {
+            MinProgress = 0;
+            MaxProgress = 100;
             Title = pair["title"]["$t"].ToString();
+            ClearTitle = MakeValidFileName(Title);
             var spraw = pair["id"]["$t"].ToString().Split('/');
             VideoID = spraw[spraw.Length - 1];
             ViewCount = (int)pair["yt$statistics"]["viewCount"];
@@ -58,7 +129,10 @@ namespace YTub.Common
 
         public VideoItem(DbDataRecord record)
         {
-            Title = record["title"].ToString();
+            MinProgress = 0;
+            MaxProgress = 100;
+            Title = record["title"].ToString().Replace("''", "'");
+            ClearTitle = MakeValidFileName(Title);
             VideoID = record["v_id"].ToString();
             VideoLink = record["url"].ToString();
             ViewCount = (int) record["viewcount"];
@@ -66,6 +140,50 @@ namespace YTub.Common
             Description = record["description"].ToString();
             Published = (DateTime) record["published"];
         }
+
+        public bool IsFileExist(string title)
+        {
+            var path = Path.Combine(Subscribe.DownloadPath, string.Format("{0}.mp4", title));
+            var fn = new FileInfo(path);
+            if (fn.Exists)
+            {
+                FilePath = path;
+            }
+            return fn.Exists;
+        }
+
+        public static string MakeValidFileName(string name)
+        {
+            string regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
+            var r = new Regex(string.Format("[{0}]", Regex.Escape(regexSearch)));
+            return r.Replace(name, String.Empty);
+            //return Path.GetInvalidFileNameChars().Aggregate(name, (current, c) => current.Replace(c, '_'));
+        }
+
+        public void RunFile(object runtype)
+        {
+            switch (runtype.ToString())
+            {
+                case "Local":
+                    var fn = new FileInfo(FilePath);
+                    if (fn.Exists)
+                    {
+                        System.Diagnostics.Process.Start(fn.FullName);
+                    }
+                    else
+                    {
+                        MessageBox.Show("File not exist", "Warning", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    break;
+
+                case "Online":
+                    var param = string.Format("{0} /play", VideoLink.Replace("https://", "http://"));
+                    var proc = System.Diagnostics.Process.Start(Subscribe.MpcPath, param);
+                    if (proc != null) proc.Close();
+                    break;
+            }
+        }
+
         //private void GetInfoAboutVideo()
         //{
         //    var wc = new System.Net.WebClient();
@@ -88,5 +206,6 @@ namespace YTub.Common
 
         #endregion
 
+        
     }
 }

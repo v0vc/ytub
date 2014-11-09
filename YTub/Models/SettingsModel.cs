@@ -9,12 +9,19 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using YTub.Common;
+using OpenFileDialog = System.Windows.Forms.OpenFileDialog;
 
 namespace YTub.Models
 {
-    public class SettingsModel :INotifyPropertyChanged
+    public class SettingsModel : INotifyPropertyChanged
     {
         private string _dirpath;
+
+        private string _mpcpath;
+
+        private string _result;
+
+        private bool _isSyncOnStart;
 
         public RelayCommand SaveCommand { get; set; }
 
@@ -30,34 +37,99 @@ namespace YTub.Models
             }
         }
 
-        public SettingsModel(string path)
+        public string Result
         {
-            DirPath = path;
+            get { return _result; }
+            set
+            {
+                _result = value;
+                OnPropertyChanged("Result");
+            }
+        }
+
+        public string MpcPath
+        {
+            get { return _mpcpath; }
+            set
+            {
+                _mpcpath = value;
+                OnPropertyChanged("MpcPath");
+            }
+        }
+
+        public bool IsSyncOnStart
+        {
+            get { return _isSyncOnStart; }
+            set
+            {
+                _isSyncOnStart = value;
+                OnPropertyChanged("IsSyncOnStart");
+            }
+        }
+
+        public SettingsModel(string savepath, string mpcpath, int synconstart)
+        {
+            DirPath = savepath;
+            MpcPath = mpcpath;
+            IsSyncOnStart = synconstart == 1;
             SaveCommand = new RelayCommand(SaveSettings);
             OpenDirCommand = new RelayCommand(OpenDir);
         }
 
         private void SaveSettings(object obj)
         {
-            var dir = new DirectoryInfo(DirPath);
-            if (dir.Exists)
+            var ressync = IsSyncOnStart ? 1 : 0;
+            Sqllite.UpdateSetting(Subscribe.ChanelDb, "synconstart", ressync);
+
+            var savedir = new DirectoryInfo(DirPath);
+            if (savedir.Exists)
             {
-                Sqllite.UpdateDownloadPath(Subscribe.ChanelDb, dir.FullName);
-                MessageBox.Show(@"Saved", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Sqllite.UpdateSetting(Subscribe.ChanelDb, "savepath", savedir.FullName);
+                Subscribe.DownloadPath = savedir.FullName;
+                Result = "Saved";
             }
             else
             {
-                MessageBox.Show(@"Check Directory", @"Warning", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Result = "Not saved, check Save dir";
+            }
+
+            if (!string.IsNullOrEmpty(MpcPath))
+            {
+                var fnmpc = new FileInfo(MpcPath);
+                if (fnmpc.Exists)
+                {
+                    Sqllite.UpdateSetting(Subscribe.ChanelDb, "pathtompc", fnmpc.FullName);
+                    Subscribe.MpcPath = fnmpc.FullName;
+                    Result = "Saved";
+                }
+                else
+                {
+                    Result = "Not saved, check MPC exe path";
+                }
             }
         }
 
         private void OpenDir(object obj)
         {
-            var dlg = new FolderBrowserDialog();
-            var res = dlg.ShowDialog();
-            if (res == DialogResult.OK)
+            switch (obj.ToString())
             {
-                DirPath = dlg.SelectedPath;
+                case "DirPath":
+                    var dlg = new FolderBrowserDialog();
+                    var res = dlg.ShowDialog();
+                    if (res == DialogResult.OK)
+                    {
+                        DirPath = dlg.SelectedPath;
+                    }
+                    break;
+
+                case "MpcPath":
+                    var dlgf = new OpenFileDialog();
+                    var resf = dlgf.ShowDialog();
+                    if (resf == DialogResult.OK)
+                    {
+                        MpcPath = dlgf.FileName;
+                    }
+                    break;
             }
         }
 

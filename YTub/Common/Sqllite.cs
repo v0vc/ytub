@@ -13,7 +13,7 @@ namespace YTub.Common
     {
         private const string TableVideos = "tblVideos";
 
-        private const string TableDir = "tblDir";
+        private const string TableSettings = "tblSettings";
 
         public static void CreateOrConnectDb(string dbfile, string autor, out int totalrow)
         {
@@ -49,8 +49,8 @@ namespace YTub.Common
             title = title.Replace("'", "''");
             chanelowner = chanelowner.Replace("'", "''");
             var zap =
-                string.Format(@"INSERT INTO '{0}' ('v_id', 'chanelowner', 'chanelname', 'url', 'title', 'viewcount', 'duration', 'published', 'description') 
-                                VALUES (@v_id, @chanelowner, @chanelname, @url, @title, @viewcount, @duration, @published, @description)", TableVideos);
+                string.Format(@"INSERT INTO '{0}' ('v_id', 'chanelowner', 'chanelname', 'url', 'title', 'viewcount', 'duration', 'published', 'description', 'cleartitle') 
+                                VALUES (@v_id, @chanelowner, @chanelname, @url, @title, @viewcount, @duration, @published, @description, @cleartitle)", TableVideos);
             using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
             using (var sqlcommand = new SQLiteCommand(sqlcon))
             {
@@ -64,6 +64,7 @@ namespace YTub.Common
                 sqlcommand.Parameters.AddWithValue("@duration", duration);
                 sqlcommand.Parameters.AddWithValue("@published", published);
                 sqlcommand.Parameters.AddWithValue("@description", description);
+                sqlcommand.Parameters.AddWithValue("@cleartitle", VideoItem.MakeValidFileName(title));
                 sqlcon.Open();
                 sqlcommand.ExecuteNonQuery();
                 sqlcon.Close();
@@ -124,10 +125,10 @@ namespace YTub.Common
             return res;
         }
 
-        public static string GetDownloadPath(string dbfile)
+        public static string GetSettingsValue(string dbfile, string settingname)
         {
             var res = string.Empty;
-            var zap = string.Format("SELECT * FROM {0}", TableDir);
+            var zap = string.Format("SELECT * FROM {0}", TableSettings);
             using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
             using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
             {
@@ -138,7 +139,7 @@ namespace YTub.Common
                     {
                         while (sdr.Read())
                         {
-                            res = sdr["path"].ToString();
+                            res = sdr[settingname].ToString();
                             break;
                         }
                     }
@@ -148,9 +149,36 @@ namespace YTub.Common
             return res;
         }
 
-        public static void UpdateDownloadPath(string dbfile, string path)
+        public static int GetSettingsIntValue(string dbfile, string settingname)
         {
-            var zap = string.Format("UPDATE {0} SET path='{1}'", TableDir, path);
+            var zap = string.Format("SELECT * FROM {0}", TableSettings);
+            using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
+            using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+            {
+                sqlcon.Open();
+                using (var sdr = sqlcommand.ExecuteReader())
+                {
+                    if (sdr.HasRows)
+                    {
+                        while (sdr.Read())
+                        {
+                            int resu;
+                            if (int.TryParse(sdr[settingname].ToString(), out resu))
+                            {
+                                return resu;
+                            }
+                            break;
+                        }
+                    }
+                }
+                sqlcon.Close();
+            }
+            return 0;
+        }
+
+        public static void UpdateSetting(string dbfile, string settingname, object settingvalue)
+        {
+            var zap = string.Format("UPDATE {0} SET {1}='{2}'", TableSettings, settingname, settingvalue);
             using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
             using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
             {
@@ -184,17 +212,16 @@ namespace YTub.Common
             }
         }
 
-        private static void CreateDb(string dbfile)
+        public static void CreateDb(string dbfile)
         {
             SQLiteConnection.CreateFile(dbfile);
             var lstcom = new List<string>();
-            var zap = string.Format("CREATE TABLE {0} (v_id TEXT PRIMARY KEY, chanelowner TEXT, chanelname TEXT, url TEXT, title TEXT, viewcount INT, duration INT, published DATETIME, description TEXT)",
+            var zap = string.Format("CREATE TABLE {0} (v_id TEXT PRIMARY KEY, chanelowner TEXT, chanelname TEXT, url TEXT, title TEXT, viewcount INT, duration INT, published DATETIME, description TEXT, cleartitle TEXT)",
                     TableVideos);
             lstcom.Add(zap);
-            var zapdir = string.Format("CREATE TABLE {0} (path TEXT)", TableDir);
+            var zapdir = string.Format("CREATE TABLE {0} (savepath TEXT, pathtompc TEXT, synconstart INT)", TableSettings);
             lstcom.Add(zapdir);
-            var insdir = string.Format(@"INSERT INTO '{0}' ('path') VALUES ('{1}')", TableDir,
-                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+            var insdir = string.Format(@"INSERT INTO '{0}' ('savepath', 'synconstart') VALUES ('{1}', '0')", TableSettings, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
             lstcom.Add(insdir);
             using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
             foreach (string com in lstcom)

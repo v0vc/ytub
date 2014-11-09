@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -33,7 +34,13 @@ namespace YTub.Common
 
         public static string ChanelDb;
 
+        public static string DownloadPath;
+
+        public static string MpcPath;
+
         private Chanel _currentChanel;
+
+        private IList _selectedListChanels = new ArrayList();
 
         private readonly BackgroundWorker _bgv = new BackgroundWorker();
 
@@ -49,12 +56,31 @@ namespace YTub.Common
 
         public ObservableCollection<Chanel> ChanelList { get; set; }
 
+        public bool IsSyncOnStart { get; set; }
+
+        public IList SelectedListChanels
+        {
+            get { return _selectedListChanels; }
+            set
+            {
+                _selectedListChanels = value;
+                OnPropertyChanged("SelectedListChanels");
+            }
+        }
+
         public Subscribe()
         {
             var dir = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
             if (dir == null) return;
             ChanelDb = Path.Combine(dir, "ytub.db");
             ChanelList = new ObservableCollection<Chanel>();
+            var fn = new FileInfo(ChanelDb);
+            if (fn.Exists)
+            {
+                DownloadPath = Sqllite.GetSettingsValue(ChanelDb, "savepath");
+                MpcPath = Sqllite.GetSettingsValue(ChanelDb, "pathtompc");
+                IsSyncOnStart = Sqllite.GetSettingsIntValue(ChanelDb, "synconstart") != 0;
+            }
             _bgv.WorkerReportsProgress = true;
             _bgv.DoWork += _bgv_DoWork;
             _bgv.RunWorkerCompleted += _bgv_RunWorkerCompleted;
@@ -62,13 +88,10 @@ namespace YTub.Common
 
         void _bgv_DoWork(object sender, DoWorkEventArgs e)
         {
-            if (e.Argument == null) return;
-            switch (e.Argument.ToString())
-            {
-                case "SyncChanel":
-                    SyncChanelBgv();
-                    break;
-            }
+            if (e.Argument == null) 
+                return;
+
+            SyncChanelBgv(e.Argument.ToString());
         }
 
         static void _bgv_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -127,24 +150,58 @@ namespace YTub.Common
 
         public void RemoveChanel(object obj)
         {
-            if (CurrentChanel == null)
-                return;
-            Sqllite.RemoveChanelFromDb(ChanelDb, CurrentChanel.ChanelOwner);
-            ChanelList.Remove(CurrentChanel);
+            if (SelectedListChanels.Count > 0)
+            {
+                var sb = new StringBuilder();
+                foreach (Chanel chanel in SelectedListChanels)
+                {
+                    sb.Append(chanel.ChanelName).Append(Environment.NewLine);
+                }
+                var result = MessageBox.Show("Are you sure to delete:" + Environment.NewLine + sb + "?", "Confirm", MessageBoxButton.OKCancel, MessageBoxImage.Information);
+                if (result == MessageBoxResult.OK)
+                {
+                    for (var i = SelectedListChanels.Count; i > 0; i--)
+                    {
+                        var chanel = SelectedListChanels[i - 1] as Chanel;
+                        if (chanel == null) continue;
+                        Sqllite.RemoveChanelFromDb(ChanelDb, chanel.ChanelOwner);
+                        ChanelList.Remove(chanel);
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please select Chanell");
+            }
+            
             if (ChanelList.Any())
                 CurrentChanel = ChanelList[0];
         }
 
         public void SyncChanel(object obj)
         {
-            if (!_bgv.IsBusy)
-                _bgv.RunWorkerAsync("SyncChanel");
+            switch (obj.ToString())
+            {
+                case "SyncChanelAll":
+                    if (!_bgv.IsBusy)
+                        _bgv.RunWorkerAsync("SyncChanelAll");
+                    break;
+
+                case "SyncChanelSelected":
+                    if (!_bgv.IsBusy)
+                        _bgv.RunWorkerAsync("SyncChanelSelected");
+                    break;
+            }
         }
 
         public void GetChanelsFromDb()
-        {
+        {   
             var fn = new FileInfo(ChanelDb);
-            if (!fn.Exists) return;
+            if (!fn.Exists)
+            {
+                Sqllite.CreateDb(ChanelDb);
+                return;
+            }
             foreach (KeyValuePair<string, string> pair in Sqllite.GetDistinctValues(ChanelDb, "chanelowner", "chanelname"))
             {
                 ChanelList.Add(new Chanel(pair.Value, pair.Key));
@@ -156,46 +213,88 @@ namespace YTub.Common
             }
             if (ChanelList.Any())
                 CurrentChanel = ChanelList[0];
+
+            if (IsSyncOnStart)
+                SyncChanel("SyncChanelAll");
         }
 
-        private void SyncChanelBgv()
+        private void SyncChanelBgv(string wtype)
         {
-            if (CurrentChanel == null)
-                return;
-            Application.Current.Dispatcher.Invoke(() => CurrentChanel.ListVideoItems.Clear());
-            
-            CurrentChanel.GetChanelVideoItems(CurrentChanel.MinRes);
-
-            var dir = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
-            if (dir != null)
+            switch (wtype)
             {
-                int totalrow;
-                Sqllite.CreateOrConnectDb(ChanelDb, CurrentChanel.ChanelOwner, out totalrow);
-                if (totalrow == 0)
-                {
-                    foreach (VideoItem videoItem in CurrentChanel.ListVideoItems)
-                    {
-                        Sqllite.InsertRecord(ChanelDb, videoItem.VideoID, CurrentChanel.ChanelOwner,
-                            CurrentChanel.ChanelName, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount,
-                            videoItem.Duration, videoItem.Published, videoItem.Description);
-                    }
-                }
-                else
-                {
-                    foreach (VideoItem videoItem in CurrentChanel.ListVideoItems)
-                    {
-                        VideoItem item = videoItem;
-                        Application.Current.Dispatcher.Invoke(() => item.IsSynced = Sqllite.IsTableHasRecord(ChanelDb, item.VideoID));
-                    }
-                    CurrentChanel.IsReady = !CurrentChanel.ListVideoItems.Select(x => x.IsSynced).Contains(false);
+                case "SyncChanelAll":
 
-                    foreach (VideoItem videoItem in CurrentChanel.ListVideoItems.Where(x => x.IsSynced == false))
+                    ChanelSync(ChanelList);
+
+                    break;
+
+                case "SyncChanelSelected":
+
+                    ChanelSync(SelectedListChanels);
+
+                    break;
+            }
+            //if (ChanelList.Any())
+            //    CurrentChanel = ChanelList[0];
+        }
+
+        private static void ChanelSync(ICollection list)
+        {
+            if (list != null && list.Count > 0)
+            {
+                foreach (Chanel chanel in list)
+                {
+                    Chanel chanel1 = chanel;
+                    chanel1.GetChanelVideoItems(chanel1.MinRes);
+
+                    var dir = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+                    if (dir != null)
                     {
-                        Sqllite.InsertRecord(ChanelDb, videoItem.VideoID, CurrentChanel.ChanelOwner,
-                            CurrentChanel.ChanelName, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount,
-                            videoItem.Duration, videoItem.Published, videoItem.Description);
+                        int totalrow;
+                        Sqllite.CreateOrConnectDb(ChanelDb, chanel1.ChanelOwner, out totalrow);
+                        if (totalrow == 0)
+                        {
+                            foreach (VideoItem videoItem in chanel1.ListVideoItems)
+                            {
+                                Sqllite.InsertRecord(ChanelDb, videoItem.VideoID, chanel1.ChanelOwner,
+                                    chanel1.ChanelName, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount,
+                                    videoItem.Duration, videoItem.Published, videoItem.Description);
+                                VideoItem item = videoItem;
+                                Application.Current.Dispatcher.Invoke(() => item.IsHasFile = item.IsFileExist(item.ClearTitle));
+                            }
+                        }
+                        else
+                        {
+                            foreach (VideoItem videoItem in chanel1.ListVideoItems)
+                            {
+                                VideoItem item = videoItem;
+                                Application.Current.Dispatcher.Invoke(() => item.IsSynced = Sqllite.IsTableHasRecord(ChanelDb, item.VideoID));
+                                Application.Current.Dispatcher.Invoke(() => item.IsHasFile = item.IsFileExist(item.ClearTitle));
+                            }
+
+                            Application.Current.Dispatcher.Invoke(() => chanel1.IsReady = !chanel1.ListVideoItems.Select(x => x.IsSynced).Contains(false));
+                            foreach (VideoItem videoItem in chanel1.ListVideoItems.Where(x => x.IsSynced == false))
+                            {
+                                Sqllite.InsertRecord(ChanelDb, videoItem.VideoID, chanel1.ChanelOwner,
+                                    chanel1.ChanelName, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount,
+                                    videoItem.Duration, videoItem.Published, videoItem.Description);
+                            }
+                        }
                     }
                 }
+            }
+        }
+
+        public void PlayFile(object obj)
+        {
+            if (string.IsNullOrEmpty(MpcPath))
+            {
+                MessageBox.Show("Please select mpc exe file", "Warning", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            if (CurrentChanel != null && CurrentChanel.CurrentVideoItem != null)
+            {
+                CurrentChanel.CurrentVideoItem.RunFile(obj);
             }
         }
     }

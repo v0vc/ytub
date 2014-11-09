@@ -1,15 +1,18 @@
 ﻿<Window x:Class="YTub.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:common="clr-namespace:YTub.Common"
         Title="YTub" Height="400" Width="850" MinWidth="500"
         DataContext="{Binding MvViewModel, Source={StaticResource ViewModelLocator}}"
         Loaded="MainWindow_OnLoaded"
-        KeyUp="MainWindow_OnKeyUp">
+        KeyUp="MainWindow_OnKeyUp"
+        Icon="../Images/start.ico"
+        Style="{StaticResource VS2012WindowStyle}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"></RowDefinition>
             <RowDefinition></RowDefinition>
-            <RowDefinition Height="20"></RowDefinition>
+            <RowDefinition Height="22"></RowDefinition>
         </Grid.RowDefinitions>
         <Menu>
             <MenuItem Header="File">
@@ -28,61 +31,114 @@
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <GridSplitter Grid.Column="1" Width="5" VerticalAlignment="Stretch" HorizontalAlignment="Center"></GridSplitter>
-            <GroupBox Header="Chanels:" Grid.Column="0">
-                <DataGrid ItemsSource="{Binding Model.MySubscribe.ChanelList}" AutoGenerateColumns="False" HeadersVisibility="None" RowHeight="25" IsReadOnly="True" SelectedItem="{Binding Model.MySubscribe.CurrentChanel}">
+            <GroupBox Header="Chanels:">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition Height="38"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <common:CustomDataGrid ItemsSource="{Binding Model.MySubscribe.ChanelList}"
+                                           SelectedItemsList="{Binding Model.MySubscribe.SelectedListChanels, Mode=TwoWay}"
+                                           AutoGenerateColumns="False"
+                                           HeadersVisibility="None"
+                                           RowHeight="25"
+                                           IsReadOnly="True"
+                                           SelectedItem="{Binding Model.MySubscribe.CurrentChanel}">
+                        <DataGrid.Resources>
+                            <ContextMenu x:Key="DataRowContextMenu">
+                                <MenuItem Header="Sync" Click="SyncChanelOnClick" />
+                                <MenuItem Header="Remove" Click="RemoveChanelOnClick" />
+                                <MenuItem Header="Edit" Click="EditChanelOnClick"></MenuItem>
+                            </ContextMenu>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding IsReady, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" IsEnabled="False" Style="{StaticResource CircleCheckbox}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Width="*">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FontSize" Value="12"></Setter>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding ChanelName}" VerticalAlignment="Center" FontSize="18" Margin="3,0,0,0">
+                                            <TextBlock.ToolTip>
+                                                <TextBlock Text="{Binding ChanelOwner}"></TextBlock>
+                                            </TextBlock.ToolTip>
+                                </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                        <DataGrid.InputBindings>
+                            <MouseBinding Gesture="LeftDoubleClick" Command="{Binding SelectChanelCommand}" CommandParameter="SyncChanelSelected"/>
+                        </DataGrid.InputBindings>
+                        <DataGrid.RowStyle>
+                            <Style TargetType="{x:Type DataGridRow}">
+                                <Setter Property="ContextMenu" Value="{StaticResource DataRowContextMenu}" />
+                                <Setter Property="BorderThickness" Value="0" />
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </common:CustomDataGrid>
+                    <Border BorderBrush="Gainsboro" BorderThickness="1" Grid.Row="1" Margin="0,3,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Width="43" Height="26" Margin="2,0,0,0" ToolTip="Sync All" 
+                                    Background="LightBlue" 
+                                    Command="{Binding SelectChanelCommand}" 
+                                    CommandParameter="SyncChanelAll"
+                                    >
+                                <Image Source="../Images/refresh_24.png" Margin="0,1,0,0" />
+                            </Button>
+                            <Button Width="43" Height="26" Margin="3,0,0,0" ToolTip="Sync Selected" 
+                                    Background="LightBlue" 
+                                    Command="{Binding SelectChanelCommand}" 
+                                    CommandParameter="SyncChanelSelected"
+                                    >
+                                <Image Source="../Images/redo_24.png" Margin="0,3,0,0" />
+                            </Button>
+                            <Button Width="43" Height="26" Margin="3,0,0,0" ToolTip="Add" 
+                                    Background="LightBlue" 
+                                    Command="{Binding OpenAddChanelCommand}"
+                                    >
+                                <Image Source="../Images/add_24.png" Margin="0,2,0,0" />
+                            </Button>
+                            <Button Width="43" Height="26" Margin="3,0,0,0" ToolTip="Remove" 
+                                    Background="LightBlue" 
+                                    Command="{Binding RemoveChanelCommand}"
+                                    >
+                                <Image Source="../Images/remove_24.png" Margin="0,2,0,0" />
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </GroupBox>
+            <GridSplitter Grid.Column="1" Width="4" VerticalAlignment="Stretch" HorizontalAlignment="Center" Margin="0,0,0,1"></GridSplitter>
+            <GroupBox Grid.Column="2" Header="Videos:">
+                <common:CustomDataGrid
+                            ItemsSource="{Binding Model.MySubscribe.CurrentChanel.ListVideoItems}"
+                            AutoGenerateColumns="False"
+                            SelectedItem="{Binding Model.MySubscribe.CurrentChanel.CurrentVideoItem}"
+                            SelectedItemsList="{Binding Model.MySubscribe.CurrentChanel.SelectedListVideoItems, Mode=TwoWay}"
+                            CanUserResizeRows="False"
+                            CanUserAddRows="False"
+                            CanUserDeleteRows="False"
+                            CanUserReorderColumns="False"
+                            FontSize="14">
                     <DataGrid.Resources>
                         <ContextMenu x:Key="DataRowContextMenu">
-                            <MenuItem Header="Sync" Click="SyncChanelOnClick" />
-                            <MenuItem Header="Remove" Click="RemoveChanelOnClick" />
-                            <MenuItem Header="Edit" Click="EditChanelOnClick"></MenuItem>
+                            <MenuItem Header="Play Online" Click="PlayOnClick" CommandParameter="Online" />
+                            <MenuItem Header="Play Local" Click="PlayOnClick" CommandParameter="Local" />
+                            <MenuItem Header="Download" Click="DownloadVideoOnClick" />
+                            <MenuItem Header="Add To Queue" Click="AddToQueueOnClick" />
                         </ContextMenu>
                     </DataGrid.Resources>
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <CheckBox IsChecked="{Binding IsReady, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" IsEnabled="False" Style="{StaticResource CircleCheckbox}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Width="*">
-                            <DataGridTemplateColumn.HeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                    <Setter Property="FontSize" Value="12"></Setter>
-                                </Style>
-                            </DataGridTemplateColumn.HeaderStyle>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding ChanelName}" VerticalAlignment="Center" FontSize="18" Margin="3,0,0,0">
-                                        <TextBlock.ToolTip>
-                                            <TextBlock Text="{Binding ChanelOwner}"></TextBlock>
-                                        </TextBlock.ToolTip>
-                                    </TextBlock>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                    <DataGrid.InputBindings>
-                        <MouseBinding Gesture="LeftDoubleClick" Command="{Binding SelectChanelCommand}" />
-                    </DataGrid.InputBindings>
-                    <DataGrid.RowStyle>
-                        <Style TargetType="{x:Type DataGridRow}">
-                            <Setter Property="ContextMenu" Value="{StaticResource DataRowContextMenu}" />
-                            <Setter Property="BorderThickness" Value="0" />
-                        </Style>
-                    </DataGrid.RowStyle>
-                </DataGrid>
-            </GroupBox>
-            <GroupBox Grid.Column="2" Header="Videos:">
-                <DataGrid ItemsSource="{Binding Model.MySubscribe.CurrentChanel.ListVideoItems}"
-                          AutoGenerateColumns="False"
-                          CanUserResizeRows="False"
-                          CanUserAddRows="False"
-                          CanUserDeleteRows="False"
-                          CanUserReorderColumns="False"
-                          FontSize="14">
                     <DataGrid.CellStyle>
                         <Style TargetType="DataGridCell">
                             <Setter Property="Padding" Value="1" />
@@ -97,6 +153,13 @@
                             </Setter>
                         </Style>
                     </DataGrid.CellStyle>
+                    <DataGrid.RowStyle>
+                        <Style TargetType="{x:Type DataGridRow}">
+                            <Setter Property="ContextMenu" Value="{StaticResource DataRowContextMenu}" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <EventSetter Event="MouseDoubleClick" Handler="PlayOnClick"></EventSetter>
+                        </Style>
+                    </DataGrid.RowStyle>
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="S">
                             <DataGridTemplateColumn.HeaderStyle>
@@ -171,12 +234,81 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="File" SortMemberPath="IsHasFile">
+                            <DataGridTemplateColumn.HeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                    <Setter Property="FontSize" Value="12"></Setter>
+                                </Style>
+                            </DataGridTemplateColumn.HeaderStyle>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button x:Name="Button" BorderThickness="0" Background="Transparent" Click="PlayLocalButton_OnClick" ToolTip="Play">
+                                        <Image x:Name="Image"></Image>
+                                    </Button>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding IsHasFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Value="true">
+                                            <Setter TargetName="Image" Property="Image.Source" Value="../Images/tick_20.png"></Setter>
+                                            <Setter TargetName="Button" Property="IsEnabled" Value="True"></Setter>
+                                            <Setter TargetName="Button" Property="Visibility" Value="Visible"></Setter>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsHasFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Value="false">
+                                            <Setter TargetName="Button" Property="IsEnabled" Value="False"></Setter>
+                                            <Setter TargetName="Button" Property="Visibility" Value="Hidden"></Setter>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Download" SortMemberPath="IsHasFile">
+                            <DataGridTemplateColumn.HeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                    <Setter Property="FontSize" Value="12"></Setter>
+                                </Style>
+                            </DataGridTemplateColumn.HeaderStyle>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ProgressBar x:Name="ProgressBar"
+                                                 Visibility="Hidden" />
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding IsDownLoading, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Value="true">
+                                            <Setter TargetName="ProgressBar" Property="Visibility" Value="Visible"></Setter>
+                                            <Setter TargetName="ProgressBar" Property="Minimum" Value="{Binding MinProgress, UpdateSourceTrigger=PropertyChanged}"></Setter>
+                                            <Setter TargetName="ProgressBar" Property="Maximum" Value="{Binding MaxProgress, UpdateSourceTrigger=PropertyChanged}"></Setter>
+                                            <Setter TargetName="ProgressBar" Property="Value" Value="{Binding PercentDownloaded, UpdateSourceTrigger=PropertyChanged}"></Setter>
+                                            <Setter TargetName="ProgressBar" Property="Background" Value="LightGreen"></Setter>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsDownLoading, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Value="false">
+                                            <Setter TargetName="ProgressBar" Property="Visibility" Value="Hidden"></Setter>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
-                </DataGrid>
+                </common:CustomDataGrid>
             </GroupBox>
         </Grid>
         <DockPanel Grid.Row="2">
-            <TextBlock DockPanel.Dock="Right" Text="{Binding Model.MySubscribe.CurrentChanel.ListVideoItems.Count, StringFormat=Total: {0}}" VerticalAlignment="Stretch" HorizontalAlignment="Right" Margin="5,0,10,0"/>
+            <ResizeGrip Opacity="0.75" DockPanel.Dock="Right"/>
+            <TextBlock DockPanel.Dock="Right" 
+                    Text="{Binding Model.MySubscribe.CurrentChanel.ListVideoItems.Count, StringFormat=Total: {0}}" 
+                    VerticalAlignment="Stretch" 
+                    HorizontalAlignment="Right" 
+                    Margin="5,0,10,0" />
         </DockPanel>
+        <!--<StatusBar Grid.Row="2">
+            <StatusBarItem HorizontalAlignment="Right" DockPanel.Dock="Right">
+                <ResizeGrip Opacity="0.75"/>
+            </StatusBarItem>
+            <StatusBarItem DockPanel.Dock="Right" HorizontalAlignment="Right">
+                <TextBlock DockPanel.Dock="Right" 
+                       Text="{Binding Model.MySubscribe.CurrentChanel.ListVideoItems.Count, StringFormat=Total: {0}}" 
+                       VerticalAlignment="Stretch" 
+                       HorizontalAlignment="Right" 
+                       Margin="5,0,10,0" />
+            </StatusBarItem>
+        </StatusBar>-->
     </Grid>
 </Window>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -11,8 +12,11 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
+//using System.Windows.Threading;
+using System.Windows.Threading;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using YoutubeExtractor;
 
 namespace YTub.Common
 {
@@ -21,6 +25,10 @@ namespace YTub.Common
         private bool _isReady;
 
         private string _chanelName;
+
+        private IList _selectedListVideoItems = new ArrayList();
+
+        private VideoItem _currentVideoItem;
 
         public int MaxResults { get; set; }
 
@@ -49,6 +57,26 @@ namespace YTub.Common
         }
 
         public TrulyObservableCollection<VideoItem> ListVideoItems { get; set; }
+
+        public IList SelectedListVideoItems
+        {
+            get { return _selectedListVideoItems; }
+            set
+            {
+                _selectedListVideoItems = value;
+                OnPropertyChanged("SelectedListVideoItems");
+            }
+        }
+
+        public VideoItem CurrentVideoItem
+        {
+            get { return _currentVideoItem; }
+            set
+            {
+                _currentVideoItem = value;
+                OnPropertyChanged("CurrentVideoItem");
+            }
+        }
 
         public Chanel(string name, string user)
         {
@@ -125,6 +153,7 @@ namespace YTub.Common
 
         public void GetChanelVideoItems(int minres)
         {
+            Application.Current.Dispatcher.Invoke(() => ListVideoItems.Clear());
             while (true)
             {
                 var wc = new WebClient {Encoding = Encoding.UTF8};
@@ -166,9 +195,62 @@ namespace YTub.Common
             ListVideoItems.Clear();
             foreach (VideoItem item in lst)
             {
+                //if (item.Num % 2 == 1)
+                //    item.IsHasFile = true;
                 ListVideoItems.Add(item);
                 item.Num = ListVideoItems.Count;
+                item.IsHasFile = item.IsFileExist(item.ClearTitle);
             }
+        }
+
+        public async void DownloadVideo()
+        {
+            foreach (VideoItem item in SelectedListVideoItems)
+            {
+                item.IsDownLoading = true;
+                await DownloadVideoAsync(item.VideoLink);
+            }
+        }
+
+        private Task DownloadVideoAsync(string url)
+        {
+            return Task.Run(() =>
+            {
+                IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(url).OrderByDescending(z => z.Resolution);
+                VideoInfo videoInfo = videoInfos.First(info => info.VideoType == VideoType.Mp4 && info.AudioBitrate != 0);
+                if (videoInfo != null)
+                {
+                    if (videoInfo.RequiresDecryption)
+                    {
+                        DownloadUrlResolver.DecryptDownloadUrl(videoInfo);
+                    }
+
+                    var downloader = new VideoDownloader(videoInfo, Path.Combine(Subscribe.DownloadPath, VideoItem.MakeValidFileName(videoInfo.Title) + videoInfo.VideoExtension));
+                    downloader.DownloadProgressChanged += downloader_DownloadProgressChanged;
+                    downloader.DownloadFinished += downloader_DownloadFinished;
+                    downloader.Execute();
+                }
+            });
+        }
+
+        void downloader_DownloadFinished(object sender, EventArgs e)
+        {
+            var vd = sender as VideoDownloader;
+            if (vd != null)
+            {
+                Application.Current.Dispatcher.BeginInvoke((Action)(() =>
+                {
+                    ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.IsHasFile = true;
+                }));
+            }
+        }
+
+        private void downloader_DownloadProgressChanged(object sender, ProgressEventArgs e)
+        {
+            Application.Current.Dispatcher.BeginInvoke((Action)(() =>
+            {
+                CurrentVideoItem.PercentDownloaded = e.ProgressPercentage;
+            }));
         }
 
         #region INotifyPropertyChanged

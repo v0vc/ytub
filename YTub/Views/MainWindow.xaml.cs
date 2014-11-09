@@ -1,5 +1,16 @@
-﻿using System.Windows;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
+//using System.Windows.Forms;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using YoutubeExtractor;
+using YTub.Common;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 
 namespace YTub.Views
 {
@@ -25,7 +36,7 @@ namespace YTub.Views
 
         private void SyncChanelOnClick(object sender, RoutedEventArgs e)
         {
-            ViewModelLocator.MvViewModel.Model.MySubscribe.SyncChanel(null);
+            ViewModelLocator.MvViewModel.Model.MySubscribe.SyncChanel("SyncChanelSelected");
         }
 
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
@@ -44,6 +55,43 @@ namespace YTub.Views
             {
                 ViewModelLocator.MvViewModel.Model.MySubscribe.AddChanel(null);
             }
+        }
+
+        private void DownloadVideoOnClick(object sender, RoutedEventArgs e)
+        {
+            ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.DownloadVideo();
+        }
+
+        private void AddToQueueOnClick(object sender, RoutedEventArgs e)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        private void PlayOnClick(object sender, RoutedEventArgs e)
+        {
+            var sndr = sender as MenuItem;
+            if (sndr == null)
+            {
+                ViewModelLocator.MvViewModel.Model.MySubscribe.PlayFile("Online");
+            }
+            else
+            {
+                switch (sndr.CommandParameter.ToString())
+                {
+                    case "Local":
+                        ViewModelLocator.MvViewModel.Model.MySubscribe.PlayFile(sndr.CommandParameter.ToString());
+                        break;
+
+                    case "Online":
+                        ViewModelLocator.MvViewModel.Model.MySubscribe.PlayFile(sndr.CommandParameter.ToString());
+                        break;
+                }    
+            }
+        }
+
+        private void PlayLocalButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            ViewModelLocator.MvViewModel.Model.MySubscribe.PlayFile("Local");
         }
     }
 }

@@ -21,13 +21,19 @@ namespace YTub.ViewModels
         public RelayCommand SelectChanelCommand { get; set; }
 
         public RelayCommand OpenSettingsCommand { get; set; }
-        
+
+        public RelayCommand RemoveChanelCommand { get; set; }
+
+        public RelayCommand PlayFileCommand { get; set; }
+
         public MainWindowViewModel(MainWindowModel model)
         {
             Model = model;
             OpenAddChanelCommand = new RelayCommand(Model.MySubscribe.AddChanel);
             SelectChanelCommand = new RelayCommand(Model.MySubscribe.SyncChanel);
+            RemoveChanelCommand = new RelayCommand(Model.MySubscribe.RemoveChanel);
             OpenSettingsCommand = new RelayCommand(Model.OpenSettings);
+            PlayFileCommand = new RelayCommand(Model.MySubscribe.PlayFile);
         }
     }
 }
