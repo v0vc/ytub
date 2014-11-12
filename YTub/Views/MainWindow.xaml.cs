@@ -53,7 +53,8 @@ namespace YTub.Views
         {
             if (e.Key == Key.Insert)
             {
-                ViewModelLocator.MvViewModel.Model.MySubscribe.AddChanel(null);
+                //ViewModelLocator.MvViewModel.Model.MySubscribe.AddChanel(null);
+                ViewModelLocator.MvViewModel.Model.AddLink(null);
             }
         }
 
@@ -95,7 +96,10 @@ namespace YTub.Views
 
         private void PlayLocalButton_OnClick(object sender, RoutedEventArgs e)
         {
-            ViewModelLocator.MvViewModel.Model.MySubscribe.PlayFile("Local");
+            if (ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.IsHasFile)
+                ViewModelLocator.MvViewModel.Model.MySubscribe.PlayFile("Local");
+            else
+                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.DownloadVideo("MaxQuality");
         }
 
         private void CopyLinkOnClick(object sender, RoutedEventArgs e)
@@ -112,6 +116,15 @@ namespace YTub.Views
                 {
                     //MessageBox.Show("SS");
                 }
+            }
+        }
+
+        private void DeleteOnClick(object sender, RoutedEventArgs e)
+        {
+            if (ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel != null &&
+                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem != null)
+            {
+                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.DeleteFiles();
             }
         }
     }

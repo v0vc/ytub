@@ -60,5 +60,31 @@ namespace YTub.Models
                 MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        public void AddLink(object obj)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(Subscribe.YoudlPath))
+                {
+                    MessageBox.Show("Please set path to Youtube-dl in the Settings", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+                var addmodel = new AddLinkModel(null);
+                var addlinkview = new AddLinkView
+                {
+                    Owner = Application.Current.MainWindow,
+                    DataContext = addmodel,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner
+                };
+                addmodel.View = addlinkview;
+                addlinkview.TextBoxLink.Focus();
+                addlinkview.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
     }
 }

@@ -28,7 +28,7 @@ namespace YTub.Common
         private double _percentDownloaded;
 
         private bool _isDownloading;
-        
+
         public int Num { get; set; }
 
         public string Title { get; set; }
@@ -159,7 +159,10 @@ namespace YTub.Common
         {
             string regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
             var r = new Regex(string.Format("[{0}]", Regex.Escape(regexSearch)));
-            return r.Replace(name, String.Empty);
+            var s = r.Replace(name, String.Empty);
+            s = Regex.Replace(s, @"\s{2,}", " ");
+            return s;
+            //return r.Replace(name, String.Empty);
             //return Path.GetInvalidFileNameChars().Aggregate(name, (current, c) => current.Replace(c, '_'));
         }
 

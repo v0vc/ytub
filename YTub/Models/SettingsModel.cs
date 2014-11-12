@@ -16,7 +16,7 @@ using System.Windows.Forms;
 using Microsoft.Win32;
 using SevenZip;
 using YTub.Common;
-using MessageBox = System.Windows.Forms.MessageBox;
+using MessageBox = System.Windows.MessageBox;
 using OpenFileDialog = System.Windows.Forms.OpenFileDialog;
 
 namespace YTub.Models
@@ -151,11 +151,17 @@ namespace YTub.Models
 
         public SettingsModel(string savepath, string mpcpath, int synconstart, string youpath, string ffmegpath)
         {
+            MpcPath = string.Empty;
+            YoudlPath = string.Empty;
+            FfmpegPath = string.Empty;
             DirPath = new DirectoryInfo(savepath).Exists ? savepath : Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            MpcPath = new FileInfo(mpcpath).Exists ? mpcpath : string.Empty;
+            if (!string.IsNullOrEmpty(mpcpath))
+                MpcPath = new FileInfo(mpcpath).Exists ? mpcpath : string.Empty;
+            if (!string.IsNullOrEmpty(youpath))
+                YoudlPath = new FileInfo(youpath).Exists ? youpath : string.Empty;
+            if (!string.IsNullOrEmpty(ffmegpath))
+                FfmpegPath = new FileInfo(ffmegpath).Exists ? ffmegpath : string.Empty;
             IsSyncOnStart = synconstart == 1;
-            YoudlPath = new FileInfo(youpath).Exists ? youpath : string.Empty;
-            FfmpegPath = new FileInfo(ffmegpath).Exists ? ffmegpath : string.Empty;
             SaveCommand = new RelayCommand(SaveSettings);
             OpenDirCommand = new RelayCommand(OpenDir);
             UpdateFileCommand = new RelayCommand(UpdateFile);
@@ -278,7 +284,7 @@ namespace YTub.Models
                 case "youtube-dl":
                     if (string.IsNullOrEmpty(YoudlPath))
                     {
-                        System.Windows.MessageBox.Show("Please set path to Youtube-dl in the Settings", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show("Please set path to Youtube-dl in the Settings", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
                         return;
                     }
                     try
@@ -298,7 +304,7 @@ namespace YTub.Models
                 case "ffmpeg":
                     if (string.IsNullOrEmpty(FfmpegPath))
                     {
-                        System.Windows.MessageBox.Show("Please set path to ffmpeg in the Settings", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show("Please set path to ffmpeg in the Settings", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
                         return;
                     }
                     try
@@ -377,7 +383,7 @@ namespace YTub.Models
             PrValue = int.Parse(Math.Truncate(percentage).ToString(CultureInfo.InvariantCulture));
         }
 
-        private static string GetVersion(string path, string param)
+        public static string GetVersion(string path, string param)
         {
             var pProcess = new System.Diagnostics.Process
             {
@@ -393,7 +399,7 @@ namespace YTub.Models
             pProcess.Start();
             var res = pProcess.StandardOutput.ReadToEnd();
             pProcess.Close();
-            return res;
+            return res.Trim();
         }
 
         private static string Makeffversion(string ver)
@@ -417,7 +423,7 @@ namespace YTub.Models
                     res = sb.ToString();
                 }
             }
-            return res;
+            return res.Trim();
         }
 
         #region INotifyPropertyChanged

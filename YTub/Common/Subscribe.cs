@@ -246,7 +246,7 @@ namespace YTub.Common
             //    CurrentChanel = ChanelList[0];
         }
 
-        private static void ChanelSync(ICollection list)
+        private void ChanelSync(ICollection list)
         {
             if (list != null && list.Count > 0)
             {
@@ -290,6 +290,7 @@ namespace YTub.Common
                         }
                     }
                 }
+                CurrentChanel.Result = "Synchronization completed";
             }
         }
 

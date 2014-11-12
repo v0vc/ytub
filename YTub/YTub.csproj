@@ -117,7 +117,12 @@
     </ApplicationDefinition>
     <Compile Include="Common\CustomDataGrid.cs" />
     <Compile Include="Common\VS2012WindowStyle.cs" />
+    <Compile Include="Common\YouWrapper.cs" />
+    <Compile Include="Models\AddLinkModel.cs" />
     <Compile Include="Models\SettingsModel.cs" />
+    <Compile Include="Views\AddLinkView.xaml.cs">
+      <DependentUpon>AddLinkView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\SettingsView.xaml.cs">
       <DependentUpon>SettingsView.xaml</DependentUpon>
     </Compile>
@@ -126,6 +131,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\AddChanelView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\AddLinkView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

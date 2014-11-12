@@ -22,6 +22,8 @@ namespace YTub.ViewModels
 
         public RelayCommand OpenSettingsCommand { get; set; }
 
+        public RelayCommand AddLinkCommand { get; set; }
+
         public RelayCommand RemoveChanelCommand { get; set; }
 
         public RelayCommand PlayFileCommand { get; set; }
@@ -31,6 +33,7 @@ namespace YTub.ViewModels
             Model = model;
             OpenAddChanelCommand = new RelayCommand(Model.MySubscribe.AddChanel);
             SelectChanelCommand = new RelayCommand(Model.MySubscribe.SyncChanel);
+            AddLinkCommand = new RelayCommand(Model.AddLink);
             RemoveChanelCommand = new RelayCommand(Model.MySubscribe.RemoveChanel);
             OpenSettingsCommand = new RelayCommand(Model.OpenSettings);
             PlayFileCommand = new RelayCommand(Model.MySubscribe.PlayFile);

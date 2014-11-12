@@ -15,6 +15,11 @@
             <RowDefinition Height="22"></RowDefinition>
         </Grid.RowDefinitions>
         <Menu>
+            <Menu.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <DockPanel HorizontalAlignment="Stretch"/>
+                </ItemsPanelTemplate>
+            </Menu.ItemsPanel>
             <MenuItem Header="File">
                 <MenuItem Header="Exit" Click="Exit_OnClick"></MenuItem>
             </MenuItem>
@@ -23,6 +28,10 @@
             </MenuItem>
             <MenuItem Header="Tools">
                 <MenuItem Header="Settings" Command="{Binding OpenSettingsCommand}"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="Add" Command="{Binding AddLinkCommand}"></MenuItem>
+            <MenuItem Header="Help" HorizontalAlignment="Right">
+                <MenuItem Header="About"/>
             </MenuItem>
         </Menu>
         <Grid Grid.Row="1">
@@ -140,6 +149,7 @@
                             <MenuItem Header="Download" Click="DownloadVideoOnClick" CommandParameter="MaxQuality" />
                             <!--<MenuItem Header="Add To Queue" Click="AddToQueueOnClick" />-->
                             <MenuItem Header="Copy Link" Click="CopyLinkOnClick"></MenuItem>
+                            <MenuItem Header="Delete File" Click="DeleteOnClick"></MenuItem>
                         </ContextMenu>
                     </DataGrid.Resources>
                     <DataGrid.CellStyle>
@@ -246,7 +256,7 @@
                             </DataGridTemplateColumn.HeaderStyle>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Button x:Name="Button" BorderThickness="0" Background="Transparent" Click="PlayLocalButton_OnClick" ToolTip="Play">
+                                    <Button x:Name="Button" BorderThickness="0" Background="Transparent" Click="PlayLocalButton_OnClick">
                                         <Image x:Name="Image"></Image>
                                     </Button>
                                     <DataTemplate.Triggers>
@@ -254,10 +264,12 @@
                                             <Setter TargetName="Image" Property="Image.Source" Value="../Images/tick_20.png"></Setter>
                                             <Setter TargetName="Button" Property="IsEnabled" Value="True"></Setter>
                                             <Setter TargetName="Button" Property="Visibility" Value="Visible"></Setter>
+                                            <Setter TargetName="Button" Property="ToolTip" Value="Play"></Setter>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding IsHasFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Value="false">
-                                            <Setter TargetName="Button" Property="IsEnabled" Value="False"></Setter>
-                                            <Setter TargetName="Button" Property="Visibility" Value="Hidden"></Setter>
+                                            <!--<Setter TargetName="Button" Property="IsEnabled" Value="False"></Setter>
+                                            <Setter TargetName="Button" Property="Visibility" Value="Hidden"></Setter>-->
+                                            <Setter TargetName="Button" Property="ToolTip" Value="Download HD"></Setter>
                                         </DataTrigger>
                                     </DataTemplate.Triggers>
                                 </DataTemplate>
@@ -298,6 +310,11 @@
             </GroupBox>
         </Grid>
         <DockPanel Grid.Row="2">
+            <TextBlock DockPanel.Dock="Left" 
+                       Text="{Binding Model.MySubscribe.CurrentChanel.Result, UpdateSourceTrigger=PropertyChanged}" 
+                       Foreground="ForestGreen" 
+                       Margin="10,2,0,0"
+                       />
             <ResizeGrip Opacity="0.75" DockPanel.Dock="Right"/>
             <TextBlock DockPanel.Dock="Right" 
                     Text="{Binding Model.MySubscribe.CurrentChanel.ListVideoItems.Count, StringFormat=Total: {0}}" 
