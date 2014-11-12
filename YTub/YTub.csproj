@@ -84,6 +84,9 @@
     <Reference Include="Ninject">
       <HintPath>DLL\Ninject.dll</HintPath>
     </Reference>
+    <Reference Include="SevenZipSharp">
+      <HintPath>..\packages\SevenZipSharp.0.64\lib\SevenZipSharp.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.SQLite, Version=1.0.94.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
@@ -188,6 +191,9 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Content Include="7z.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="DLL\Ninject.dll" />
     <Content Include="DLL\System.Data.SQLite.dll" />
     <Resource Include="Images\tick_20.png" />
@@ -196,6 +202,7 @@
     <Resource Include="Images\refresh_24.png" />
     <Resource Include="Images\remove_24.png" />
     <Resource Include="Images\start.ico" />
+    <Resource Include="Images\refresh_20.png" />
     <Content Include="SQLite.Interop.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

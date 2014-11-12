@@ -37,6 +37,8 @@ namespace YTub.Common
 
         public string VideoID { get; set; }
 
+        public string VideoOwner { get; set; }
+
         public int ViewCount { get; set; }
 
         public int Duration { get; set; }
@@ -134,6 +136,7 @@ namespace YTub.Common
             Title = record["title"].ToString().Replace("''", "'");
             ClearTitle = MakeValidFileName(Title);
             VideoID = record["v_id"].ToString();
+            VideoOwner = record["chanelowner"].ToString();
             VideoLink = record["url"].ToString();
             ViewCount = (int) record["viewcount"];
             Duration = (int) record["duration"];
@@ -141,9 +144,9 @@ namespace YTub.Common
             Published = (DateTime) record["published"];
         }
 
-        public bool IsFileExist(string title)
+        public bool IsFileExist(VideoItem item)
         {
-            var path = Path.Combine(Subscribe.DownloadPath, string.Format("{0}.mp4", title));
+            var path = Path.Combine(Subscribe.DownloadPath, item.VideoOwner, string.Format("{0}.mp4", item.ClearTitle));
             var fn = new FileInfo(path);
             if (fn.Exists)
             {
@@ -177,6 +180,11 @@ namespace YTub.Common
                     break;
 
                 case "Online":
+                    if (string.IsNullOrEmpty(Subscribe.MpcPath))
+                    {
+                        MessageBox.Show("Please select mpc exe file", "Warning", MessageBoxButton.OK, MessageBoxImage.Information);
+                        return;
+                    }
                     var param = string.Format("{0} /play", VideoLink.Replace("https://", "http://"));
                     var proc = System.Diagnostics.Process.Start(Subscribe.MpcPath, param);
                     if (proc != null) proc.Close();

@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using SevenZip;
 using YTub.Models;
 using YTub.Views;
 
@@ -37,6 +38,10 @@ namespace YTub.Common
         public static string DownloadPath;
 
         public static string MpcPath;
+
+        public static string YoudlPath;
+
+        public static string FfmpegPath;
 
         private Chanel _currentChanel;
 
@@ -74,12 +79,15 @@ namespace YTub.Common
             if (dir == null) return;
             ChanelDb = Path.Combine(dir, "ytub.db");
             ChanelList = new ObservableCollection<Chanel>();
+            SevenZipBase.SetLibraryPath(Path.Combine(dir, "7z.dll"));
             var fn = new FileInfo(ChanelDb);
             if (fn.Exists)
             {
                 DownloadPath = Sqllite.GetSettingsValue(ChanelDb, "savepath");
                 MpcPath = Sqllite.GetSettingsValue(ChanelDb, "pathtompc");
                 IsSyncOnStart = Sqllite.GetSettingsIntValue(ChanelDb, "synconstart") != 0;
+                YoudlPath = Sqllite.GetSettingsValue(ChanelDb, "pathtoyoudl");
+                FfmpegPath = Sqllite.GetSettingsValue(ChanelDb, "pathtoffmpeg");
             }
             _bgv.WorkerReportsProgress = true;
             _bgv.DoWork += _bgv_DoWork;
@@ -260,7 +268,7 @@ namespace YTub.Common
                                     chanel1.ChanelName, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount,
                                     videoItem.Duration, videoItem.Published, videoItem.Description);
                                 VideoItem item = videoItem;
-                                Application.Current.Dispatcher.Invoke(() => item.IsHasFile = item.IsFileExist(item.ClearTitle));
+                                Application.Current.Dispatcher.Invoke(() => item.IsHasFile = item.IsFileExist(item));
                             }
                         }
                         else
@@ -269,7 +277,7 @@ namespace YTub.Common
                             {
                                 VideoItem item = videoItem;
                                 Application.Current.Dispatcher.Invoke(() => item.IsSynced = Sqllite.IsTableHasRecord(ChanelDb, item.VideoID));
-                                Application.Current.Dispatcher.Invoke(() => item.IsHasFile = item.IsFileExist(item.ClearTitle));
+                                Application.Current.Dispatcher.Invoke(() => item.IsHasFile = item.IsFileExist(item));
                             }
 
                             Application.Current.Dispatcher.Invoke(() => chanel1.IsReady = !chanel1.ListVideoItems.Select(x => x.IsSynced).Contains(false));
@@ -287,11 +295,6 @@ namespace YTub.Common
 
         public void PlayFile(object obj)
         {
-            if (string.IsNullOrEmpty(MpcPath))
-            {
-                MessageBox.Show("Please select mpc exe file", "Warning", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
             if (CurrentChanel != null && CurrentChanel.CurrentVideoItem != null)
             {
                 CurrentChanel.CurrentVideoItem.RunFile(obj);

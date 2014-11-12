@@ -167,7 +167,7 @@ namespace YTub.Common
                 {
                     foreach (JToken pair in jsvideo["feed"]["entry"])
                     {
-                        var v = new VideoItem(pair) {Num = ListVideoItems.Count + 1};
+                        var v = new VideoItem(pair) {Num = ListVideoItems.Count + 1, VideoOwner = ChanelOwner};
                         Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
                     }
                     if (total > ListVideoItems.Count)
@@ -199,24 +199,72 @@ namespace YTub.Common
                 //    item.IsHasFile = true;
                 ListVideoItems.Add(item);
                 item.Num = ListVideoItems.Count;
-                item.IsHasFile = item.IsFileExist(item.ClearTitle);
+                item.IsHasFile = item.IsFileExist(item);
             }
         }
 
-        public async void DownloadVideo()
+        public async void DownloadVideo(string downloadtype)
         {
             foreach (VideoItem item in SelectedListVideoItems)
             {
-                item.IsDownLoading = true;
-                await DownloadVideoAsync(item.VideoLink);
+                var dir = new DirectoryInfo(Path.Combine(Subscribe.DownloadPath, item.VideoOwner));
+                if (!dir.Exists)
+                    dir.Create();
+
+                switch (downloadtype)
+                {
+                    case "Internal":
+                        item.IsDownLoading = true;
+                        item.IsHasFile = false;
+                        await DownloadVideoAsync(item);
+                        break;
+
+                    case "MaxQuality":
+                        if (string.IsNullOrEmpty(Subscribe.YoudlPath))
+                        {
+                            MessageBox.Show("Please set path to Youtube-dl in the Settings", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                            return;
+                        }
+                        var param = string.Format("-f bestvideo+bestaudio -o {0}\\%(title)s.%(ext)s {1}", Path.Combine(Subscribe.DownloadPath, item.VideoOwner), item.VideoLink);
+                        var proc = System.Diagnostics.Process.Start(Subscribe.YoudlPath, param);
+                        if (proc != null) proc.WaitForExit();
+
+                        VideoItem item1 = item;
+                        var fndl =
+                            new DirectoryInfo(Subscribe.DownloadPath).GetFiles("*.*", SearchOption.AllDirectories)
+                                .Where(x => x.Name.StartsWith(item1.ClearTitle))
+                                .ToList();
+                        if (fndl.Count == 2)
+                        {
+                            if (!string.IsNullOrEmpty(Subscribe.FfmpegPath))
+                            {
+
+                            }
+                            else
+                            {
+                                foreach (FileInfo fileInfo in fndl)
+                                {
+                                    var sp = fileInfo.Name.Split('.');
+                                    if (sp.Length >= 3 &&
+                                        (sp[sp.Length - 2].StartsWith("f") && fileInfo.DirectoryName != null))
+                                    {
+                                        File.Move(fileInfo.FullName,
+                                            Path.Combine(fileInfo.DirectoryName, sp[0] + "." + sp[2]));
+                                    }
+                                }
+                            }
+                        }
+
+                        break;
+                }
             }
         }
 
-        private Task DownloadVideoAsync(string url)
+        private Task DownloadVideoAsync(VideoItem item)
         {
             return Task.Run(() =>
             {
-                IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(url).OrderByDescending(z => z.Resolution);
+                IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(item.VideoLink).OrderByDescending(z => z.Resolution);
                 VideoInfo videoInfo = videoInfos.First(info => info.VideoType == VideoType.Mp4 && info.AudioBitrate != 0);
                 if (videoInfo != null)
                 {
@@ -225,7 +273,7 @@ namespace YTub.Common
                         DownloadUrlResolver.DecryptDownloadUrl(videoInfo);
                     }
 
-                    var downloader = new VideoDownloader(videoInfo, Path.Combine(Subscribe.DownloadPath, VideoItem.MakeValidFileName(videoInfo.Title) + videoInfo.VideoExtension));
+                    var downloader = new VideoDownloader(videoInfo, Path.Combine(Subscribe.DownloadPath, item.VideoOwner, VideoItem.MakeValidFileName(videoInfo.Title) + videoInfo.VideoExtension));
                     downloader.DownloadProgressChanged += downloader_DownloadProgressChanged;
                     downloader.DownloadFinished += downloader_DownloadFinished;
                     downloader.Execute();
@@ -241,6 +289,8 @@ namespace YTub.Common
                 Application.Current.Dispatcher.BeginInvoke((Action)(() =>
                 {
                     ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.IsHasFile = true;
+                    ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.FilePath = vd.SavePath;
+                    //ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.IsDownLoading = false;
                 }));
             }
         }

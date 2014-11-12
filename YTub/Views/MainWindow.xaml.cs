@@ -59,13 +59,17 @@ namespace YTub.Views
 
         private void DownloadVideoOnClick(object sender, RoutedEventArgs e)
         {
-            ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.DownloadVideo();
+            var sndr = sender as MenuItem;
+            if (sndr == null)
+                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.DownloadVideo("Internal");
+            else
+                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.DownloadVideo(sndr.CommandParameter.ToString());
         }
 
-        private void AddToQueueOnClick(object sender, RoutedEventArgs e)
-        {
-            throw new System.NotImplementedException();
-        }
+        //private void AddToQueueOnClick(object sender, RoutedEventArgs e)
+        //{
+        //    throw new System.NotImplementedException();
+        //}
 
         private void PlayOnClick(object sender, RoutedEventArgs e)
         {
@@ -92,6 +96,23 @@ namespace YTub.Views
         private void PlayLocalButton_OnClick(object sender, RoutedEventArgs e)
         {
             ViewModelLocator.MvViewModel.Model.MySubscribe.PlayFile("Local");
+        }
+
+        private void CopyLinkOnClick(object sender, RoutedEventArgs e)
+        {
+            if (ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel != null &&
+                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem != null)
+            {
+                try
+                {
+                    Clipboard.SetText(
+                        ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.VideoLink);
+                }
+                catch
+                {
+                    //MessageBox.Show("SS");
+                }
+            }
         }
     }
 }

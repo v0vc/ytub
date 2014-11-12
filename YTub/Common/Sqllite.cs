@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace YTub.Common
 {
@@ -139,7 +140,16 @@ namespace YTub.Common
                     {
                         while (sdr.Read())
                         {
-                            res = sdr[settingname].ToString();
+                            try
+                            {
+                                res = sdr[settingname].ToString();
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show(string.Format("Check db: {0}{1} {2}", settingname, Environment.NewLine,
+                                    ex.Message));
+                            }
+                            
                             break;
                         }
                     }
@@ -219,7 +229,7 @@ namespace YTub.Common
             var zap = string.Format("CREATE TABLE {0} (v_id TEXT PRIMARY KEY, chanelowner TEXT, chanelname TEXT, url TEXT, title TEXT, viewcount INT, duration INT, published DATETIME, description TEXT, cleartitle TEXT)",
                     TableVideos);
             lstcom.Add(zap);
-            var zapdir = string.Format("CREATE TABLE {0} (savepath TEXT, pathtompc TEXT, synconstart INT)", TableSettings);
+            var zapdir = string.Format("CREATE TABLE {0} (savepath TEXT, pathtompc TEXT, synconstart INT, pathtoyoudl TEXT, pathtoffmpeg TEXT)", TableSettings);
             lstcom.Add(zapdir);
             var insdir = string.Format(@"INSERT INTO '{0}' ('savepath', 'synconstart') VALUES ('{1}', '0')", TableSettings, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
             lstcom.Add(insdir);

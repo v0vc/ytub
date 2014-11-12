@@ -27,12 +27,16 @@ namespace YTub.Models
             string savepath;
             var mpcpath = string.Empty;
             var synconstart = 0;
+            var youpath = string.Empty;
+            var ffpath = string.Empty;
             var fn = new FileInfo(Subscribe.ChanelDb);
             if (fn.Exists)
             {
                 savepath = Sqllite.GetSettingsValue(fn.FullName, "savepath");
                 mpcpath = Sqllite.GetSettingsValue(fn.FullName, "pathtompc");
                 synconstart = Sqllite.GetSettingsIntValue(fn.FullName, "synconstart");
+                youpath = Sqllite.GetSettingsValue(fn.FullName, "pathtoyoudl");
+                ffpath = Sqllite.GetSettingsValue(fn.FullName, "pathtoffmpeg");
             }
             else
             {
@@ -41,7 +45,7 @@ namespace YTub.Models
 
             try
             {
-                var settingsModel = new SettingsModel(savepath, mpcpath, synconstart);
+                var settingsModel = new SettingsModel(savepath, mpcpath, synconstart, youpath, ffpath);
                 var settingslView = new SettingsView
                 {
                     Owner = Application.Current.MainWindow,
