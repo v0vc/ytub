@@ -33,6 +33,6 @@
                 </Style>
             </TextBox.Style>
         </TextBox>
-        <Button Grid.Column="1" Margin="5,10" Content="GO" Name="ButtonGo" Command="{Binding GoCommand}"/>
+        <Button Grid.Column="1" Margin="5" Content="GO" Name="ButtonGo" Command="{Binding GoCommand}"/>
     </Grid>
 </Window>

@@ -52,8 +52,9 @@ namespace YTub.Models
         {
             if (IsValidUrl(Link))
             {
+                bool isok;
                 View.Close();
-                YouWrapper.DownloadFile(Subscribe.YoudlPath, Link, Subscribe.DownloadPath);
+                YouWrapper.DownloadFile(Subscribe.YoudlPath, Link, Subscribe.DownloadPath, null, out isok);
             }
             else
             {

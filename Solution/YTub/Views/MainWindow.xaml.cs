@@ -62,15 +62,10 @@ namespace YTub.Views
         {
             var sndr = sender as MenuItem;
             if (sndr == null)
-                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.DownloadVideo("Internal");
+                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.DownloadVideoInternal();
             else
-                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.DownloadVideo(sndr.CommandParameter.ToString());
+                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.DownloadVideoExternal();
         }
-
-        //private void AddToQueueOnClick(object sender, RoutedEventArgs e)
-        //{
-        //    throw new System.NotImplementedException();
-        //}
 
         private void PlayOnClick(object sender, RoutedEventArgs e)
         {
@@ -81,16 +76,7 @@ namespace YTub.Views
             }
             else
             {
-                switch (sndr.CommandParameter.ToString())
-                {
-                    case "Local":
-                        ViewModelLocator.MvViewModel.Model.MySubscribe.PlayFile(sndr.CommandParameter.ToString());
-                        break;
-
-                    case "Online":
-                        ViewModelLocator.MvViewModel.Model.MySubscribe.PlayFile(sndr.CommandParameter.ToString());
-                        break;
-                }    
+                ViewModelLocator.MvViewModel.Model.MySubscribe.PlayFile(sndr.CommandParameter.ToString());
             }
         }
 
@@ -99,7 +85,7 @@ namespace YTub.Views
             if (ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.IsHasFile)
                 ViewModelLocator.MvViewModel.Model.MySubscribe.PlayFile("Local");
             else
-                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.DownloadVideo("MaxQuality");
+                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.DownloadVideoExternal();
         }
 
         private void CopyLinkOnClick(object sender, RoutedEventArgs e)
