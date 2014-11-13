@@ -212,6 +212,7 @@
     <Resource Include="Images\remove_24.png" />
     <Resource Include="Images\start.ico" />
     <Resource Include="Images\refresh_20.png" />
+    <Resource Include="Images\save_16.png" />
     <Content Include="SQLite.Interop.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
