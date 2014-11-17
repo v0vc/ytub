@@ -419,13 +419,13 @@ namespace YTub.Models
             match = regex2.Match(ver);
             if (match.Success)
             {
-                var sp = match.Value.Replace("  ", " ").Split(' ');
+                var sp = VideoItem.MakeValidFileName(match.Value).Split(' ');
                 if (sp.Length == 7)
                 {
-                    var sb = new StringBuilder(res);
+                    var sb = new StringBuilder(sp[3]);
                     sb.Append(' ').Append(sp[2]).Append(' ');
-                    sb.Append(sp[3]).Append(' ');
-                    sb.Append(sp[4]);
+                    sb.Append(sp[4]).Append(' ');
+                    sb.Append(res);
                     res = sb.ToString();
                 }
             }

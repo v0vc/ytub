@@ -162,7 +162,7 @@ namespace YTub.Common
             VideoOwner = record["chanelowner"].ToString();
             VideoLink = record["url"].ToString();
             ViewCount = (int) record["viewcount"];
-            //PrevViewCount = (int)record["previewcount"];
+            PrevViewCount = (int)record["previewcount"];
             Duration = (int) record["duration"];
             Description = record["description"].ToString();
             Published = (DateTime) record["published"];
