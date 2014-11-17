@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -44,6 +45,10 @@ namespace YTub.Common
         public static string FfmpegPath;
 
         private Chanel _currentChanel;
+
+        private Timer _timer;
+
+        private DateTime _synctime;
 
         private IList _selectedListChanels = new ArrayList();
 
@@ -188,6 +193,9 @@ namespace YTub.Common
 
         public void SyncChanel(object obj)
         {
+            var tcb = new TimerCallback(tmr_Tick);
+            _timer = new Timer(tcb, null, 0, 1000);
+
             switch (obj.ToString())
             {
                 case "SyncChanelAll":
@@ -250,6 +258,7 @@ namespace YTub.Common
         {
             if (list != null && list.Count > 0)
             {
+                
                 foreach (Chanel chanel in list)
                 {
                     Chanel chanel1 = chanel;
@@ -265,7 +274,7 @@ namespace YTub.Common
                             foreach (VideoItem videoItem in chanel1.ListVideoItems)
                             {
                                 Sqllite.InsertRecord(ChanelDb, videoItem.VideoID, chanel1.ChanelOwner,
-                                    chanel1.ChanelName, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount,
+                                    chanel1.ChanelName, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount, videoItem.ViewCount,
                                     videoItem.Duration, videoItem.Published, videoItem.Description);
                                 VideoItem item = videoItem;
                                 Application.Current.Dispatcher.Invoke(() => item.IsHasFile = item.IsFileExist(item));
@@ -276,22 +285,37 @@ namespace YTub.Common
                             foreach (VideoItem videoItem in chanel1.ListVideoItems)
                             {
                                 VideoItem item = videoItem;
-                                Application.Current.Dispatcher.Invoke(() => item.IsSynced = Sqllite.IsTableHasRecord(ChanelDb, item.VideoID));
-                                Application.Current.Dispatcher.Invoke(() => item.IsHasFile = item.IsFileExist(item));
+                                //Application.Current.Dispatcher.Invoke(() => item.IsSynced = Sqllite.IsTableHasRecord(ChanelDb, item.VideoID));
+                                //Application.Current.Dispatcher.Invoke(() => item.IsHasFile = item.IsFileExist(item));
+                                Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    item.IsSynced = Sqllite.IsTableHasRecord(ChanelDb, item.VideoID);
+                                    item.IsHasFile = item.IsFileExist(item);
+                                    item.PrevViewCount = Sqllite.GetVideoIntValue(ChanelDb, "viewcount", item.VideoID);
+                                });
+
+                                Sqllite.UpdateValue(ChanelDb, "previewcount", item.VideoID, item.PrevViewCount);
+                                Sqllite.UpdateValue(ChanelDb, "viewcount", item.VideoID, item.ViewCount);
                             }
 
                             Application.Current.Dispatcher.Invoke(() => chanel1.IsReady = !chanel1.ListVideoItems.Select(x => x.IsSynced).Contains(false));
                             foreach (VideoItem videoItem in chanel1.ListVideoItems.Where(x => x.IsSynced == false))
                             {
                                 Sqllite.InsertRecord(ChanelDb, videoItem.VideoID, chanel1.ChanelOwner,
-                                    chanel1.ChanelName, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount,
+                                    chanel1.ChanelName, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount, videoItem.ViewCount,
                                     videoItem.Duration, videoItem.Published, videoItem.Description);
                             }
                         }
                     }
                 }
-                CurrentChanel.Result = "Synchronization completed";
+                CurrentChanel.Result = "Synchronization completed in " + _synctime.ToLongTimeString();
+                _timer.Dispose();
             }
+        }
+
+        void tmr_Tick(object o)
+        {
+            _synctime = _synctime.AddSeconds(1);
         }
 
         public void PlayFile(object obj)

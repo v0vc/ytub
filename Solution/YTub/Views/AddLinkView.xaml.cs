@@ -48,5 +48,10 @@ namespace YTub.Views
         {
             TextBoxLink.SelectAll();
         }
+
+        private void UIElement_OnMouseEnter(object sender, MouseEventArgs e)
+        {
+            CheckBox.IsChecked = !CheckBox.IsChecked;
+        }
     }
 }

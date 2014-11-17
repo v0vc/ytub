@@ -17,6 +17,8 @@ namespace YTub.Models
     {
         private string _link;
 
+        private bool _isAudio;
+
         public AddLinkView View { get; set; }
 
         public string Link
@@ -31,6 +33,16 @@ namespace YTub.Models
 
         public RelayCommand GoCommand { get; set; }
 
+        public bool IsAudio
+        {
+            get { return _isAudio; }
+            set
+            {
+                _isAudio = value;
+                OnPropertyChanged("IsAudio");
+            }
+        }
+
         public AddLinkModel(AddLinkView view)
         {
             View = view;
@@ -38,7 +50,7 @@ namespace YTub.Models
             try
             {
                 var text = Clipboard.GetData(DataFormats.Text) as string;
-                if (string.IsNullOrWhiteSpace(text))
+                if (string.IsNullOrWhiteSpace(text) || text.Contains(Environment.NewLine))
                     return;
                 Link = text;
             }
@@ -52,9 +64,9 @@ namespace YTub.Models
         {
             if (IsValidUrl(Link))
             {
-                bool isok;
                 View.Close();
-                YouWrapper.DownloadFile(Subscribe.YoudlPath, Link, Subscribe.DownloadPath, null, out isok);
+                var youdl = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Subscribe.DownloadPath, Link, null);
+                youdl.DownloadFile(IsAudio);
             }
             else
             {

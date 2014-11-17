@@ -22,5 +22,29 @@ namespace YTub.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://ffmpeg.zeranoe.com/builds/win32/static/ffmpeg-latest-win32-static.7z")]
+        public string FFmpeg {
+            get {
+                return ((string)(this["FFmpeg"]));
+            }
+            set {
+                this["FFmpeg"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://yt-dl.org/latest/youtube-dl.exe")]
+        public string Youtubedl {
+            get {
+                return ((string)(this["Youtubedl"]));
+            }
+            set {
+                this["Youtubedl"] = value;
+            }
+        }
     }
 }
