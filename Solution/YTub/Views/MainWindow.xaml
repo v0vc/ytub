@@ -6,8 +6,7 @@
         DataContext="{Binding MvViewModel, Source={StaticResource ViewModelLocator}}"
         Loaded="MainWindow_OnLoaded"
         KeyUp="MainWindow_OnKeyUp"
-        Icon="../Images/start.ico"
-        
+        Icon="../Images/ok.ico"
         >
     <Grid>
         <Grid.RowDefinitions>
@@ -233,6 +232,19 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Delta" SortMemberPath="Delta">
+                            <DataGridTemplateColumn.HeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                    <Setter Property="FontSize" Value="12"></Setter>
+                                </Style>
+                            </DataGridTemplateColumn.HeaderStyle>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Delta}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="2,0,2,0" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                         <DataGridTemplateColumn Header="Published" SortMemberPath="Published">
                             <DataGridTemplateColumn.HeaderStyle>
                                 <Style TargetType="DataGridColumnHeader">
@@ -323,7 +335,7 @@
         </Grid>
         <DockPanel Grid.Row="2">
             <TextBlock DockPanel.Dock="Left" 
-                       Text="{Binding Model.MySubscribe.CurrentChanel.Result, UpdateSourceTrigger=PropertyChanged}" 
+                       Text="{Binding Model.MySubscribe.CurrentChanel.Result, Mode=TwoWay}" 
                        Foreground="ForestGreen" 
                        Margin="10,2,0,0"
                        />
@@ -334,17 +346,5 @@
                     HorizontalAlignment="Right" 
                     Margin="5,0,10,0" />
         </DockPanel>
-        <!--<StatusBar Grid.Row="2">
-            <StatusBarItem HorizontalAlignment="Right" DockPanel.Dock="Right">
-                <ResizeGrip Opacity="0.75"/>
-            </StatusBarItem>
-            <StatusBarItem DockPanel.Dock="Right" HorizontalAlignment="Right">
-                <TextBlock DockPanel.Dock="Right" 
-                       Text="{Binding Model.MySubscribe.CurrentChanel.ListVideoItems.Count, StringFormat=Total: {0}}" 
-                       VerticalAlignment="Stretch" 
-                       HorizontalAlignment="Right" 
-                       Margin="5,0,10,0" />
-            </StatusBarItem>
-        </StatusBar>-->
     </Grid>
 </Window>

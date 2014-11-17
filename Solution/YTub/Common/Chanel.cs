@@ -245,8 +245,6 @@ namespace YTub.Common
             ListVideoItems.Clear();
             foreach (VideoItem item in lst)
             {
-                //if (item.Num % 2 == 1)
-                //    item.IsHasFile = true;
                 ListVideoItems.Add(item);
                 item.Num = ListVideoItems.Count;
                 item.IsHasFile = item.IsFileExist(item);
@@ -326,10 +324,8 @@ namespace YTub.Common
 
             foreach (VideoItem item in SelectedListVideoItems)
             {
-                bool isok;
-                YouWrapper.DownloadFile(Subscribe.YoudlPath, item.VideoLink, Path.Combine(Subscribe.DownloadPath, item.VideoOwner), item.ClearTitle, out isok);
-                if (isok)
-                    item.IsHasFile = true;
+                var youwr = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Path.Combine(Subscribe.DownloadPath, item.VideoOwner), item);
+                youwr.DownloadFile(false);
             }
         }
 

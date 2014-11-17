@@ -9,7 +9,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -27,6 +26,10 @@ namespace YTub.Common
 
         private double _percentDownloaded;
 
+        private int _previewcount;
+
+        private int _delta;
+
         private bool _isDownloading;
 
         public int Num { get; set; }
@@ -40,6 +43,26 @@ namespace YTub.Common
         public string VideoOwner { get; set; }
 
         public int ViewCount { get; set; }
+
+        public int PrevViewCount
+        {
+            get { return _previewcount; }
+            set
+            {
+                _previewcount = value;
+                Delta = ViewCount - _previewcount;
+            }
+        }
+
+        public int Delta
+        {
+            get { return _delta; }
+            set
+            {
+                _delta = value;
+                OnPropertyChanged("Delta");
+            }
+        }
 
         public int Duration { get; set; }
 
@@ -139,6 +162,7 @@ namespace YTub.Common
             VideoOwner = record["chanelowner"].ToString();
             VideoLink = record["url"].ToString();
             ViewCount = (int) record["viewcount"];
+            //PrevViewCount = (int)record["previewcount"];
             Duration = (int) record["duration"];
             Description = record["description"].ToString();
             Published = (DateTime) record["published"];
@@ -162,8 +186,6 @@ namespace YTub.Common
             var s = r.Replace(name, String.Empty);
             s = Regex.Replace(s, @"\s{2,}", " ");
             return s;
-            //return r.Replace(name, String.Empty);
-            //return Path.GetInvalidFileNameChars().Aggregate(name, (current, c) => current.Replace(c, '_'));
         }
 
         public void RunFile(object runtype)

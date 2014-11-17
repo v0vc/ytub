@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -291,7 +292,8 @@ namespace YTub.Models
                     {
                         YouHeader = "Youtube-dl:";
                         IsPrVisible = true;
-                        StartDownload("https://yt-dl.org/latest/youtube-dl.exe", YoudlPath, "youtube-dl");
+                        var link = (string) Properties.Settings.Default["Youtubedl"];
+                        StartDownload(link, YoudlPath, "youtube-dl");
                     }
                     catch (Exception ex)
                     {
@@ -315,7 +317,8 @@ namespace YTub.Models
                             FfHeader = "FFmpeg:";
                             IsPrVisible = true;
                             var dest = Path.Combine(fn.Directory.FullName, "ffmpeg-latest-win32-static.7z");
-                            StartDownload("http://ffmpeg.zeranoe.com/builds/win32/static/ffmpeg-latest-win32-static.7z", dest, dest);
+                            var link = (string)Properties.Settings.Default["FFmpeg"];
+                            StartDownload(link, dest, dest);
                         }
                     }
                     catch (Exception ex)
@@ -352,12 +355,15 @@ namespace YTub.Models
                     var fn = new FileInfo(e.UserState.ToString());
                     if (fn.Exists && fn.Directory != null)
                     {
-                        var extr = new SevenZipExtractor(fn.FullName) { PreserveDirectoryStructure = false };
-                        var fileList = extr.ArchiveFileNames.Where(d => d.ToLowerInvariant().EndsWith("ffmpeg.exe")).ToList();
-                        extr.ExtractionFinished += extr_ExtractionFinished;
-                        extr.Extracting += extr_Extracting;
-                        PrValue = 0;
-                        extr.ExtractFiles(fn.Directory.FullName, fileList.ToArray());
+                        using (var extr = new SevenZipExtractor(fn.FullName) {PreserveDirectoryStructure = false})
+                        {
+                            var fileList = extr.ArchiveFileNames.Where(d => d.ToLowerInvariant().EndsWith("ffmpeg.exe")).ToList();
+                            extr.ExtractionFinished += extr_ExtractionFinished;
+                            extr.Extracting += extr_Extracting;
+                            PrValue = 0;
+                            extr.ExtractFiles(fn.Directory.FullName, fileList.ToArray());
+                        }
+                        fn.Delete();
                     }
                 }
             }
@@ -399,7 +405,7 @@ namespace YTub.Models
             pProcess.Start();
             var res = pProcess.StandardOutput.ReadToEnd();
             pProcess.Close();
-            return res.Trim();
+            return VideoItem.MakeValidFileName(res);
         }
 
         private static string Makeffversion(string ver)
