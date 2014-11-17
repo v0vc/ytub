@@ -211,7 +211,6 @@
     <Resource Include="Images\add_24.png" />
     <Resource Include="Images\refresh_24.png" />
     <Resource Include="Images\remove_24.png" />
-    <Resource Include="Images\start.ico" />
     <Resource Include="Images\refresh_20.png" />
     <Resource Include="Images\save_16.png" />
     <Resource Include="Images\ok.ico" />

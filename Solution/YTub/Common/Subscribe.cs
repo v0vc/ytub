@@ -44,15 +44,11 @@ namespace YTub.Common
 
         public static string FfmpegPath;
 
+        private string _result;
+
         private Chanel _currentChanel;
 
-        private Timer _timer;
-
-        private DateTime _synctime;
-
         private IList _selectedListChanels = new ArrayList();
-
-        private readonly BackgroundWorker _bgv = new BackgroundWorker();
 
         public Chanel CurrentChanel
         {
@@ -66,6 +62,8 @@ namespace YTub.Common
 
         public ObservableCollection<Chanel> ChanelList { get; set; }
 
+        public TimeSpan Synctime { get; set; }
+
         public bool IsSyncOnStart { get; set; }
 
         public IList SelectedListChanels
@@ -75,6 +73,16 @@ namespace YTub.Common
             {
                 _selectedListChanels = value;
                 OnPropertyChanged("SelectedListChanels");
+            }
+        }
+
+        public string Result
+        {
+            get { return _result; }
+            set
+            {
+                _result = value;
+                OnPropertyChanged("Result");
             }
         }
 
@@ -93,32 +101,6 @@ namespace YTub.Common
                 IsSyncOnStart = Sqllite.GetSettingsIntValue(ChanelDb, "synconstart") != 0;
                 YoudlPath = Sqllite.GetSettingsValue(ChanelDb, "pathtoyoudl");
                 FfmpegPath = Sqllite.GetSettingsValue(ChanelDb, "pathtoffmpeg");
-            }
-            _bgv.WorkerReportsProgress = true;
-            _bgv.DoWork += _bgv_DoWork;
-            _bgv.RunWorkerCompleted += _bgv_RunWorkerCompleted;
-        }
-
-        void _bgv_DoWork(object sender, DoWorkEventArgs e)
-        {
-            if (e.Argument == null) 
-                return;
-
-            SyncChanelBgv(e.Argument.ToString());
-        }
-
-        static void _bgv_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            if (e.Error != null)
-            {
-                if (e.Error is SQLiteException)
-                {
-                    MessageBox.Show(e.Error.Message, "Database exception", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                else
-                {
-                    MessageBox.Show(e.Error.Message, "Common error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
             }
         }
 
@@ -193,50 +175,9 @@ namespace YTub.Common
 
         public void SyncChanel(object obj)
         {
-            var tcb = new TimerCallback(tmr_Tick);
-            _timer = new Timer(tcb, null, 0, 1000);
+            Result = string.Empty;
 
             switch (obj.ToString())
-            {
-                case "SyncChanelAll":
-                    if (!_bgv.IsBusy)
-                        _bgv.RunWorkerAsync("SyncChanelAll");
-                    break;
-
-                case "SyncChanelSelected":
-                    if (!_bgv.IsBusy)
-                        _bgv.RunWorkerAsync("SyncChanelSelected");
-                    break;
-            }
-        }
-
-        public void GetChanelsFromDb()
-        {   
-            var fn = new FileInfo(ChanelDb);
-            if (!fn.Exists)
-            {
-                Sqllite.CreateDb(ChanelDb);
-                return;
-            }
-            foreach (KeyValuePair<string, string> pair in Sqllite.GetDistinctValues(ChanelDb, "chanelowner", "chanelname"))
-            {
-                ChanelList.Add(new Chanel(pair.Value, pair.Key));
-            }
-
-            foreach (Chanel chanel in ChanelList)
-            {
-                chanel.GetChanelVideoItemsFromDb(ChanelDb);
-            }
-            if (ChanelList.Any())
-                CurrentChanel = ChanelList[0];
-
-            if (IsSyncOnStart)
-                SyncChanel("SyncChanelAll");
-        }
-
-        private void SyncChanelBgv(string wtype)
-        {
-            switch (wtype)
             {
                 case "SyncChanelAll":
 
@@ -250,72 +191,42 @@ namespace YTub.Common
 
                     break;
             }
-            //if (ChanelList.Any())
-            //    CurrentChanel = ChanelList[0];
         }
 
-        private void ChanelSync(ICollection list)
-        {
-            if (list != null && list.Count > 0)
+        public void GetChanelsFromDb()
+        {   
+            var fn = new FileInfo(ChanelDb);
+            if (!fn.Exists)
             {
-                
-                foreach (Chanel chanel in list)
-                {
-                    Chanel chanel1 = chanel;
-                    chanel1.GetChanelVideoItems(chanel1.MinRes);
-
-                    var dir = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
-                    if (dir != null)
-                    {
-                        int totalrow;
-                        Sqllite.CreateOrConnectDb(ChanelDb, chanel1.ChanelOwner, out totalrow);
-                        if (totalrow == 0)
-                        {
-                            foreach (VideoItem videoItem in chanel1.ListVideoItems)
-                            {
-                                Sqllite.InsertRecord(ChanelDb, videoItem.VideoID, chanel1.ChanelOwner,
-                                    chanel1.ChanelName, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount, videoItem.ViewCount,
-                                    videoItem.Duration, videoItem.Published, videoItem.Description);
-                                VideoItem item = videoItem;
-                                Application.Current.Dispatcher.Invoke(() => item.IsHasFile = item.IsFileExist(item));
-                            }
-                        }
-                        else
-                        {
-                            foreach (VideoItem videoItem in chanel1.ListVideoItems)
-                            {
-                                VideoItem item = videoItem;
-                                //Application.Current.Dispatcher.Invoke(() => item.IsSynced = Sqllite.IsTableHasRecord(ChanelDb, item.VideoID));
-                                //Application.Current.Dispatcher.Invoke(() => item.IsHasFile = item.IsFileExist(item));
-                                Application.Current.Dispatcher.Invoke(() =>
-                                {
-                                    item.IsSynced = Sqllite.IsTableHasRecord(ChanelDb, item.VideoID);
-                                    item.IsHasFile = item.IsFileExist(item);
-                                    item.PrevViewCount = Sqllite.GetVideoIntValue(ChanelDb, "viewcount", item.VideoID);
-                                });
-
-                                Sqllite.UpdateValue(ChanelDb, "previewcount", item.VideoID, item.PrevViewCount);
-                                Sqllite.UpdateValue(ChanelDb, "viewcount", item.VideoID, item.ViewCount);
-                            }
-
-                            Application.Current.Dispatcher.Invoke(() => chanel1.IsReady = !chanel1.ListVideoItems.Select(x => x.IsSynced).Contains(false));
-                            foreach (VideoItem videoItem in chanel1.ListVideoItems.Where(x => x.IsSynced == false))
-                            {
-                                Sqllite.InsertRecord(ChanelDb, videoItem.VideoID, chanel1.ChanelOwner,
-                                    chanel1.ChanelName, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount, videoItem.ViewCount,
-                                    videoItem.Duration, videoItem.Published, videoItem.Description);
-                            }
-                        }
-                    }
-                }
-                CurrentChanel.Result = "Synchronization completed in " + _synctime.ToLongTimeString();
-                _timer.Dispose();
+                Sqllite.CreateDb(ChanelDb);
+                return;
             }
+
+            foreach (KeyValuePair<string, string> pair in Sqllite.GetDistinctValues(ChanelDb, "chanelowner", "chanelname"))
+            {
+                ChanelList.Add(new Chanel(pair.Value, pair.Key));
+            }
+
+            foreach (Chanel chanel in ChanelList)
+            {
+                chanel.GetChanelVideoItemsFromDb(ChanelDb);
+            }
+
+            if (ChanelList.Any())
+                CurrentChanel = ChanelList[0];
+
+            if (IsSyncOnStart)
+                SyncChanel("SyncChanelAll");
         }
 
-        void tmr_Tick(object o)
+        private static void ChanelSync(ICollection list)
         {
-            _synctime = _synctime.AddSeconds(1);
+            if (list == null || list.Count <= 0) return;
+
+            foreach (Chanel chanel in list)
+            {
+                chanel.GetChanelVideoItems();
+            }
         }
 
         public void PlayFile(object obj)

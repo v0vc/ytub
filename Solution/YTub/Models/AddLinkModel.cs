@@ -79,7 +79,7 @@ namespace YTub.Models
             if (string.IsNullOrEmpty(url))
                 return false;
             Uri uri;
-            if (!Uri.TryCreate(url, UriKind.Absolute, out uri) || null == uri)
+            if (!Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out uri) || null == uri)
             {
                 return false;
             }

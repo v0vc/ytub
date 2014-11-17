@@ -198,7 +198,7 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="Title" Width="*">
+                        <DataGridTemplateColumn Header="Title" Width="*" SortMemberPath="Title">
                             <DataGridTemplateColumn.HeaderStyle>
                                 <Style TargetType="DataGridColumnHeader">
                                     <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -335,7 +335,7 @@
         </Grid>
         <DockPanel Grid.Row="2">
             <TextBlock DockPanel.Dock="Left" 
-                       Text="{Binding Model.MySubscribe.CurrentChanel.Result, Mode=TwoWay}" 
+                       Text="{Binding Model.MySubscribe.Result, Mode=TwoWay}" 
                        Foreground="ForestGreen" 
                        Margin="10,2,0,0"
                        />
