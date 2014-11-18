@@ -8,6 +8,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Xml.Linq;
+using Microsoft.Win32;
 using YTub.Common;
 using YTub.Views;
 
@@ -84,6 +86,65 @@ namespace YTub.Models
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public void BackupRestore(object obj)
+        {
+            switch (obj.ToString())
+            {
+                case "backup":
+                    Backup();
+                    break;
+
+                case "restore":
+                    Restore();
+                    break;
+            }
+        }
+
+        private void Backup()
+        {
+            var dlg = new SaveFileDialog
+            {
+                FileName = "backup_" + DateTime.Now.ToShortDateString(),
+                DefaultExt = ".xml",
+                Filter = "XML documents (.xml)|*.xml",
+                OverwritePrompt = true
+            };
+            var res = dlg.ShowDialog();
+            if (res == true)
+            {
+                var doc = new XDocument(new XElement("tables", new XElement("tblSettings",
+                    new XElement("savepath", Sqllite.GetSettingsValue(Subscribe.ChanelDb, "savepath")),
+                    new XElement("pathtompc", Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtompc")),
+                    new XElement("synconstart", Sqllite.GetSettingsIntValue(Subscribe.ChanelDb, "synconstart")),
+                    new XElement("pathtoyoudl", Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtoyoudl")),
+                    new XElement("pathtoffmpeg", Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtoffmpeg"))
+                    )));
+                doc.Save(dlg.FileName);
+            }
+        }
+
+        private void Restore()
+        {
+            var opf = new OpenFileDialog {Filter = "XML documents (.xml)|*.xml"};
+            var res = opf.ShowDialog();
+            if (res == true)
+            {
+                try
+                {
+                    var doc = XDocument.Load(opf.FileName);
+                    var dicv = doc.Descendants("tblSettings").Elements().ToDictionary(setting => setting.Name.LocalName, setting => setting.Value);
+                    var dic = doc.Descendants("tblSettings").Elements().ToDictionary(setting => setting.Name.LocalName, setting => setting.Name.LocalName == "synconstart" ? "INT" : "TEXT");
+                    Sqllite.DropTable(Subscribe.ChanelDb, "tblSettings");
+                    Sqllite.CreateTable(Subscribe.ChanelDb, "tblSettings", dic);
+                    Sqllite.CreateSettings(Subscribe.ChanelDb, "tblSettings", dicv);
+                }
+                catch (Exception ex)
+                {
+                    ViewModelLocator.MvViewModel.Model.MySubscribe.Result = ex.Message;
+                }
             }
         }
     }

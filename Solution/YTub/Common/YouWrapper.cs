@@ -79,6 +79,7 @@ namespace YTub.Common
                 dir.Create();
             if (VideoLink.ToLower().Contains("youtu"))
             {
+                //"--restrict-filenames"
                 var filename = SettingsModel.GetVersion(Youdl, String.Format("--get-filename -o \"%(title)s.%(ext)s\" {0}", VideoLink));
                 string param;
                 if (isAudio)
@@ -94,29 +95,6 @@ namespace YTub.Common
                             SavePath, VideoLink);
                 }
 
-                //var isnameok = false;
-                //var filename = SettingsModel.GetVersion(Youdl, String.Format("--get-filename -o \"%(title)s.%(ext)s\" {0} --restrict-filenames", VideoLink));
-                //if (Path.GetFileNameWithoutExtension(filename) == "_")
-                //{
-                //    isnameok = true;
-                //    filename = SettingsModel.GetVersion(Youdl, String.Format("--get-filename -o \"%(title)s.%(ext)s\" {0}", VideoLink));
-                //}
-                //string param;
-                //if (isAudio)
-                //{
-                //    if (isnameok)
-                //        param = String.Format("-f bestaudio -o {0}\\%(title)s.%(ext)s {1} --no-check-certificate --console-title", SavePath, VideoLink);
-                //    else
-                //        param = String.Format("-f bestaudio -o {0}\\%(title)s.%(ext)s {1} --restrict-filenames --no-check-certificate --console-title", SavePath, VideoLink);
-                //}
-                //else
-                //{
-                //    if (isnameok)
-                //        param = String.Format("-f bestvideo,bestaudio -o {0}\\%(title)s.%(ext)s {1} --no-check-certificate --console-title", SavePath, VideoLink);
-                //    else
-                //        param = String.Format("-f bestvideo,bestaudio -o {0}\\%(title)s.%(ext)s {1} --restrict-filenames --no-check-certificate --console-title", SavePath, VideoLink);
-                //}
-                
                 var proc = Process.Start(Youdl, param);
                 if (proc != null)
                 {
@@ -127,8 +105,10 @@ namespace YTub.Common
                 var fndl = new DirectoryInfo(SavePath).GetFiles("*.*", SearchOption.TopDirectoryOnly).Where(x => filename != null && x.Name.StartsWith(Path.GetFileNameWithoutExtension(filename))).ToList();
                 if (fndl.Count() != 2 || String.IsNullOrEmpty(Ffmpeg))
                     return;
-                var fnvid = fndl.First(x => x.Length == fndl.Max(z => z.Length));
-                var fnaud = fndl.First(x => x.Length == fndl.Min(z => z.Length));
+                //var fnvid = fndl.First(x => x.Length == fndl.Max(z => z.Length));
+                //var fnaud = fndl.First(x => x.Length == fndl.Min(z => z.Length));
+                var fnvid = fndl.First(x => Path.GetExtension(x.Name) == ".mp4");
+                var fnaud = fndl.First(x => Path.GetExtension(x.Name) == ".m4a");
                 FilePath = MergeVideos(Ffmpeg, fnvid, fnaud, ClearTitle);
             }
             else

@@ -396,4 +396,14 @@
         </Style.Resources>
     </Style>
 
+    <Style x:Key="CellStyle" TargetType="{x:Type DataGridCell}">
+        <Setter Property="Foreground" Value="Black" />
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{x:Null}" />
+                <Setter Property="BorderBrush" Value="{x:Null}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
 </ResourceDictionary>

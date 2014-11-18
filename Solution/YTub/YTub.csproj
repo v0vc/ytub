@@ -207,13 +207,15 @@
     <Content Include="DLL\Ninject.dll" />
     <Content Include="DLL\System.Data.SQLite.dll" />
     <Resource Include="Images\tick_20.png" />
-    <Resource Include="Images\redo_24.png" />
     <Resource Include="Images\add_24.png" />
     <Resource Include="Images\refresh_24.png" />
     <Resource Include="Images\remove_24.png" />
     <Resource Include="Images\refresh_20.png" />
     <Resource Include="Images\save_16.png" />
     <Resource Include="Images\ok.ico" />
+    <Resource Include="Images\favor_16.png" />
+    <Resource Include="Images\notfavor_16.png" />
+    <Resource Include="Images\redo_24.png" />
     <Content Include="SQLite.Interop.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

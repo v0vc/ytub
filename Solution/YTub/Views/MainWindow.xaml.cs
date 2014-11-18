@@ -42,6 +42,7 @@ namespace YTub.Views
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
             ViewModelLocator.MvViewModel.Model.MySubscribe.GetChanelsFromDb();
+            //DataGridChanels.UnselectAll();
         }
 
         private void EditChanelOnClick(object sender, RoutedEventArgs e)
@@ -72,18 +73,21 @@ namespace YTub.Views
             var sndr = sender as MenuItem;
             if (sndr == null)
             {
-                ViewModelLocator.MvViewModel.Model.MySubscribe.PlayFile("Online");
+                if (ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.IsHasFile)
+                    ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.RunFile("Local");
+                else
+                    ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.RunFile("Online");
             }
             else
             {
-                ViewModelLocator.MvViewModel.Model.MySubscribe.PlayFile(sndr.CommandParameter.ToString());
+                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.RunFile(sndr.CommandParameter.ToString());
             }
         }
 
         private void PlayLocalButton_OnClick(object sender, RoutedEventArgs e)
         {
             if (ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.IsHasFile)
-                ViewModelLocator.MvViewModel.Model.MySubscribe.PlayFile("Local");
+                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.RunFile("Local");
             else
                 ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.DownloadVideoExternal();
         }
@@ -112,6 +116,19 @@ namespace YTub.Views
             {
                 ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.DeleteFiles();
             }
+        }
+
+        private void Favour_OnMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel != null)
+            {
+                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.AddToFavorites();
+            }
+        }
+
+        private void Row_doubleClick(object sender, MouseButtonEventArgs e)
+        {
+            ViewModelLocator.MvViewModel.Model.MySubscribe.SyncChanel("SyncChanelSelected");
         }
     }
 }

@@ -26,7 +26,7 @@ namespace YTub.ViewModels
 
         public RelayCommand RemoveChanelCommand { get; set; }
 
-        public RelayCommand PlayFileCommand { get; set; }
+        public RelayCommand BackupRestoreCommand { get; set; }
 
         public MainWindowViewModel(MainWindowModel model)
         {
@@ -36,7 +36,7 @@ namespace YTub.ViewModels
             AddLinkCommand = new RelayCommand(Model.AddLink);
             RemoveChanelCommand = new RelayCommand(Model.MySubscribe.RemoveChanel);
             OpenSettingsCommand = new RelayCommand(Model.OpenSettings);
-            PlayFileCommand = new RelayCommand(Model.MySubscribe.PlayFile);
+            BackupRestoreCommand = new RelayCommand(Model.BackupRestore);
         }
     }
 }
