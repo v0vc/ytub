@@ -190,6 +190,10 @@ namespace YTub.Common
                     ChanelSync(SelectedListChanels);
 
                     break;
+
+                case "SyncChanelFavorites":
+                    ChanelSync(ChanelList.Where(x => x.IsFavorite).ToList());
+                    break;
             }
         }
 
@@ -226,14 +230,6 @@ namespace YTub.Common
             foreach (Chanel chanel in list)
             {
                 chanel.GetChanelVideoItems();
-            }
-        }
-
-        public void PlayFile(object obj)
-        {
-            if (CurrentChanel != null && CurrentChanel.CurrentVideoItem != null)
-            {
-                CurrentChanel.CurrentVideoItem.RunFile(obj);
             }
         }
     }

@@ -45,20 +45,27 @@ namespace YTub.Common
             }
         }
 
-        public static void InsertRecord(string dbfile, string id, string chanelowner, string chanelname, string url, string title, int viewcount, int previewcount, int duration, DateTime published, string description)
+        public static void InsertRecord(string dbfile, string id, string chanelowner, string chanelname, int isfavorite,
+            string url, string title, int viewcount, int previewcount, int duration, DateTime published,
+            string description)
         {
             title = title.Replace("'", "''");
             chanelowner = chanelowner.Replace("'", "''");
             var zap =
-                string.Format(@"INSERT INTO '{0}' ('v_id', 'chanelowner', 'chanelname', 'url', 'title', 'viewcount', 'previewcount', 'duration', 'published', 'description', 'cleartitle') 
-                                VALUES (@v_id, @chanelowner, @chanelname, @url, @title, @viewcount, @previewcount, @duration, @published, @description, @cleartitle)", TableVideos);
-            using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
+                string.Format(
+                    @"INSERT INTO '{0}' ('v_id', 'chanelowner', 'chanelname', 'isfavorite', 'url', 'title', 'viewcount', 'previewcount', 'duration', 'published', 'description', 'cleartitle') 
+                                VALUES (@v_id, @chanelowner, @chanelname, @isfavorite, @url, @title, @viewcount, @previewcount, @duration, @published, @description, @cleartitle)",
+                    TableVideos);
+            using (
+                var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile))
+                )
             using (var sqlcommand = new SQLiteCommand(sqlcon))
             {
                 sqlcommand.CommandText = zap;
                 sqlcommand.Parameters.AddWithValue("@v_id", id);
                 sqlcommand.Parameters.AddWithValue("@chanelowner", chanelowner);
                 sqlcommand.Parameters.AddWithValue("@chanelname", chanelname);
+                sqlcommand.Parameters.AddWithValue("@isfavorite", isfavorite);
                 sqlcommand.Parameters.AddWithValue("@url", url);
                 sqlcommand.Parameters.AddWithValue("@title", title);
                 sqlcommand.Parameters.AddWithValue("@viewcount", viewcount);
@@ -187,9 +194,9 @@ namespace YTub.Common
             return 0;
         }
 
-        public static int GetVideoIntValue(string dbfile, string settingname, string key)
+        public static int GetVideoIntValue(string dbfile, string settingname, string keyfield, string key)
         {
-            var zap = string.Format("SELECT * FROM {0} WHERE v_id='{1}'", TableVideos, key);
+            var zap = string.Format("SELECT * FROM {0} WHERE {1}='{2}'", TableVideos, keyfield, key);
             using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
             using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
             {
@@ -226,9 +233,33 @@ namespace YTub.Common
             }
         }
 
-        public static void UpdateValue(string dbfile, string valuename, string key, object value)
+        public static void CreateSettings(string dbfile, string tablename, Dictionary<string, string> columns)
         {
-            var zap = string.Format("UPDATE {0} SET {1}='{2}' WHERE v_id='{3}'", TableVideos, valuename, value, key);
+            var sb = new StringBuilder(string.Format("INSERT INTO '{0}' (", tablename));
+            foreach (KeyValuePair<string, string> column in columns)
+            {
+                sb.AppendFormat("'{0}',", column.Key);
+            }
+            var tmp = sb.ToString().TrimEnd(',') + ") VALUES (";
+            sb = new StringBuilder(tmp);
+            foreach (KeyValuePair<string, string> column in columns)
+            {
+                sb.AppendFormat("'{0}',", column.Value);
+            }
+
+            var zap = sb.ToString().TrimEnd(',') + ")";
+            using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
+            using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+            {
+                sqlcon.Open();
+                sqlcommand.ExecuteNonQuery();
+                sqlcon.Close();
+            }
+        }
+
+        public static void UpdateValue(string dbfile, string valuename, string keyfield, string key, object value)
+        {
+            var zap = string.Format("UPDATE {0} SET {1}='{2}' WHERE {3}='{4}'", TableVideos, valuename, value, keyfield, key);
             using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
             using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
             {
@@ -262,6 +293,35 @@ namespace YTub.Common
             }
         }
 
+        public static void DropTable(string dbfile, string tablename)
+        {
+            var zap = string.Format("DROP TABLE {0}", tablename);
+            using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
+            using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+            {
+                sqlcon.Open();
+                sqlcommand.ExecuteNonQuery();
+                sqlcon.Close();
+            }
+        }
+
+        public static void CreateTable(string dbfile, string tablename, Dictionary<string, string> columns)
+        {
+            var sb = new StringBuilder(string.Format("CREATE TABLE {0} (", tablename));
+            foreach (KeyValuePair<string, string> column in columns)
+            {
+                sb.AppendFormat("{0} {1},", column.Key, column.Value);
+            }
+            var zap = sb.ToString().TrimEnd(',') + ")";
+            using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
+            using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+            {
+                sqlcon.Open();
+                sqlcommand.ExecuteNonQuery();
+                sqlcon.Close();
+            }
+        }
+
         public static void CreateDb(string dbfile)
         {
             SQLiteConnection.CreateFile(dbfile);
@@ -269,6 +329,7 @@ namespace YTub.Common
             var zap = string.Format(@"CREATE TABLE {0} (v_id TEXT PRIMARY KEY,
                                                         chanelowner TEXT,
                                                         chanelname TEXT,
+                                                        isfavorite INT,
                                                         url TEXT,
                                                         title TEXT,
                                                         viewcount INT,

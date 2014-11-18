@@ -24,6 +24,8 @@ namespace YTub.Common
     {
         private bool _isReady;
 
+        private bool _isFavorite;
+
         private string _chanelName;
 
         private IList _selectedListVideoItems = new ArrayList();
@@ -84,6 +86,16 @@ namespace YTub.Common
             }
         }
 
+        public bool IsFavorite
+        {
+            get { return _isFavorite; }
+            set
+            {
+                _isFavorite = value;
+                OnPropertyChanged("IsFavorite");
+            }
+        }
+
         public Chanel(string name, string user)
         {
             MaxResults = 25;
@@ -96,9 +108,18 @@ namespace YTub.Common
 
             ChanelName = name;
             ChanelOwner = user;
+            var res = Sqllite.GetVideoIntValue(Subscribe.ChanelDb, "isfavorite", "chanelowner", ChanelOwner);
+            IsFavorite = res != 0;
             ListVideoItems = new TrulyObservableCollection<VideoItem>();
             _bgv.DoWork += _bgv_DoWork;
             _bgv.RunWorkerCompleted += _bgv_RunWorkerCompleted;
+        }
+
+        public void AddToFavorites()
+        {
+            IsFavorite = !IsFavorite;
+            var res = IsFavorite ? 1 : 0;
+            Sqllite.UpdateValue(Subscribe.ChanelDb, "isfavorite", "chanelowner", ChanelOwner, res);
         }
 
         void _bgv_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -126,7 +147,7 @@ namespace YTub.Common
                     {
                         foreach (VideoItem videoItem in ListVideoItems)
                         {
-                            Sqllite.InsertRecord(Subscribe.ChanelDb, videoItem.VideoID, ChanelOwner, ChanelName, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount, videoItem.ViewCount, videoItem.Duration, videoItem.Published, videoItem.Description);
+                            Sqllite.InsertRecord(Subscribe.ChanelDb, videoItem.VideoID, ChanelOwner, ChanelName, 0, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount, videoItem.ViewCount, videoItem.Duration, videoItem.Published, videoItem.Description);
                             videoItem.IsHasFile = videoItem.IsFileExist(videoItem);
                         }
                     }
@@ -136,15 +157,15 @@ namespace YTub.Common
                         {
                             item.IsSynced = Sqllite.IsTableHasRecord(Subscribe.ChanelDb, item.VideoID);
                             item.IsHasFile = item.IsFileExist(item);
-                            item.PrevViewCount = Sqllite.GetVideoIntValue(Subscribe.ChanelDb, "viewcount", item.VideoID);
+                            item.PrevViewCount = Sqllite.GetVideoIntValue(Subscribe.ChanelDb, "viewcount", "v_id", item.VideoID);
                             item.Delta = item.ViewCount - item.PrevViewCount;
-                            Sqllite.UpdateValue(Subscribe.ChanelDb, "previewcount", item.VideoID, item.PrevViewCount);
-                            Sqllite.UpdateValue(Subscribe.ChanelDb, "viewcount", item.VideoID, item.ViewCount);
+                            Sqllite.UpdateValue(Subscribe.ChanelDb, "previewcount", "v_id", item.VideoID, item.PrevViewCount);
+                            Sqllite.UpdateValue(Subscribe.ChanelDb, "viewcount", "v_id", item.VideoID, item.ViewCount);
                         }
                         IsReady = !ListVideoItems.Select(x => x.IsSynced).Contains(false);
                         foreach (VideoItem videoItem in ListVideoItems.Where(x => x.IsSynced == false))
                         {
-                            Sqllite.InsertRecord(Subscribe.ChanelDb, videoItem.VideoID, ChanelOwner, ChanelName, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount, videoItem.ViewCount, videoItem.Duration, videoItem.Published, videoItem.Description);
+                            Sqllite.InsertRecord(Subscribe.ChanelDb, videoItem.VideoID, ChanelOwner, ChanelName, 0, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount, videoItem.ViewCount, videoItem.Duration, videoItem.Published, videoItem.Description);
                         }
                     }
                 }
@@ -335,7 +356,6 @@ namespace YTub.Common
         void tmr_Tick(object o)
         {
             Synctime = Synctime.Add(TimeSpan.FromSeconds(1));
-            //ViewModelLocator.MvViewModel.Model.MySubscribe.Result = Synctime.ToString(@"hh\:mm\:ss");
         }
 
         #region INotifyPropertyChanged
