@@ -216,6 +216,8 @@
     <Resource Include="Images\favor_16.png" />
     <Resource Include="Images\notfavor_16.png" />
     <Resource Include="Images\redo_24.png" />
+    <Resource Include="Images\down_24.png" />
+    <Resource Include="Images\up_24.png" />
     <Content Include="SQLite.Interop.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

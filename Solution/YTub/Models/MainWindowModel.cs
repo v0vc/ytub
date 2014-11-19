@@ -29,6 +29,7 @@ namespace YTub.Models
             string savepath;
             var mpcpath = string.Empty;
             var synconstart = 0;
+            var isonlyfavor = 0;
             var youpath = string.Empty;
             var ffpath = string.Empty;
             var fn = new FileInfo(Subscribe.ChanelDb);
@@ -37,6 +38,7 @@ namespace YTub.Models
                 savepath = Sqllite.GetSettingsValue(fn.FullName, "savepath");
                 mpcpath = Sqllite.GetSettingsValue(fn.FullName, "pathtompc");
                 synconstart = Sqllite.GetSettingsIntValue(fn.FullName, "synconstart");
+                isonlyfavor = Sqllite.GetSettingsIntValue(fn.FullName, "isonlyfavor");
                 youpath = Sqllite.GetSettingsValue(fn.FullName, "pathtoyoudl");
                 ffpath = Sqllite.GetSettingsValue(fn.FullName, "pathtoffmpeg");
             }
@@ -47,7 +49,7 @@ namespace YTub.Models
 
             try
             {
-                var settingsModel = new SettingsModel(savepath, mpcpath, synconstart, youpath, ffpath);
+                var settingsModel = new SettingsModel(savepath, mpcpath, synconstart, youpath, ffpath, isonlyfavor);
                 var settingslView = new SettingsView
                 {
                     Owner = Application.Current.MainWindow,
@@ -103,7 +105,7 @@ namespace YTub.Models
             }
         }
 
-        private void Backup()
+        private static void Backup()
         {
             var dlg = new SaveFileDialog
             {
@@ -119,14 +121,29 @@ namespace YTub.Models
                     new XElement("savepath", Sqllite.GetSettingsValue(Subscribe.ChanelDb, "savepath")),
                     new XElement("pathtompc", Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtompc")),
                     new XElement("synconstart", Sqllite.GetSettingsIntValue(Subscribe.ChanelDb, "synconstart")),
+                    new XElement("isonlyfavor", Sqllite.GetSettingsIntValue(Subscribe.ChanelDb, "isonlyfavor")),
                     new XElement("pathtoyoudl", Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtoyoudl")),
                     new XElement("pathtoffmpeg", Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtoffmpeg"))
-                    )));
+                    ), new XElement("tblVideos")));
+
+                var element = doc.Element("tables");
+                if (element != null)
+                {
+                    var xElement = element.Element("tblVideos");
+                    if (xElement != null)
+                    {
+                        foreach (KeyValuePair<string, string> pair in Sqllite.GetDistinctValues(Subscribe.ChanelDb, "chanelowner", "chanelname"))
+                        {
+                            xElement.Add(new XElement("Chanell", 
+                                new XElement("chanelowner", pair.Key), new XElement("chanelname", pair.Value)));
+                        }
+                    }
+                }
                 doc.Save(dlg.FileName);
             }
         }
 
-        private void Restore()
+        private static void Restore()
         {
             var opf = new OpenFileDialog {Filter = "XML documents (.xml)|*.xml"};
             var res = opf.ShowDialog();
@@ -136,10 +153,37 @@ namespace YTub.Models
                 {
                     var doc = XDocument.Load(opf.FileName);
                     var dicv = doc.Descendants("tblSettings").Elements().ToDictionary(setting => setting.Name.LocalName, setting => setting.Value);
-                    var dic = doc.Descendants("tblSettings").Elements().ToDictionary(setting => setting.Name.LocalName, setting => setting.Name.LocalName == "synconstart" ? "INT" : "TEXT");
+                    var dic = new Dictionary<string, string>();
+                    foreach (XElement element in doc.Descendants("tblSettings").Elements())
+                    {
+                        if (element.Name.LocalName == "synconstart" || element.Name.LocalName == "isonlyfavor")
+                            dic.Add(element.Name.LocalName, "INT");
+                        else
+                            dic.Add(element.Name.LocalName, "TEXT");
+                    }
                     Sqllite.DropTable(Subscribe.ChanelDb, "tblSettings");
                     Sqllite.CreateTable(Subscribe.ChanelDb, "tblSettings", dic);
                     Sqllite.CreateSettings(Subscribe.ChanelDb, "tblSettings", dicv);
+
+                    var xElement1 = doc.Element("tables");
+                    if (xElement1 == null) return;
+                    var xElement = xElement1.Element("tblVideos");
+                    if (xElement == null) return;
+                    foreach (XElement element in xElement.Descendants("Chanell"))
+                    {
+                        var owner = element.Elements().FirstOrDefault(z => z.Name == "chanelowner");
+                        var name = element.Elements().FirstOrDefault(z => z.Name == "chanelname");
+                        if (owner != null & name != null)
+                        {
+                            ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(new Chanel(name.Value, owner.Value));
+                            ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites = false;
+                        }
+                    }
+
+                    Subscribe.DownloadPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "savepath");
+                    Subscribe.MpcPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtompc");
+                    Subscribe.YoudlPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtoyoudl");
+                    Subscribe.FfmpegPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtoffmpeg");
                 }
                 catch (Exception ex)
                 {

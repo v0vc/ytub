@@ -36,6 +36,8 @@ namespace YTub.Models
 
         private bool _isSyncOnStart;
 
+        private bool _isOnlyFavorites;
+
         private int _prValue;
 
         private bool _isPrVisible;
@@ -100,6 +102,16 @@ namespace YTub.Models
             }
         }
 
+        public bool IsOnlyFavorites
+        {
+            get { return _isOnlyFavorites; }
+            set
+            {
+                _isOnlyFavorites = value;
+                OnPropertyChanged("IsOnlyFavorites");
+            }
+        }
+
         public int PrValue
         {
             get { return _prValue; }
@@ -150,7 +162,7 @@ namespace YTub.Models
             }
         }
 
-        public SettingsModel(string savepath, string mpcpath, int synconstart, string youpath, string ffmegpath)
+        public SettingsModel(string savepath, string mpcpath, int synconstart, string youpath, string ffmegpath, int isonlyfavor)
         {
             MpcPath = string.Empty;
             YoudlPath = string.Empty;
@@ -163,6 +175,7 @@ namespace YTub.Models
             if (!string.IsNullOrEmpty(ffmegpath))
                 FfmpegPath = new FileInfo(ffmegpath).Exists ? ffmegpath : string.Empty;
             IsSyncOnStart = synconstart == 1;
+            IsOnlyFavorites = isonlyfavor == 1;
             SaveCommand = new RelayCommand(SaveSettings);
             OpenDirCommand = new RelayCommand(OpenDir);
             UpdateFileCommand = new RelayCommand(UpdateFile);
@@ -174,6 +187,10 @@ namespace YTub.Models
         {
             var ressync = IsSyncOnStart ? 1 : 0;
             Sqllite.UpdateSetting(Subscribe.ChanelDb, "synconstart", ressync);
+
+            var favor = IsOnlyFavorites ? 1 : 0;
+            Sqllite.UpdateSetting(Subscribe.ChanelDb, "isonlyfavor", favor);
+            //ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites = IsOnlyFavorites;
 
             var savedir = new DirectoryInfo(DirPath);
             if (savedir.Exists)

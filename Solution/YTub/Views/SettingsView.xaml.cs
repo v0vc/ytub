@@ -44,5 +44,15 @@ namespace YTub.Views
                     invokeProv.Invoke();
             }
         }
+
+        private void SyncOnStart(object sender, MouseButtonEventArgs e)
+        {
+            CheckBoxSync.IsChecked = !CheckBoxSync.IsChecked;
+        }
+
+        private void ShowFavorites(object sender, MouseButtonEventArgs e)
+        {
+            CheckBoxFavor.IsChecked = !CheckBoxFavor.IsChecked;
+        }
     }
 }

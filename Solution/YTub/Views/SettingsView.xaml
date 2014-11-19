@@ -169,8 +169,10 @@
             </Grid.ColumnDefinitions>
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal">
-                    <CheckBox VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="{Binding IsSyncOnStart, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                    <Label Content="Sync on start"></Label>
+                    <CheckBox Name="CheckBoxSync" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="{Binding IsSyncOnStart, Mode=TwoWay}"></CheckBox>
+                    <Label Content="Sync on start" MouseLeftButtonUp="SyncOnStart"></Label>
+                    <CheckBox Name="CheckBoxFavor" VerticalAlignment="Center" Margin="25,0,0,0" IsChecked="{Binding IsOnlyFavorites, Mode=TwoWay}"></CheckBox>
+                    <Label Content="Show only favorites" MouseLeftButtonUp="ShowFavorites"></Label>
                 </StackPanel>
                     <Label Content="{Binding Result}" VerticalAlignment="Top" HorizontalAlignment="Left" Foreground="ForestGreen"></Label>
             </StackPanel>
@@ -186,10 +188,10 @@
                 <ProgressBar.Resources>
                     <Style TargetType="ProgressBar">
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsPrVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Value="true">
+                            <DataTrigger Binding="{Binding IsPrVisible, Mode=OneWay}" Value="true">
                                 <Setter Property="Visibility" Value="Visible"/>
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding IsPrVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Value="false">
+                            <DataTrigger Binding="{Binding IsPrVisible, Mode=OneWay}" Value="false">
                                 <Setter Property="Visibility" Value="Hidden"/>
                             </DataTrigger>
                         </Style.Triggers>
