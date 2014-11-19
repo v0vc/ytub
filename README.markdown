@@ -1,10 +1,10 @@
-My Youtube Manager.
+﻿My Youtube Manager.
 Add chanel as user name, like www.youtube.com/user/zapatou ==> zapatou
 Then sync and enjoy
 
-![Main Window](https://raw.githubusercontent.com/v0vc/Ytub/master/Screens/2014-11-12_224200.png)
+![Main Window](https://raw.githubusercontent.com/v0vc/Ytub/master/Screens/main.png)
 
-![Settings](https://raw.githubusercontent.com/v0vc/Ytub/master/Screens/2014-11-12_224635.png)
+![Settings](https://raw.githubusercontent.com/v0vc/Ytub/master/Screens/settings.png)
 
 Приложение позволяет "подписаться" на канал Youtube, не имея регистрации на самом сайте.
 Данные хранятся в локальной базе данных, при синхронизации зеленым выделяются те видео, которые уже были синхронизованы, красным - новые. 
