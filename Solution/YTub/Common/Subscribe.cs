@@ -22,18 +22,6 @@ namespace YTub.Common
 {
     public class Subscribe : INotifyPropertyChanged
     {
-        #region INotifyPropertyChanged
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        #endregion
-
         public static string ChanelDb;
 
         public static string DownloadPath;
@@ -44,11 +32,16 @@ namespace YTub.Common
 
         public static string FfmpegPath;
 
+        private bool _isOnlyFavorites;
+
         private string _result;
 
         private Chanel _currentChanel;
 
         private IList _selectedListChanels = new ArrayList();
+
+        #region Fields
+        private Visibility _prVisibility;
 
         public Chanel CurrentChanel
         {
@@ -61,6 +54,8 @@ namespace YTub.Common
         }
 
         public ObservableCollection<Chanel> ChanelList { get; set; }
+
+        public ObservableCollection<Chanel> ChanelListToBind { get; set; }
 
         public TimeSpan Synctime { get; set; }
 
@@ -86,12 +81,36 @@ namespace YTub.Common
             }
         }
 
+        public bool IsOnlyFavorites
+        {
+            get { return _isOnlyFavorites; }
+            set
+            {
+                _isOnlyFavorites = value;
+                OnPropertyChanged("IsOnlyFavorites");
+                FilterChanell();
+            }
+        }
+
+        public Visibility PrVisibility
+        {
+            get { return _prVisibility; }
+            set
+            {
+                _prVisibility = value;
+                OnPropertyChanged("PrVisibility");
+            }
+        } 
+        #endregion
+
         public Subscribe()
         {
+            PrVisibility = Visibility.Hidden;
             var dir = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
             if (dir == null) return;
             ChanelDb = Path.Combine(dir, "ytub.db");
             ChanelList = new ObservableCollection<Chanel>();
+            ChanelListToBind = new ObservableCollection<Chanel>();
             SevenZipBase.SetLibraryPath(Path.Combine(dir, "7z.dll"));
             var fn = new FileInfo(ChanelDb);
             if (fn.Exists)
@@ -99,6 +118,7 @@ namespace YTub.Common
                 DownloadPath = Sqllite.GetSettingsValue(ChanelDb, "savepath");
                 MpcPath = Sqllite.GetSettingsValue(ChanelDb, "pathtompc");
                 IsSyncOnStart = Sqllite.GetSettingsIntValue(ChanelDb, "synconstart") != 0;
+                IsOnlyFavorites = Sqllite.GetSettingsIntValue(ChanelDb, "isonlyfavor") != 0;
                 YoudlPath = Sqllite.GetSettingsValue(ChanelDb, "pathtoyoudl");
                 FfmpegPath = Sqllite.GetSettingsValue(ChanelDb, "pathtoffmpeg");
             }
@@ -127,7 +147,7 @@ namespace YTub.Common
 
                 if (isEdit)
                 {
-                    addChanelView.TextBoxLink.IsEnabled = false;
+                    addChanelView.TextBoxLink.IsReadOnly = true;
                     addChanelView.TextBoxName.Focus();
                 }
                 else
@@ -161,6 +181,7 @@ namespace YTub.Common
                         if (chanel == null) continue;
                         Sqllite.RemoveChanelFromDb(ChanelDb, chanel.ChanelOwner);
                         ChanelList.Remove(chanel);
+                        FilterChanell();
                     }
                 }
             }
@@ -219,6 +240,8 @@ namespace YTub.Common
             if (ChanelList.Any())
                 CurrentChanel = ChanelList[0];
 
+            IsOnlyFavorites = Sqllite.GetSettingsIntValue(ChanelDb, "isonlyfavor") == 1;
+
             if (IsSyncOnStart)
                 SyncChanel("SyncChanelAll");
         }
@@ -232,5 +255,38 @@ namespace YTub.Common
                 chanel.GetChanelVideoItems();
             }
         }
+
+        private void FilterChanell()
+        {
+            ChanelListToBind.Clear();
+            if (IsOnlyFavorites)
+            {
+                foreach (Chanel chanel in ChanelList.Where(x=>x.IsFavorite))
+                {
+                    ChanelListToBind.Add(chanel);
+                }
+            }
+            else
+            {
+                foreach (Chanel chanel in ChanelList)
+                {
+                    ChanelListToBind.Add(chanel);
+                }
+            }
+            if (ChanelListToBind.Any())
+                CurrentChanel = ChanelListToBind[0];
+        }
+
+        #region INotifyPropertyChanged
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        #endregion
     }
 }

@@ -49,6 +49,8 @@ namespace YTub.Models
                 {
                     var chanel = new Chanel(ChanelName, ChanelOwner);
                     ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(chanel);
+                    ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelListToBind.Add(chanel);
+                    //ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites = false;
                 }
                 View.Close();    
             }

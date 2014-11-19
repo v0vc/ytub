@@ -32,6 +32,7 @@ namespace YTub.Common
 
         private bool _isDownloading;
 
+        #region Fields
         public int Num { get; set; }
 
         public string Title { get; set; }
@@ -69,8 +70,6 @@ namespace YTub.Common
         public string VideoLink { get; set; }
 
         public string FilePath { get; set; }
-
-        //public DateTime Updated { get; set; }
 
         public string Description { get; set; }
 
@@ -134,7 +133,8 @@ namespace YTub.Common
                 _isDownloading = value;
                 OnPropertyChanged("IsDownLoading");
             }
-        }
+        } 
+        #endregion
 
         public VideoItem(JToken pair)
         {
@@ -238,7 +238,5 @@ namespace YTub.Common
         }
 
         #endregion
-
-        
     }
 }

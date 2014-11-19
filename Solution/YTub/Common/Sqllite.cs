@@ -20,6 +20,7 @@ namespace YTub.Common
         {
             totalrow = 0;
             var fn = new FileInfo(dbfile);
+
             if (fn.Exists)
             {
                 if (fn.Length == 0)
@@ -28,7 +29,7 @@ namespace YTub.Common
                     CreateDb(fn.FullName);
                 }
                 var zap = string.Format("SELECT * FROM {0} WHERE chanelowner='{1}'", TableVideos, autor);
-                using (var sqlcon =new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", fn.FullName)))
+                using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", fn.FullName)))
                 using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
                 {
                     sqlcon.Open();
@@ -49,284 +50,341 @@ namespace YTub.Common
             string url, string title, int viewcount, int previewcount, int duration, DateTime published,
             string description)
         {
-            title = title.Replace("'", "''");
-            chanelowner = chanelowner.Replace("'", "''");
-            var zap =
-                string.Format(
-                    @"INSERT INTO '{0}' ('v_id', 'chanelowner', 'chanelname', 'isfavorite', 'url', 'title', 'viewcount', 'previewcount', 'duration', 'published', 'description', 'cleartitle') 
-                                VALUES (@v_id, @chanelowner, @chanelname, @isfavorite, @url, @title, @viewcount, @previewcount, @duration, @published, @description, @cleartitle)",
-                    TableVideos);
-            using (
-                var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile))
-                )
-            using (var sqlcommand = new SQLiteCommand(sqlcon))
+            Task.Run(() =>
             {
-                sqlcommand.CommandText = zap;
-                sqlcommand.Parameters.AddWithValue("@v_id", id);
-                sqlcommand.Parameters.AddWithValue("@chanelowner", chanelowner);
-                sqlcommand.Parameters.AddWithValue("@chanelname", chanelname);
-                sqlcommand.Parameters.AddWithValue("@isfavorite", isfavorite);
-                sqlcommand.Parameters.AddWithValue("@url", url);
-                sqlcommand.Parameters.AddWithValue("@title", title);
-                sqlcommand.Parameters.AddWithValue("@viewcount", viewcount);
-                sqlcommand.Parameters.AddWithValue("@previewcount", previewcount);
-                sqlcommand.Parameters.AddWithValue("@duration", duration);
-                sqlcommand.Parameters.AddWithValue("@published", published);
-                sqlcommand.Parameters.AddWithValue("@description", description);
-                sqlcommand.Parameters.AddWithValue("@cleartitle", VideoItem.MakeValidFileName(title));
-                sqlcon.Open();
-                sqlcommand.ExecuteNonQuery();
-                sqlcon.Close();
-            }
+                title = title.Replace("'", "''");
+                chanelowner = chanelowner.Replace("'", "''");
+                var zap =
+                    string.Format(
+                        @"INSERT INTO '{0}' ('v_id', 'chanelowner', 'chanelname', 'isfavorite', 'url', 'title', 'viewcount', 'previewcount', 'duration', 'published', 'description', 'cleartitle') 
+                                VALUES (@v_id, @chanelowner, @chanelname, @isfavorite, @url, @title, @viewcount, @previewcount, @duration, @published, @description, @cleartitle)",
+                        TableVideos);
+                using (
+                    var sqlcon =
+                        new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile))
+                    )
+                using (var sqlcommand = new SQLiteCommand(sqlcon))
+                {
+                    sqlcommand.CommandText = zap;
+                    sqlcommand.Parameters.AddWithValue("@v_id", id);
+                    sqlcommand.Parameters.AddWithValue("@chanelowner", chanelowner);
+                    sqlcommand.Parameters.AddWithValue("@chanelname", chanelname);
+                    sqlcommand.Parameters.AddWithValue("@isfavorite", isfavorite);
+                    sqlcommand.Parameters.AddWithValue("@url", url);
+                    sqlcommand.Parameters.AddWithValue("@title", title);
+                    sqlcommand.Parameters.AddWithValue("@viewcount", viewcount);
+                    sqlcommand.Parameters.AddWithValue("@previewcount", previewcount);
+                    sqlcommand.Parameters.AddWithValue("@duration", duration);
+                    sqlcommand.Parameters.AddWithValue("@published", published);
+                    sqlcommand.Parameters.AddWithValue("@description", description);
+                    sqlcommand.Parameters.AddWithValue("@cleartitle", VideoItem.MakeValidFileName(title));
+                    sqlcon.Open();
+                    sqlcommand.ExecuteNonQuery();
+                    sqlcon.Close();
+                }
+            });
         }
 
         public static bool IsTableHasRecord(string dbfile, string id)
         {
-            bool res;
-            var zap = string.Format("SELECT * FROM {0} WHERE v_id='{1}'", TableVideos, id);
-            using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
-            using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+            var res = false;
+            Task t = Task.Run(() =>
             {
-                sqlcon.Open();
-                using (var sdr = sqlcommand.ExecuteReader())
+                var zap = string.Format("SELECT * FROM {0} WHERE v_id='{1}'", TableVideos, id);
+                using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
+                using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
                 {
-                    res = sdr.HasRows;
+                    sqlcon.Open();
+                    using (var sdr = sqlcommand.ExecuteReader())
+                    {
+                        res = sdr.HasRows;
+                    }
+                    sqlcon.Close();
                 }
-                sqlcon.Close();
-            }
+            });
+            t.Wait();
             return res;
         }
 
         public static Dictionary<string, string> GetDistinctValues(string dbfile, string chanelowner, string chanelname)
         {
             var res = new Dictionary<string, string>();
-            var zap = string.Format("SELECT DISTINCT {0}, {1} FROM {2}", chanelowner, chanelname, TableVideos);
-            using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
-            using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+            Task t = Task.Run(() =>
             {
-                sqlcon.Open();
-                using (var sdr = sqlcommand.ExecuteReader())
+                var zap = string.Format("SELECT DISTINCT {0}, {1} FROM {2}", chanelowner, chanelname, TableVideos);
+                using (
+                    var sqlcon =
+                        new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
+                using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
                 {
-                    foreach (DbDataRecord record in sdr)
+                    sqlcon.Open();
+                    using (var sdr = sqlcommand.ExecuteReader())
                     {
-                        res.Add(record[chanelowner].ToString(), record[chanelname].ToString());
+                        foreach (DbDataRecord record in sdr)
+                        {
+                            res.Add(record[chanelowner].ToString(), record[chanelname].ToString());
+                        }
                     }
+                    sqlcon.Close();
                 }
-                sqlcon.Close();
-            }
+            });
+            t.Wait();
             return res;
         }
 
         public static List<DbDataRecord> GetChanelVideos(string dbfile, string chanelowner)
         {
             var res = new List<DbDataRecord>();
-            var zap = string.Format("SELECT * FROM {0} WHERE chanelowner='{1}'", TableVideos, chanelowner);
-            using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
-            using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+            Task t = Task.Run(() =>
             {
-                sqlcon.Open();
-                using (var sdr = sqlcommand.ExecuteReader())
+                var zap = string.Format("SELECT * FROM {0} WHERE chanelowner='{1}'", TableVideos, chanelowner);
+                using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
+                using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
                 {
-                    res.AddRange(sdr.Cast<DbDataRecord>());
+                    sqlcon.Open();
+                    using (var sdr = sqlcommand.ExecuteReader())
+                    {
+                        res.AddRange(sdr.Cast<DbDataRecord>());
+                    }
+                    sqlcon.Close();
                 }
-                sqlcon.Close();
-            }
+            });
+            t.Wait();
             return res;
         }
 
         public static string GetSettingsValue(string dbfile, string settingname)
         {
             var res = string.Empty;
-            var zap = string.Format("SELECT * FROM {0}", TableSettings);
-            using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
-            using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+            Task t = Task.Run(() =>
             {
-                sqlcon.Open();
-                using (var sdr = sqlcommand.ExecuteReader())
+                var zap = string.Format("SELECT * FROM {0}", TableSettings);
+                using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
+                using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
                 {
-                    if (sdr.HasRows)
+                    sqlcon.Open();
+                    using (var sdr = sqlcommand.ExecuteReader())
                     {
-                        while (sdr.Read())
+                        if (sdr.HasRows)
                         {
-                            try
+                            while (sdr.Read())
                             {
-                                res = sdr[settingname].ToString();
+                                try
+                                {
+                                    res = sdr[settingname].ToString();
+                                }
+                                catch (Exception ex)
+                                {
+                                    MessageBox.Show(string.Format("Check db: {0}{1} {2}", settingname,
+                                        Environment.NewLine,
+                                        ex.Message));
+                                }
+
+                                break;
                             }
-                            catch (Exception ex)
-                            {
-                                MessageBox.Show(string.Format("Check db: {0}{1} {2}", settingname, Environment.NewLine,
-                                    ex.Message));
-                            }
-                            
-                            break;
                         }
                     }
+                    sqlcon.Close();
                 }
-                sqlcon.Close();
-            }
+            });
+            t.Wait();
             return res;
         }
 
         public static int GetSettingsIntValue(string dbfile, string settingname)
         {
-            var zap = string.Format("SELECT * FROM {0}", TableSettings);
-            using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
-            using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+            var res = 0;
+            Task t = Task.Run(() =>
             {
-                sqlcon.Open();
-                using (var sdr = sqlcommand.ExecuteReader())
+                var zap = string.Format("SELECT * FROM {0}", TableSettings);
+                using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
+                using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
                 {
-                    if (sdr.HasRows)
+                    sqlcon.Open();
+                    using (var sdr = sqlcommand.ExecuteReader())
                     {
-                        while (sdr.Read())
+                        if (sdr.HasRows)
                         {
-                            int resu;
-                            if (int.TryParse(sdr[settingname].ToString(), out resu))
+                            while (sdr.Read())
                             {
-                                return resu;
+                                int resu;
+                                if (int.TryParse(sdr[settingname].ToString(), out resu))
+                                {
+                                    res = resu;
+                                }
+                                break;
                             }
-                            break;
                         }
                     }
+                    sqlcon.Close();
                 }
-                sqlcon.Close();
-            }
-            return 0;
+            });
+            t.Wait();
+            return res;
         }
 
         public static int GetVideoIntValue(string dbfile, string settingname, string keyfield, string key)
         {
-            var zap = string.Format("SELECT * FROM {0} WHERE {1}='{2}'", TableVideos, keyfield, key);
-            using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
-            using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+            var res = 0;
+            Task t = Task.Run(() =>
             {
-                sqlcon.Open();
-                using (var sdr = sqlcommand.ExecuteReader())
+                var zap = string.Format("SELECT * FROM {0} WHERE {1}='{2}'", TableVideos, keyfield, key);
+                using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
+                using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
                 {
-                    if (sdr.HasRows)
+                    sqlcon.Open();
+                    using (var sdr = sqlcommand.ExecuteReader())
                     {
-                        while (sdr.Read())
+                        if (sdr.HasRows)
                         {
-                            int resu;
-                            if (int.TryParse(sdr[settingname].ToString(), out resu))
+                            while (sdr.Read())
                             {
-                                return resu;
+                                int resu;
+                                if (int.TryParse(sdr[settingname].ToString(), out resu))
+                                {
+                                    res = resu;
+                                }
+                                break;
                             }
-                            break;
                         }
                     }
+                    sqlcon.Close();
                 }
-                sqlcon.Close();
-            }
-            return 0;
+            });
+            t.Wait();
+            return res;
         }
 
         public static void UpdateSetting(string dbfile, string settingname, object settingvalue)
         {
-            var zap = string.Format("UPDATE {0} SET {1}='{2}'", TableSettings, settingname, settingvalue);
-            using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
-            using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+            Task.Run(() =>
             {
-                sqlcon.Open();
-                sqlcommand.ExecuteNonQuery();
-                sqlcon.Close();
-            }
+                var zap = string.Format("UPDATE {0} SET {1}='{2}'", TableSettings, settingname, settingvalue);
+                using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
+                using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+                {
+                    sqlcon.Open();
+                    sqlcommand.ExecuteNonQuery();
+                    sqlcon.Close();
+                }
+            });
         }
 
         public static void CreateSettings(string dbfile, string tablename, Dictionary<string, string> columns)
         {
-            var sb = new StringBuilder(string.Format("INSERT INTO '{0}' (", tablename));
-            foreach (KeyValuePair<string, string> column in columns)
+            Task.Run(() =>
             {
-                sb.AppendFormat("'{0}',", column.Key);
-            }
-            var tmp = sb.ToString().TrimEnd(',') + ") VALUES (";
-            sb = new StringBuilder(tmp);
-            foreach (KeyValuePair<string, string> column in columns)
-            {
-                sb.AppendFormat("'{0}',", column.Value);
-            }
+                var sb = new StringBuilder(string.Format("INSERT INTO '{0}' (", tablename));
+                foreach (KeyValuePair<string, string> column in columns)
+                {
+                    sb.AppendFormat("'{0}',", column.Key);
+                }
+                var tmp = sb.ToString().TrimEnd(',') + ") VALUES (";
+                sb = new StringBuilder(tmp);
+                foreach (KeyValuePair<string, string> column in columns)
+                {
+                    sb.AppendFormat("'{0}',", column.Value);
+                }
 
-            var zap = sb.ToString().TrimEnd(',') + ")";
-            using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
-            using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
-            {
-                sqlcon.Open();
-                sqlcommand.ExecuteNonQuery();
-                sqlcon.Close();
-            }
+                var zap = sb.ToString().TrimEnd(',') + ")";
+                using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
+                using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+                {
+                    sqlcon.Open();
+                    sqlcommand.ExecuteNonQuery();
+                    sqlcon.Close();
+                }
+            });
         }
 
         public static void UpdateValue(string dbfile, string valuename, string keyfield, string key, object value)
         {
-            var zap = string.Format("UPDATE {0} SET {1}='{2}' WHERE {3}='{4}'", TableVideos, valuename, value, keyfield, key);
-            using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
-            using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+            Task.Run(() =>
             {
-                sqlcon.Open();
-                sqlcommand.ExecuteNonQuery();
-                sqlcon.Close();
-            }
+                var zap = string.Format("UPDATE {0} SET {1}='{2}' WHERE {3}='{4}'", TableVideos, valuename, value,
+                    keyfield, key);
+                using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
+                using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+                {
+                    sqlcon.Open();
+                    sqlcommand.ExecuteNonQuery();
+                    sqlcon.Close();
+                }
+            });
         }
 
         public static void RemoveChanelFromDb(string dbfile, string chanelowner)
         {
-            var zap = string.Format("DELETE FROM {0} WHERE chanelowner='{1}'", TableVideos, chanelowner);
-            using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
-            using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+            Task.Run(() =>
             {
-                sqlcon.Open();
-                sqlcommand.ExecuteNonQuery();
-                sqlcon.Close();
-            }
+                var zap = string.Format("DELETE FROM {0} WHERE chanelowner='{1}'", TableVideos, chanelowner);
+                using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
+                using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+                {
+                    sqlcon.Open();
+                    sqlcommand.ExecuteNonQuery();
+                    sqlcon.Close();
+                }
+            });
         }
 
         public static void UpdateChanelName(string dbfile, string newname, string chanelowner)
         {
-            var zap = string.Format("UPDATE {0} SET chanelname='{1}' WHERE chanelowner='{2}'", TableVideos, newname, chanelowner);
-            using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
-            using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+            Task.Run(() =>
             {
-                sqlcon.Open();
-                sqlcommand.ExecuteNonQuery();
-                sqlcon.Close();
-            }
+                var zap = string.Format("UPDATE {0} SET chanelname='{1}' WHERE chanelowner='{2}'", TableVideos, newname, chanelowner);
+                using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
+                using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+                {
+                    sqlcon.Open();
+                    sqlcommand.ExecuteNonQuery();
+                    sqlcon.Close();
+                }
+            });
         }
 
         public static void DropTable(string dbfile, string tablename)
         {
-            var zap = string.Format("DROP TABLE {0}", tablename);
-            using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
-            using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+            Task.Run(() =>
             {
-                sqlcon.Open();
-                sqlcommand.ExecuteNonQuery();
-                sqlcon.Close();
-            }
+                var zap = string.Format("DROP TABLE {0}", tablename);
+                using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
+                using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+                {
+                    sqlcon.Open();
+                    sqlcommand.ExecuteNonQuery();
+                    sqlcon.Close();
+                }
+            });
         }
 
         public static void CreateTable(string dbfile, string tablename, Dictionary<string, string> columns)
         {
-            var sb = new StringBuilder(string.Format("CREATE TABLE {0} (", tablename));
-            foreach (KeyValuePair<string, string> column in columns)
+            Task.Run(() =>
             {
-                sb.AppendFormat("{0} {1},", column.Key, column.Value);
-            }
-            var zap = sb.ToString().TrimEnd(',') + ")";
-            using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
-            using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
-            {
-                sqlcon.Open();
-                sqlcommand.ExecuteNonQuery();
-                sqlcon.Close();
-            }
+                var sb = new StringBuilder(string.Format("CREATE TABLE {0} (", tablename));
+                foreach (KeyValuePair<string, string> column in columns)
+                {
+                    sb.AppendFormat("{0} {1},", column.Key, column.Value);
+                }
+                var zap = sb.ToString().TrimEnd(',') + ")";
+                using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
+                using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
+                {
+                    sqlcon.Open();
+                    sqlcommand.ExecuteNonQuery();
+                    sqlcon.Close();
+                }
+            });
         }
 
         public static void CreateDb(string dbfile)
         {
-            SQLiteConnection.CreateFile(dbfile);
-            var lstcom = new List<string>();
-            var zap = string.Format(@"CREATE TABLE {0} (v_id TEXT PRIMARY KEY,
+            Task.Run(() =>
+            {
+                SQLiteConnection.CreateFile(dbfile);
+                var lstcom = new List<string>();
+                var zap = string.Format(@"CREATE TABLE {0} (v_id TEXT PRIMARY KEY,
                                                         chanelowner TEXT,
                                                         chanelname TEXT,
                                                         isfavorite INT,
@@ -338,21 +396,24 @@ namespace YTub.Common
                                                         published DATETIME,
                                                         description TEXT,
                                                         cleartitle TEXT)", TableVideos);
-            lstcom.Add(zap);
-            var zapdir = string.Format("CREATE TABLE {0} (savepath TEXT, pathtompc TEXT, synconstart INT, pathtoyoudl TEXT, pathtoffmpeg TEXT)", TableSettings);
-            lstcom.Add(zapdir);
-            var insdir = string.Format(@"INSERT INTO '{0}' ('savepath', 'synconstart') VALUES ('{1}', '0')", TableSettings, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-            lstcom.Add(insdir);
-            using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
-            foreach (string com in lstcom)
-            {
-                using (var sqlcommand = new SQLiteCommand(com, sqlcon))
+                lstcom.Add(zap);
+                var zapdir = string.Format("CREATE TABLE {0} (savepath TEXT, pathtompc TEXT, synconstart INT, pathtoyoudl TEXT, pathtoffmpeg TEXT, isonlyfavor INT)",
+                        TableSettings);
+                lstcom.Add(zapdir);
+                var insdir = string.Format(@"INSERT INTO '{0}' ('savepath', 'synconstart', 'isonlyfavor') VALUES ('{1}', '0', '0')",
+                        TableSettings, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+                lstcom.Add(insdir);
+                using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
+                foreach (string com in lstcom)
                 {
-                    sqlcon.Open();
-                    sqlcommand.ExecuteNonQuery();
-                    sqlcon.Close();
+                    using (var sqlcommand = new SQLiteCommand(com, sqlcon))
+                    {
+                        sqlcon.Open();
+                        sqlcommand.ExecuteNonQuery();
+                        sqlcon.Close();
+                    }
                 }
-            }
+            });
         }
     }
 }

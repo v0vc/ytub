@@ -130,5 +130,11 @@ namespace YTub.Views
         {
             ViewModelLocator.MvViewModel.Model.MySubscribe.SyncChanel("SyncChanelSelected");
         }
+
+        private void ButtonShowHideFavor_OnClick(object sender, RoutedEventArgs e)
+        {
+            ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites =
+                !ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites;
+        }
     }
 }
