@@ -113,21 +113,18 @@ namespace YTub.Common
                     {
                         //process.OutputDataReceived += (sender, e) => Console.WriteLine(e.Data);
                         //process.OutputDataReceived += (sender, e) => Console.WriteLine(GetPercentFromYoudlOutput(e.Data));
-                        process.OutputDataReceived += (sender, e) => SetPercentage(GetPercentFromYoudlOutput(e.Data));
+                        process.OutputDataReceived += (sender, e) => SetLogAndPercentage(e.Data);
                         process.BeginOutputReadLine();
                         process.Start();
                         process.WaitForExit();
-                        process.Close();
+                        //process.Close();
                     }
 
-                    //var proc = Process.Start(Youdl, param);
-                    //if (proc != null)
-                    //{
-                    //    proc.WaitForExit();
-                    //    proc.Close();
-                    //}
-                    var filename = SettingsModel.GetVersion(Youdl, String.Format("--get-filename -o \"%(title)s.%(ext)s\" {0}", VideoLink));
-                    FilePath = Path.Combine(SavePath, filename);
+                    if (Item == null) return;
+                    var filename = SettingsModel.GetVersion(Youdl,
+                        String.Format("--get-filename -o \"%(title)s.%(ext)s\" {0}", VideoLink));
+                    if (!string.IsNullOrEmpty(filename))
+                        FilePath = Path.Combine(SavePath, filename);
                 }
                 else
                 {
@@ -202,15 +199,16 @@ namespace YTub.Common
             return res;
         }
 
-        private void SetPercentage(double percent)
+        private void SetLogAndPercentage(string data)
         {
+            Application.Current.Dispatcher.BeginInvoke((Action) (() => ViewModelLocator.MvViewModel.Model.LogCollection.Add(data)));
             if (Item == null)
                 return;
+            var percent = GetPercentFromYoudlOutput(data);
             if (Math.Abs(percent) > 0)
             {
                 Application.Current.Dispatcher.BeginInvoke((Action) (() => { Item.PercentDownloaded = percent; }));
             }
-            //Application.Current.Dispatcher.Invoke(() => Item.PercentDownloaded = percent);
         }
 
         private static double GetPercentFromYoudlOutput(string input)

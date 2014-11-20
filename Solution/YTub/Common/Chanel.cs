@@ -239,7 +239,7 @@ namespace YTub.Common
                 {
                     foreach (JToken pair in jsvideo["feed"]["entry"])
                     {
-                        var v = new VideoItem(pair) { Num = ListVideoItems.Count + 1, VideoOwner = ChanelOwner };
+                        var v = new VideoItem(pair, false) { Num = ListVideoItems.Count + 1, VideoOwner = ChanelOwner };
                         Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
                     }
                     if (total > ListVideoItems.Count)

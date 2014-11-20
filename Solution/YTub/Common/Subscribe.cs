@@ -7,6 +7,7 @@ using System.Data.SQLite;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
@@ -14,6 +15,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SevenZip;
 using YTub.Models;
 using YTub.Views;
@@ -41,6 +44,8 @@ namespace YTub.Common
         private Chanel _currentChanel;
 
         private IList _selectedListChanels = new ArrayList();
+
+        private readonly BackgroundWorker _bgv = new BackgroundWorker();
 
         #region Fields
 
@@ -93,6 +98,8 @@ namespace YTub.Common
             }
         }
 
+        public TrulyObservableCollection<VideoItem> ListPopularVideoItems { get; set; }
+
         #endregion
 
         public Subscribe()
@@ -103,6 +110,7 @@ namespace YTub.Common
             ChanelDb = Path.Combine(dir, "ytub.db");
             ChanelList = new ObservableCollection<Chanel>();
             ChanelListToBind = new ObservableCollection<Chanel>();
+            ListPopularVideoItems = new TrulyObservableCollection<VideoItem>();
             SevenZipBase.SetLibraryPath(Path.Combine(dir, "7z.dll"));
             var fn = new FileInfo(ChanelDb);
             if (fn.Exists)
@@ -113,6 +121,28 @@ namespace YTub.Common
                 IsOnlyFavorites = Sqllite.GetSettingsIntValue(ChanelDb, "isonlyfavor") != 0;
                 YoudlPath = Sqllite.GetSettingsValue(ChanelDb, "pathtoyoudl");
                 FfmpegPath = Sqllite.GetSettingsValue(ChanelDb, "pathtoffmpeg");
+            }
+            _bgv.DoWork += _bgv_DoWork;
+            _bgv.RunWorkerCompleted += _bgv_RunWorkerCompleted;
+        }
+
+        void _bgv_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            Result = "Popular finished";
+        }
+
+        void _bgv_DoWork(object sender, DoWorkEventArgs e)
+        {
+            var wc = new WebClient { Encoding = Encoding.UTF8 };
+            var zap = string.Format("https://gdata.youtube.com/feeds/api/standardfeeds/RU/most_popular?v=2&alt=json");
+            string s = wc.DownloadString(zap);
+            var jsvideo = (JObject)JsonConvert.DeserializeObject(s);
+            if (jsvideo == null)
+                return;
+            foreach (JToken pair in jsvideo["feed"]["entry"])
+            {
+                var v = new VideoItem(pair, true) { Num = ListPopularVideoItems.Count + 1, VideoOwner = "Popular" };
+                Application.Current.Dispatcher.Invoke(() => ListPopularVideoItems.Add(v));
             }
         }
 
@@ -236,6 +266,8 @@ namespace YTub.Common
 
             if (IsSyncOnStart)
                 SyncChanel("SyncChanelAll");
+
+            _bgv.RunWorkerAsync();
         }
 
         public static void CheckFfmpegPath()

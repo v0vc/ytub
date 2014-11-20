@@ -136,20 +136,38 @@ namespace YTub.Common
         } 
         #endregion
 
-        public VideoItem(JToken pair)
+        public VideoItem(JToken pair, bool isPopular)
         {
-            MinProgress = 0;
-            MaxProgress = 100;
-            Title = pair["title"]["$t"].ToString();
-            ClearTitle = MakeValidFileName(Title);
-            var spraw = pair["id"]["$t"].ToString().Split('/');
-            VideoID = spraw[spraw.Length - 1];
-            ViewCount = (int)pair["yt$statistics"]["viewCount"];
-            Duration = (int) pair["media$group"]["yt$duration"]["seconds"];
-            VideoLink = pair["link"][0]["href"].ToString().Split('&')[0];
-            //Updated = (DateTime) pair["updated"]["$t"];
-            Published = (DateTime)pair["published"]["$t"];
-            Description = pair["content"]["$t"].ToString();
+            if (isPopular)
+            {
+                MinProgress = 0;
+                MaxProgress = 100;
+                Title = pair["title"]["$t"].ToString();
+                ClearTitle = MakeValidFileName(Title);
+                var spraw = pair["id"]["$t"].ToString().Split('/');
+                VideoID = spraw[spraw.Length - 1];
+                ViewCount = (int)pair["yt$statistics"]["viewCount"];
+                Duration = (int)pair["media$group"]["yt$duration"]["seconds"];
+                VideoLink = pair["link"][0]["href"].ToString().Split('&')[0];
+                //Updated = (DateTime) pair["updated"]["$t"];
+                Published = (DateTime)pair["published"]["$t"];
+                //Description = pair["content"]["$t"].ToString();    
+            }
+            else
+            {
+                MinProgress = 0;
+                MaxProgress = 100;
+                Title = pair["title"]["$t"].ToString();
+                ClearTitle = MakeValidFileName(Title);
+                var spraw = pair["id"]["$t"].ToString().Split('/');
+                VideoID = spraw[spraw.Length - 1];
+                ViewCount = (int)pair["yt$statistics"]["viewCount"];
+                Duration = (int)pair["media$group"]["yt$duration"]["seconds"];
+                VideoLink = pair["link"][0]["href"].ToString().Split('&')[0];
+                //Updated = (DateTime) pair["updated"]["$t"];
+                Published = (DateTime)pair["published"]["$t"];
+                Description = pair["content"]["$t"].ToString();    
+            }
         }
 
         public VideoItem(DbDataRecord record)
