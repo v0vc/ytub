@@ -19,9 +19,12 @@ namespace YTub.Models
     {
         public Subscribe MySubscribe { get; set; }
 
+        public ObservableCollection<string> LogCollection { get; set; }
+
         public MainWindowModel()
         {
             MySubscribe = new Subscribe();
+            LogCollection = new ObservableCollection<string>();
         }
 
         public void OpenSettings(object obj)

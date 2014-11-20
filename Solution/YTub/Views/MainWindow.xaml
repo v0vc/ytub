@@ -6,8 +6,7 @@
         DataContext="{Binding MvViewModel, Source={StaticResource ViewModelLocator}}"
         Loaded="MainWindow_OnLoaded"
         KeyUp="MainWindow_OnKeyUp"
-        Icon="../Images/ok.ico"
-        >
+        Icon="../Images/ok.ico">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"></RowDefinition>
@@ -17,13 +16,13 @@
         <Menu>
             <Menu.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <DockPanel HorizontalAlignment="Stretch"/>
+                    <DockPanel HorizontalAlignment="Stretch" />
                 </ItemsPanelTemplate>
             </Menu.ItemsPanel>
             <MenuItem Header="File">
                 <MenuItem Header="Backup" Command="{Binding BackupRestoreCommand}" CommandParameter="backup"></MenuItem>
                 <MenuItem Header="Restore" Command="{Binding BackupRestoreCommand}" CommandParameter="restore"></MenuItem>
-                <Separator/>
+                <Separator />
                 <MenuItem Header="Exit" Click="Exit_OnClick"></MenuItem>
             </MenuItem>
             <MenuItem Header="Subscribe">
@@ -32,9 +31,9 @@
             <MenuItem Header="Tools">
                 <MenuItem Header="Settings" Command="{Binding OpenSettingsCommand}"></MenuItem>
             </MenuItem>
-            <MenuItem Header="Add" Command="{Binding AddLinkCommand}"></MenuItem>
+            <MenuItem Header="Add Link" Command="{Binding AddLinkCommand}"></MenuItem>
             <MenuItem Header="Help" HorizontalAlignment="Right">
-                <MenuItem Header="About"/>
+                <MenuItem Header="About" />
             </MenuItem>
         </Menu>
         <Grid Grid.Row="1">
@@ -56,8 +55,7 @@
                                            RowHeight="25"
                                            IsReadOnly="True"
                                            SelectedItem="{Binding Model.MySubscribe.CurrentChanel}"
-                                           x:Name="DataGridChanels"
-                                           >
+                                           x:Name="DataGridChanels">
                         <DataGrid.CellStyle>
                             <Style TargetType="{x:Type DataGridCell}">
                                 <Setter Property="Foreground" Value="Black" />
@@ -109,10 +107,10 @@
                                                 <Style TargetType="{x:Type Image}">
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsFavorite, Mode=TwoWay}" Value="False">
-                                                            <Setter Property="Source" Value="../Images/notfavor_16.png"/>
+                                                            <Setter Property="Source" Value="../Images/notfavor_16.png" />
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding IsFavorite, Mode=TwoWay}" Value="True">
-                                                            <Setter Property="Source" Value="../Images/favor_16.png"/>
+                                                            <Setter Property="Source" Value="../Images/favor_16.png" />
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -126,42 +124,37 @@
                             <Style TargetType="{x:Type DataGridRow}">
                                 <Setter Property="ContextMenu" Value="{StaticResource DataRowContextMenu}" />
                                 <Setter Property="BorderThickness" Value="0" />
-                                <EventSetter Event="MouseDoubleClick" Handler="Row_doubleClick"/>
+                                <EventSetter Event="MouseDoubleClick" Handler="Row_doubleClick" />
                             </Style>
                         </DataGrid.RowStyle>
                     </common:CustomDataGrid>
                     <Border BorderBrush="Gainsboro" BorderThickness="1" Grid.Row="1" Margin="0,3,0,0">
                         <StackPanel Orientation="Horizontal">
-                            <Button Width="43" Height="26" Margin="2,0,0,0" ToolTip="Sync All" 
-                                    Background="#CCDAFF" 
-                                    Command="{Binding SelectChanelCommand}" 
-                                    CommandParameter="SyncChanelAll"
-                                    >
+                            <Button Width="43" Height="26" Margin="2,0,0,0" ToolTip="Sync All"
+                                    Background="#CCDAFF"
+                                    Command="{Binding SelectChanelCommand}"
+                                    CommandParameter="SyncChanelAll">
                                 <Image Source="../Images/refresh_24.png" Margin="0,1,0,0" />
                             </Button>
-                            <Button Width="43" Height="26" Margin="3,0,0,0" ToolTip="Sync Favorites" 
-                                    Background="#CCDAFF" 
-                                    Command="{Binding SelectChanelCommand}" 
-                                    CommandParameter="SyncChanelFavorites"
-                                    >
+                            <Button Width="43" Height="26" Margin="3,0,0,0" ToolTip="Sync Favorites"
+                                    Background="#CCDAFF"
+                                    Command="{Binding SelectChanelCommand}"
+                                    CommandParameter="SyncChanelFavorites">
                                 <Image Source="../Images/redo_24.png" Margin="0,3,0,0" />
                             </Button>
-                            <Button Width="43" Height="26" Margin="3,0,0,0" ToolTip="Add" 
-                                    Background="#CCDAFF" 
-                                    Command="{Binding OpenAddChanelCommand}"
-                                    >
+                            <Button Width="43" Height="26" Margin="3,0,0,0" ToolTip="Add"
+                                    Background="#CCDAFF"
+                                    Command="{Binding OpenAddChanelCommand}">
                                 <Image Source="../Images/add_24.png" Margin="0,2,0,0" />
                             </Button>
-                            <Button Width="43" Height="26" Margin="3,0,0,0" ToolTip="Remove" 
-                                    Background="#CCDAFF" 
-                                    Command="{Binding RemoveChanelCommand}"
-                                    >
+                            <Button Width="43" Height="26" Margin="3,0,0,0" ToolTip="Remove"
+                                    Background="#CCDAFF"
+                                    Command="{Binding RemoveChanelCommand}">
                                 <Image Source="../Images/remove_24.png" Margin="0,2,0,0" />
                             </Button>
-                            <Button Width="43" Height="26" Margin="3,0,0,0" 
+                            <Button Width="43" Height="26" Margin="3,0,0,0"
                                     Click="ButtonShowHideFavor_OnClick"
-                                    Background="#CCDAFF"
-                                    >
+                                    Background="#CCDAFF">
                                 <Image>
                                     <Image.Style>
                                         <Style TargetType="Image">
@@ -184,8 +177,9 @@
                 </Grid>
             </GroupBox>
             <GridSplitter Grid.Column="1" Width="4" VerticalAlignment="Stretch" HorizontalAlignment="Center" Margin="0,0,0,1"></GridSplitter>
-            <GroupBox Grid.Column="2" Header="Videos:">
-                <common:CustomDataGrid
+            <TabControl Grid.Column="2">
+                <TabItem Header="Videos:" Width="60">
+                    <common:CustomDataGrid
                             ItemsSource="{Binding Model.MySubscribe.CurrentChanel.ListVideoItems}"
                             AutoGenerateColumns="False"
                             SelectedItem="{Binding Model.MySubscribe.CurrentChanel.CurrentVideoItem}"
@@ -195,216 +189,401 @@
                             CanUserDeleteRows="False"
                             CanUserReorderColumns="False"
                             FontSize="14"
+                            HeadersVisibility="Column"
+                            RowHeaderWidth="0"
                             RowHeight="27">
-                    <DataGrid.Resources>
-                        <ContextMenu x:Key="DataRowContextMenu">
-                            <MenuItem Header="Play Online" Click="PlayOnClick" CommandParameter="Online" />
-                            <MenuItem Header="Play Local" Click="PlayOnClick" CommandParameter="Local" />
-                            <MenuItem Header="Download" Click="DownloadVideoOnClick" />
-                            <MenuItem Header="Copy Link" Click="CopyLinkOnClick"></MenuItem>
-                            <MenuItem Header="Delete File" Click="DeleteOnClick"></MenuItem>
-                        </ContextMenu>
-                    </DataGrid.Resources>
-                    <DataGrid.CellStyle>
-                        <Style TargetType="DataGridCell">
-                            <Setter Property="Padding" Value="1" />
-                            <Setter Property="Foreground" Value="Black" />
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="{x:Type DataGridCell}">
-                                        <Border Padding="{TemplateBinding Padding}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
-                                            <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                            <Style.Triggers>
-                                <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background" Value="#CCDAFF" />
-                                    <Setter Property="BorderThickness" Value="1"></Setter>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGrid.CellStyle>
-                    <DataGrid.RowStyle>
-                        <Style TargetType="{x:Type DataGridRow}">
-                            <Setter Property="ContextMenu" Value="{StaticResource DataRowContextMenu}" />
-                            <Setter Property="BorderThickness" Value="0" />
-                            <EventSetter Event="MouseDoubleClick" Handler="PlayOnClick"></EventSetter>
-                        </Style>
-                    </DataGrid.RowStyle>
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="S" Width="28" CanUserResize="False">
-                            <DataGridTemplateColumn.HeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                    <Setter Property="FontSize" Value="12"></Setter>
-                                </Style>
-                            </DataGridTemplateColumn.HeaderStyle>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <CheckBox IsChecked="{Binding IsSynced, Mode=TwoWay}" HorizontalAlignment="Center" IsEnabled="False" Style="{StaticResource CircleCheckbox}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="N" Width="28" MaxWidth="50">
-                            <DataGridTemplateColumn.HeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                    <Setter Property="FontSize" Value="12"></Setter>
-                                </Style>
-                            </DataGridTemplateColumn.HeaderStyle>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock HorizontalAlignment="Center" IsEnabled="False" Text="{Binding Num}" VerticalAlignment="Bottom" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="Title" Width="*" SortMemberPath="Title">
-                            <DataGridTemplateColumn.HeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                    <Setter Property="FontSize" Value="12"></Setter>
-                                </Style>
-                            </DataGridTemplateColumn.HeaderStyle>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Title}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="2,0,0,0" ToolTipService.ShowDuration="120000">
-                                        <TextBlock.ToolTip>
-                                            <TextBlock Text="{Binding Description}"></TextBlock>
-                                        </TextBlock.ToolTip>
+                        <DataGrid.Resources>
+                            <ContextMenu x:Key="DataRowContextMenu">
+                                <MenuItem Header="Play Online" Click="PlayOnClick" CommandParameter="Online" />
+                                <MenuItem Header="Play Local" Click="PlayOnClick" CommandParameter="Local" />
+                                <MenuItem Header="Download" Click="DownloadVideoOnClick" />
+                                <MenuItem Header="Copy Link" Click="CopyLinkOnClick"></MenuItem>
+                                <MenuItem Header="Delete File" Click="DeleteOnClick"></MenuItem>
+                            </ContextMenu>
+                        </DataGrid.Resources>
+                        <DataGrid.CellStyle>
+                            <Style TargetType="DataGridCell">
+                                <Setter Property="Padding" Value="1" />
+                                <Setter Property="Foreground" Value="Black" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                            <Border Padding="{TemplateBinding Padding}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                                                <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="#CCDAFF" />
+                                        <Setter Property="BorderThickness" Value="1"></Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.CellStyle>
+                        <DataGrid.RowStyle>
+                            <Style TargetType="{x:Type DataGridRow}">
+                                <Setter Property="ContextMenu" Value="{StaticResource DataRowContextMenu}" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <EventSetter Event="MouseDoubleClick" Handler="PlayOnClick"></EventSetter>
+                            </Style>
+                        </DataGrid.RowStyle>
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="S" Width="28" CanUserResize="False">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FontSize" Value="12"></Setter>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding IsSynced, Mode=TwoWay}" HorizontalAlignment="Center" IsEnabled="False" Style="{StaticResource CircleCheckbox}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="N" Width="28" MaxWidth="50">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FontSize" Value="12"></Setter>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock HorizontalAlignment="Center" IsEnabled="False" Text="{Binding Num}" VerticalAlignment="Bottom" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Title" Width="*" SortMemberPath="Title">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FontSize" Value="12"></Setter>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Title}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="2,0,0,0" ToolTipService.ShowDuration="120000">
+                                            <TextBlock.ToolTip>
+                                                <TextBlock Text="{Binding Description}"></TextBlock>
+                                            </TextBlock.ToolTip>
                                     </TextBlock>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="Views" SortMemberPath="ViewCount">
-                            <DataGridTemplateColumn.HeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                    <Setter Property="FontSize" Value="12"></Setter>
-                                </Style>
-                            </DataGridTemplateColumn.HeaderStyle>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding ViewCount}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="2,0,2,0">
-                                        <TextBlock.ToolTip>
-                                            <TextBlock Text="{Binding Duration, StringFormat=Duration (sec): {0}}"></TextBlock>
-                                        </TextBlock.ToolTip>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Views" SortMemberPath="ViewCount">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FontSize" Value="12"></Setter>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding ViewCount}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="2,0,2,0">
+                                            <TextBlock.ToolTip>
+                                                <TextBlock Text="{Binding Duration, StringFormat=Duration (sec): {0}}"></TextBlock>
+                                            </TextBlock.ToolTip>
                                     </TextBlock>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <!--<DataGridTemplateColumn Header="Delta" SortMemberPath="Delta">
-                            <DataGridTemplateColumn.HeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                    <Setter Property="FontSize" Value="12"></Setter>
-                                </Style>
-                            </DataGridTemplateColumn.HeaderStyle>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Delta}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="2,0,2,0" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>-->
-                        <DataGridTemplateColumn Header="Published" SortMemberPath="Published" Width="78">
-                            <DataGridTemplateColumn.HeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                    <Setter Property="FontSize" Value="12"></Setter>
-                                </Style>
-                            </DataGridTemplateColumn.HeaderStyle>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Published, StringFormat={}{0:dd.MM.yyyy}}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="2,0,2,0" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="Duration" SortMemberPath="Duration" Width="56">
-                            <DataGridTemplateColumn.HeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                    <Setter Property="FontSize" Value="12"></Setter>
-                                </Style>
-                            </DataGridTemplateColumn.HeaderStyle>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Duration}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="2,0,2,0" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="File" SortMemberPath="IsHasFile" Width="28" CanUserResize="False">
-                            <DataGridTemplateColumn.HeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                    <Setter Property="FontSize" Value="12"></Setter>
-                                </Style>
-                            </DataGridTemplateColumn.HeaderStyle>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button x:Name="Button" BorderThickness="0" Background="Transparent" Click="PlayLocalButton_OnClick">
-                                        <Image x:Name="Image"></Image>
-                                    </Button>
-                                    <DataTemplate.Triggers>
-                                        <DataTrigger Binding="{Binding IsHasFile, Mode=TwoWay}" Value="true">
-                                            <Setter TargetName="Image" Property="Image.Source" Value="../Images/tick_20.png"></Setter>
-                                            <Setter TargetName="Button" Property="IsEnabled" Value="True"></Setter>
-                                            <Setter TargetName="Button" Property="Visibility" Value="Visible"></Setter>
-                                            <Setter TargetName="Button" Property="ToolTip" Value="Play"></Setter>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding IsHasFile, Mode=TwoWay}" Value="false">
-                                            <Setter TargetName="Image" Property="Image.Source" Value="../Images/save_16.png"></Setter>
-                                            <Setter TargetName="Image" Property="Image.Margin" Value="2"></Setter>
-                                            <Setter TargetName="Button" Property="ToolTip" Value="Download HD"></Setter>
-                                        </DataTrigger>
-                                    </DataTemplate.Triggers>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="Download" SortMemberPath="IsHasFile" Width="65" CanUserResize="False">
-                            <DataGridTemplateColumn.HeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                    <Setter Property="FontSize" Value="12"></Setter>
-                                </Style>
-                            </DataGridTemplateColumn.HeaderStyle>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button x:Name="Button" Click="DownloadVideoOnClick" BorderThickness="0.3" ToolTip="Download" Background="Transparent">
-                                        <ProgressBar x:Name="ProgressBar" HorizontalAlignment="Stretch" Height="19" HorizontalContentAlignment="Stretch" Width="58"
-                                        Visibility="Collapsed" 
-                                        />
-                                    </Button>
-                                    <DataTemplate.Triggers>
-                                        <DataTrigger Binding="{Binding IsDownLoading, Mode=TwoWay}" Value="true">
-                                            <Setter TargetName="ProgressBar" Property="Visibility" Value="Visible"></Setter>
-                                            <Setter TargetName="ProgressBar" Property="Minimum" Value="{Binding MinProgress}"></Setter>
-                                            <Setter TargetName="ProgressBar" Property="Maximum" Value="{Binding MaxProgress}"></Setter>
-                                            <Setter TargetName="ProgressBar" Property="Value" Value="{Binding PercentDownloaded}"></Setter>
-                                            <Setter TargetName="ProgressBar" Property="Background" Value="LightGreen"></Setter>
-                                        </DataTrigger>
-                                    </DataTemplate.Triggers>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </common:CustomDataGrid>
-            </GroupBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Published" SortMemberPath="Published" Width="78">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FontSize" Value="12"></Setter>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Published, StringFormat={}{0:dd.MM.yyyy}}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="2,0,2,0" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Duration" SortMemberPath="Duration" Width="56">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FontSize" Value="12"></Setter>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Duration}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="2,0,2,0" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="File" SortMemberPath="IsHasFile" Width="28" CanUserResize="False">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FontSize" Value="12"></Setter>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button x:Name="Button" BorderThickness="0" Background="Transparent" Click="PlayLocalButton_OnClick">
+                                            <Image x:Name="Image"></Image>
+                                        </Button>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsHasFile, Mode=TwoWay}" Value="true">
+                                                <Setter TargetName="Image" Property="Image.Source" Value="../Images/tick_20.png"></Setter>
+                                                <Setter TargetName="Button" Property="IsEnabled" Value="True"></Setter>
+                                                <Setter TargetName="Button" Property="Visibility" Value="Visible"></Setter>
+                                                <Setter TargetName="Button" Property="ToolTip" Value="Play"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsHasFile, Mode=TwoWay}" Value="false">
+                                                <Setter TargetName="Image" Property="Image.Source" Value="../Images/save_16.png"></Setter>
+                                                <Setter TargetName="Image" Property="Image.Margin" Value="2"></Setter>
+                                                <Setter TargetName="Button" Property="ToolTip" Value="Download HD"></Setter>
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Download" SortMemberPath="IsHasFile" Width="65" CanUserResize="False">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FontSize" Value="12"></Setter>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button x:Name="Button" Click="DownloadVideoOnClick" BorderThickness="0.3" ToolTip="Download" Background="Transparent">
+                                            <ProgressBar x:Name="ProgressBar" HorizontalAlignment="Stretch" Height="19" HorizontalContentAlignment="Stretch" Width="58"
+                                        Visibility="Collapsed" />
+                                        </Button>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsDownLoading, Mode=TwoWay}" Value="true">
+                                                <Setter TargetName="ProgressBar" Property="Visibility" Value="Visible"></Setter>
+                                                <Setter TargetName="ProgressBar" Property="Minimum" Value="{Binding MinProgress}"></Setter>
+                                                <Setter TargetName="ProgressBar" Property="Maximum" Value="{Binding MaxProgress}"></Setter>
+                                                <Setter TargetName="ProgressBar" Property="Value" Value="{Binding PercentDownloaded}"></Setter>
+                                                <Setter TargetName="ProgressBar" Property="Background" Value="LightGreen"></Setter>
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </common:CustomDataGrid>
+                </TabItem>
+                <TabItem Header="Popular" Width="60">
+                    <common:CustomDataGrid
+                            ItemsSource="{Binding Model.MySubscribe.ListPopularVideoItems}"
+                            AutoGenerateColumns="False"
+                            SelectedItem="{Binding Model.MySubscribe.CurrentChanel.CurrentVideoItem}"
+                            SelectedItemsList="{Binding Model.MySubscribe.CurrentChanel.SelectedListVideoItems, Mode=TwoWay}"
+                            CanUserResizeRows="False"
+                            CanUserAddRows="False"
+                            CanUserDeleteRows="False"
+                            CanUserReorderColumns="False"
+                            FontSize="14"
+                            HeadersVisibility="Column"
+                            RowHeaderWidth="0"
+                            RowHeight="27">
+                        <DataGrid.Resources>
+                            <ContextMenu x:Key="DataRowContextMenu">
+                                <MenuItem Header="Play Online" Click="PlayOnClick" CommandParameter="Online" />
+                                <MenuItem Header="Play Local" Click="PlayOnClick" CommandParameter="Local" />
+                                <MenuItem Header="Download" Click="DownloadVideoOnClick" />
+                                <MenuItem Header="Copy Link" Click="CopyLinkOnClick"></MenuItem>
+                                <MenuItem Header="Delete File" Click="DeleteOnClick"></MenuItem>
+                            </ContextMenu>
+                        </DataGrid.Resources>
+                        <DataGrid.CellStyle>
+                            <Style TargetType="DataGridCell">
+                                <Setter Property="Padding" Value="1" />
+                                <Setter Property="Foreground" Value="Black" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                            <Border Padding="{TemplateBinding Padding}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                                                <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="#CCDAFF" />
+                                        <Setter Property="BorderThickness" Value="1"></Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.CellStyle>
+                        <DataGrid.RowStyle>
+                            <Style TargetType="{x:Type DataGridRow}">
+                                <Setter Property="ContextMenu" Value="{StaticResource DataRowContextMenu}" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <EventSetter Event="MouseDoubleClick" Handler="PlayOnClick"></EventSetter>
+                            </Style>
+                        </DataGrid.RowStyle>
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="S" Width="28" CanUserResize="False">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FontSize" Value="12"></Setter>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding IsSynced, Mode=TwoWay}" HorizontalAlignment="Center" IsEnabled="False" Style="{StaticResource CircleCheckbox}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="N" Width="28" MaxWidth="50">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FontSize" Value="12"></Setter>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock HorizontalAlignment="Center" IsEnabled="False" Text="{Binding Num}" VerticalAlignment="Bottom" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Title" Width="*" SortMemberPath="Title">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FontSize" Value="12"></Setter>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Title}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="2,0,0,0" ToolTipService.ShowDuration="120000">
+                                            <TextBlock.ToolTip>
+                                                <TextBlock Text="{Binding Description}"></TextBlock>
+                                            </TextBlock.ToolTip>
+                                    </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Views" SortMemberPath="ViewCount">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FontSize" Value="12"></Setter>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding ViewCount}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="2,0,2,0">
+                                            <TextBlock.ToolTip>
+                                                <TextBlock Text="{Binding Duration, StringFormat=Duration (sec): {0}}"></TextBlock>
+                                            </TextBlock.ToolTip>
+                                    </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Published" SortMemberPath="Published" Width="78">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FontSize" Value="12"></Setter>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Published, StringFormat={}{0:dd.MM.yyyy}}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="2,0,2,0" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Duration" SortMemberPath="Duration" Width="56">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FontSize" Value="12"></Setter>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Duration}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="2,0,2,0" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="File" SortMemberPath="IsHasFile" Width="28" CanUserResize="False">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FontSize" Value="12"></Setter>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button x:Name="Button" BorderThickness="0" Background="Transparent" Click="PlayLocalButton_OnClick">
+                                            <Image x:Name="Image"></Image>
+                                        </Button>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsHasFile, Mode=TwoWay}" Value="true">
+                                                <Setter TargetName="Image" Property="Image.Source" Value="../Images/tick_20.png"></Setter>
+                                                <Setter TargetName="Button" Property="IsEnabled" Value="True"></Setter>
+                                                <Setter TargetName="Button" Property="Visibility" Value="Visible"></Setter>
+                                                <Setter TargetName="Button" Property="ToolTip" Value="Play"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsHasFile, Mode=TwoWay}" Value="false">
+                                                <Setter TargetName="Image" Property="Image.Source" Value="../Images/save_16.png"></Setter>
+                                                <Setter TargetName="Image" Property="Image.Margin" Value="2"></Setter>
+                                                <Setter TargetName="Button" Property="ToolTip" Value="Download HD"></Setter>
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Download" SortMemberPath="IsHasFile" Width="65" CanUserResize="False">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FontSize" Value="12"></Setter>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button x:Name="Button" Click="DownloadVideoOnClick" BorderThickness="0.3" ToolTip="Download" Background="Transparent">
+                                            <ProgressBar x:Name="ProgressBar" HorizontalAlignment="Stretch" Height="19" HorizontalContentAlignment="Stretch" Width="58"
+                                        Visibility="Collapsed" />
+                                        </Button>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsDownLoading, Mode=TwoWay}" Value="true">
+                                                <Setter TargetName="ProgressBar" Property="Visibility" Value="Visible"></Setter>
+                                                <Setter TargetName="ProgressBar" Property="Minimum" Value="{Binding MinProgress}"></Setter>
+                                                <Setter TargetName="ProgressBar" Property="Maximum" Value="{Binding MaxProgress}"></Setter>
+                                                <Setter TargetName="ProgressBar" Property="Value" Value="{Binding PercentDownloaded}"></Setter>
+                                                <Setter TargetName="ProgressBar" Property="Background" Value="LightGreen"></Setter>
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </common:CustomDataGrid>
+                </TabItem>
+                <TabItem Header="Log" Width="60">
+                    <ListBox ItemsSource="{Binding Model.LogCollection}"></ListBox>
+                </TabItem>
+            </TabControl>
         </Grid>
         <DockPanel Grid.Row="2">
-            <TextBlock DockPanel.Dock="Left" 
-                       Text="{Binding Model.MySubscribe.Result, Mode=TwoWay}" 
-                       Foreground="ForestGreen" 
-                       Margin="10,2,0,0"
-                       />
-            <ResizeGrip Opacity="0.75" DockPanel.Dock="Right"/>
-            <TextBlock DockPanel.Dock="Right" 
-                    Text="{Binding Model.MySubscribe.CurrentChanel.ListVideoItems.Count, StringFormat=Total: {0}}" 
-                    VerticalAlignment="Stretch" 
-                    HorizontalAlignment="Right" 
+            <TextBlock DockPanel.Dock="Left"
+                       Text="{Binding Model.MySubscribe.Result, Mode=TwoWay}"
+                       Foreground="ForestGreen"
+                       Margin="10,2,0,0" />
+            <ResizeGrip Opacity="0.75" DockPanel.Dock="Right" />
+            <TextBlock DockPanel.Dock="Right"
+                    Text="{Binding Model.MySubscribe.CurrentChanel.ListVideoItems.Count, StringFormat=Total: {0}}"
+                    VerticalAlignment="Stretch"
+                    HorizontalAlignment="Right"
                     Margin="5,0,10,0" />
-            <!--<ProgressBar Margin="10,2,10,2" 
-                         Visibility="{Binding Model.MySubscribe.PrVisibility, Mode=OneWay}" 
+            <!--<ProgressBar Margin="10,2,10,2"
+                         Visibility="{Binding Model.MySubscribe.PrVisibility, Mode=OneWay}"
                          Value="{Binding Model.MySubscribe.CurrentChanel.PrValue}"
                          Minimum="0"
                          Maximum="100"
