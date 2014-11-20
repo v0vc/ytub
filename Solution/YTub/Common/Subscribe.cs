@@ -32,6 +32,8 @@ namespace YTub.Common
 
         public static string FfmpegPath;
 
+        public static bool IsPathContainFfmpeg;
+
         private bool _isOnlyFavorites;
 
         private string _result;
@@ -41,7 +43,6 @@ namespace YTub.Common
         private IList _selectedListChanels = new ArrayList();
 
         #region Fields
-        private Visibility _prVisibility;
 
         public Chanel CurrentChanel
         {
@@ -92,22 +93,13 @@ namespace YTub.Common
             }
         }
 
-        public Visibility PrVisibility
-        {
-            get { return _prVisibility; }
-            set
-            {
-                _prVisibility = value;
-                OnPropertyChanged("PrVisibility");
-            }
-        } 
         #endregion
 
         public Subscribe()
         {
-            PrVisibility = Visibility.Hidden;
             var dir = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
             if (dir == null) return;
+            Sqllite.AppDir = dir;
             ChanelDb = Path.Combine(dir, "ytub.db");
             ChanelList = new ObservableCollection<Chanel>();
             ChanelListToBind = new ObservableCollection<Chanel>();
@@ -244,6 +236,26 @@ namespace YTub.Common
 
             if (IsSyncOnStart)
                 SyncChanel("SyncChanelAll");
+        }
+
+        public static void CheckFfmpegPath()
+        {
+            if (string.IsNullOrEmpty(FfmpegPath))
+                IsPathContainFfmpeg = false;
+            else
+            {
+                var fn = new FileInfo(FfmpegPath);
+                if (fn.Exists && fn.DirectoryName != null)
+                {
+                    var winpath = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine);
+                    if (winpath != null && winpath.Contains(fn.DirectoryName))
+                        IsPathContainFfmpeg = true;
+                    else
+                        IsPathContainFfmpeg = false;
+                }
+                else
+                    IsPathContainFfmpeg = false;
+            }
         }
 
         private static void ChanelSync(ICollection list)
