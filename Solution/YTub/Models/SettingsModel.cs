@@ -52,6 +52,7 @@ namespace YTub.Models
 
         public RelayCommand UpdateFileCommand { get; set; }
 
+        #region Fields
         public string DirPath
         {
             get { return _dirpath; }
@@ -160,7 +161,8 @@ namespace YTub.Models
                 _ffheader = value;
                 OnPropertyChanged("FfHeader");
             }
-        }
+        } 
+        #endregion
 
         public SettingsModel(string savepath, string mpcpath, int synconstart, string youpath, string ffmegpath, int isonlyfavor)
         {
@@ -237,8 +239,27 @@ namespace YTub.Models
             if (!string.IsNullOrEmpty(FfmpegPath))
             {
                 var fn = new FileInfo(FfmpegPath);
-                if (fn.Exists)
+                if (fn.Exists && fn.DirectoryName != null)
                 {
+                    var winpath = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine);
+                    if (winpath != null && !winpath.Contains(fn.DirectoryName))
+                    {
+                        var res = winpath + ";" + fn.DirectoryName;
+                        try
+                        {
+                            Environment.SetEnvironmentVariable("PATH", res, EnvironmentVariableTarget.Machine);
+                            Subscribe.IsPathContainFfmpeg = true;
+                        }
+                        catch
+                        {
+                            Subscribe.IsPathContainFfmpeg = false;
+                            ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "Need admin rights to set ffmpeg into Windows PATH";
+                        }
+                    }
+                    else
+                    {
+                        Subscribe.IsPathContainFfmpeg = true;
+                    }
                     Sqllite.UpdateSetting(Subscribe.ChanelDb, "pathtoffmpeg", fn.FullName);
                     Subscribe.FfmpegPath = fn.FullName;
                     Result = "Saved";

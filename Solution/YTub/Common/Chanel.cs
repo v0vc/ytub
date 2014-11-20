@@ -203,7 +203,6 @@ namespace YTub.Common
                 if (dir == null) return;
                 int totalrow;
                 Sqllite.CreateOrConnectDb(Subscribe.ChanelDb, ChanelOwner, out totalrow);
-                ViewModelLocator.MvViewModel.Model.MySubscribe.PrVisibility = Visibility.Visible;
                 if (totalrow == 0)
                 {
                     foreach (VideoItem item in ListVideoItems)
@@ -378,13 +377,10 @@ namespace YTub.Common
 
         private static void downloader_DownloadProgressChanged(ProgressEventArgs e, VideoItem o)
         {
-            if ((int)e.ProgressPercentage%5 == 0)
+            Application.Current.Dispatcher.BeginInvoke((Action) (() =>
             {
-                Application.Current.Dispatcher.BeginInvoke((Action) (() =>
-                {
-                    o.PercentDownloaded = e.ProgressPercentage;
-                }));
-            }
+                o.PercentDownloaded = e.ProgressPercentage;
+            }));
         }
 
         public void DownloadVideoExternal()
@@ -395,9 +391,11 @@ namespace YTub.Common
                 return;
             }
 
+            Subscribe.CheckFfmpegPath();
+
             foreach (VideoItem item in SelectedListVideoItems)
             {
-                var youwr = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Path.Combine(Subscribe.DownloadPath, item.VideoOwner), item);
+                var youwr = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Path.Combine(Subscribe.DownloadPath, item.VideoOwner), item, Subscribe.IsPathContainFfmpeg);
                 youwr.DownloadFile(false);
             }
         }

@@ -16,6 +16,8 @@ namespace YTub.Common
 
         private const string TableSettings = "tblSettings";
 
+        public static string AppDir;
+
         public static void CreateOrConnectDb(string dbfile, string autor, out int totalrow)
         {
             totalrow = 0;
@@ -382,6 +384,8 @@ namespace YTub.Common
         {
             Task.Run(() =>
             {
+                var fnyoudl = new FileInfo(Path.Combine(AppDir, "youtube-dl", "youtube-dl.exe"));
+                var fnffmpeg = new FileInfo(Path.Combine(AppDir, "ffmpeg", "ffmpeg.exe"));
                 SQLiteConnection.CreateFile(dbfile);
                 var lstcom = new List<string>();
                 var zap = string.Format(@"CREATE TABLE {0} (v_id TEXT PRIMARY KEY,
@@ -400,8 +404,15 @@ namespace YTub.Common
                 var zapdir = string.Format("CREATE TABLE {0} (savepath TEXT, pathtompc TEXT, synconstart INT, pathtoyoudl TEXT, pathtoffmpeg TEXT, isonlyfavor INT)",
                         TableSettings);
                 lstcom.Add(zapdir);
-                var insdir = string.Format(@"INSERT INTO '{0}' ('savepath', 'synconstart', 'isonlyfavor') VALUES ('{1}', '0', '0')",
-                        TableSettings, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+                string insdir;
+                if (fnyoudl.Exists & fnffmpeg.Exists)
+                {
+                    insdir = string.Format(@"INSERT INTO '{0}' ('savepath', 'synconstart', 'isonlyfavor', 'pathtoyoudl', 'pathtoffmpeg') VALUES ('{1}', '0', '0', '{2}', '{3}')", TableSettings, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), fnyoudl.FullName, fnffmpeg.FullName);
+                }
+                else
+                {
+                    insdir = string.Format(@"INSERT INTO '{0}' ('savepath', 'synconstart', 'isonlyfavor') VALUES ('{1}', '0', '0')", TableSettings, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));    
+                }
                 lstcom.Add(insdir);
                 using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
                 foreach (string com in lstcom)

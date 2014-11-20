@@ -65,7 +65,10 @@ namespace YTub.Models
             if (IsValidUrl(Link))
             {
                 View.Close();
-                var youdl = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Subscribe.DownloadPath, Link, null);
+
+                Subscribe.CheckFfmpegPath();
+                
+                var youdl = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Subscribe.DownloadPath, Link, null, Subscribe.IsPathContainFfmpeg);
                 youdl.DownloadFile(IsAudio);
             }
             else
