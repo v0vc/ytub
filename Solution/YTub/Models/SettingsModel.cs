@@ -1,20 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
-using Microsoft.Win32;
 using SevenZip;
 using YTub.Common;
 using MessageBox = System.Windows.MessageBox;
@@ -38,6 +35,8 @@ namespace YTub.Models
 
         private bool _isOnlyFavorites;
 
+        private bool _isPopular;
+
         private int _prValue;
 
         private bool _isPrVisible;
@@ -53,6 +52,10 @@ namespace YTub.Models
         public RelayCommand UpdateFileCommand { get; set; }
 
         #region Fields
+
+        public List<KeyValuePair<string, string>> Countries { get; set; }
+
+        public KeyValuePair<string, string> SelectedCountry { get; set; }
         public string DirPath
         {
             get { return _dirpath; }
@@ -113,6 +116,16 @@ namespace YTub.Models
             }
         }
 
+        public bool IsPopular
+        {
+            get { return _isPopular; }
+            set
+            {
+                _isPopular = value;
+                OnPropertyChanged("IsPopular");
+            }
+        }
+
         public int PrValue
         {
             get { return _prValue; }
@@ -161,10 +174,11 @@ namespace YTub.Models
                 _ffheader = value;
                 OnPropertyChanged("FfHeader");
             }
-        } 
+        }
+
         #endregion
 
-        public SettingsModel(string savepath, string mpcpath, int synconstart, string youpath, string ffmegpath, int isonlyfavor)
+        public SettingsModel(string savepath, string mpcpath, int synconstart, string youpath, string ffmegpath, int isonlyfavor, int ispopular, string culture, List<KeyValuePair<string, string>> countries)
         {
             MpcPath = string.Empty;
             YoudlPath = string.Empty;
@@ -178,11 +192,14 @@ namespace YTub.Models
                 FfmpegPath = new FileInfo(ffmegpath).Exists ? ffmegpath : string.Empty;
             IsSyncOnStart = synconstart == 1;
             IsOnlyFavorites = isonlyfavor == 1;
+            IsPopular = ispopular == 1;
             SaveCommand = new RelayCommand(SaveSettings);
             OpenDirCommand = new RelayCommand(OpenDir);
             UpdateFileCommand = new RelayCommand(UpdateFile);
             YouHeader = string.IsNullOrEmpty(YoudlPath) ? "Youtube-dl:" : string.Format("Youtube-dl ({0})", GetVersion(YoudlPath, "--version").Trim());
             FfHeader = string.IsNullOrEmpty(FfmpegPath) ? "FFmpeg:" : string.Format("FFmpeg ({0})", Makeffversion(GetVersion(FfmpegPath, "-version")));
+            Countries = countries;
+            SelectedCountry = Countries.First(x => x.Value == culture);
         }
 
         private void SaveSettings(object obj)
@@ -192,7 +209,14 @@ namespace YTub.Models
 
             var favor = IsOnlyFavorites ? 1 : 0;
             Sqllite.UpdateSetting(Subscribe.ChanelDb, "isonlyfavor", favor);
-            //ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites = IsOnlyFavorites;
+
+            var popular = IsPopular ? 1 : 0;
+            Sqllite.UpdateSetting(Subscribe.ChanelDb, "ispopular", popular);
+
+            if (IsPopular)
+            {
+                Sqllite.UpdateSetting(Subscribe.ChanelDb, "culture", SelectedCountry.Value);
+            }
 
             var savedir = new DirectoryInfo(DirPath);
             if (savedir.Exists)

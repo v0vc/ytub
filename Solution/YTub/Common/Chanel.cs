@@ -38,11 +38,14 @@ namespace YTub.Common
 
         private Timer _timer;
 
-        public TimeSpan Synctime;
+        private string _titleFilter;
+
+        private readonly List<VideoItem> _filterlist = new List<VideoItem>();
 
         #region Fields
         public int MaxResults { get; set; }
 
+        public TimeSpan Synctime;
         public int MinRes { get; set; }
 
         public string ChanelOwner { get; set; }
@@ -97,7 +100,19 @@ namespace YTub.Common
                 _isFavorite = value;
                 OnPropertyChanged("IsFavorite");
             }
-        } 
+        }
+
+        public string TitleFilter
+        {
+            get { return _titleFilter; }
+            set
+            {
+                _titleFilter = value;
+                OnPropertyChanged("TitleFilter");
+                Filter();
+            }
+        }
+
         #endregion
 
         public Chanel(string name, string user)
@@ -119,6 +134,33 @@ namespace YTub.Common
             _bgv.RunWorkerCompleted += _bgv_RunWorkerCompleted;
             _bgvdb.DoWork += _bgvdb_DoWork;
             _bgvdb.RunWorkerCompleted += _bgvdb_RunWorkerCompleted;
+        }
+
+        private void Filter()
+        {
+            if (string.IsNullOrEmpty(_titleFilter))
+            {
+                if (_filterlist.Any())
+                {
+                    ListVideoItems.Clear();
+                    foreach (VideoItem item in _filterlist)
+                    {
+                        if (item.Title.Contains(_titleFilter))
+                            ListVideoItems.Add(item);
+                    }
+                }
+            }
+            else
+            {
+                if (!_filterlist.Any())
+                    _filterlist.AddRange(ListVideoItems);
+                ListVideoItems.Clear();
+                foreach (VideoItem item in _filterlist)
+                {
+                    if (item.Title.ToLower().Contains(_titleFilter.ToLower()))
+                        ListVideoItems.Add(item);
+                }
+            }
         }
 
         public void AddToFavorites()
@@ -239,7 +281,7 @@ namespace YTub.Common
                 {
                     foreach (JToken pair in jsvideo["feed"]["entry"])
                     {
-                        var v = new VideoItem(pair, false) { Num = ListVideoItems.Count + 1, VideoOwner = ChanelOwner };
+                        var v = new VideoItem(pair, false, "RU") { Num = ListVideoItems.Count + 1, VideoOwner = ChanelOwner };
                         Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
                     }
                     if (total > ListVideoItems.Count)
@@ -395,7 +437,11 @@ namespace YTub.Common
 
             foreach (VideoItem item in SelectedListVideoItems)
             {
-                var youwr = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Path.Combine(Subscribe.DownloadPath, item.VideoOwner), item, Subscribe.IsPathContainFfmpeg);
+                YouWrapper youwr;
+                if (!string.IsNullOrEmpty(item.VideoOwner))
+                    youwr = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Path.Combine(Subscribe.DownloadPath, item.VideoOwner), item, Subscribe.IsPathContainFfmpeg);
+                else
+                    youwr = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Subscribe.DownloadPath, item, Subscribe.IsPathContainFfmpeg);
                 youwr.DownloadFile(false);
             }
         }

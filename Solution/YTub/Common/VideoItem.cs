@@ -73,6 +73,8 @@ namespace YTub.Common
 
         public string Description { get; set; }
 
+        public string Region { get; set; }
+
         public DateTime Published { get; set; }
 
         public double MinProgress
@@ -136,38 +138,21 @@ namespace YTub.Common
         } 
         #endregion
 
-        public VideoItem(JToken pair, bool isPopular)
+        public VideoItem(JToken pair, bool isPopular, string region)
         {
-            if (isPopular)
-            {
-                MinProgress = 0;
-                MaxProgress = 100;
-                Title = pair["title"]["$t"].ToString();
-                ClearTitle = MakeValidFileName(Title);
-                var spraw = pair["id"]["$t"].ToString().Split('/');
-                VideoID = spraw[spraw.Length - 1];
-                ViewCount = (int)pair["yt$statistics"]["viewCount"];
-                Duration = (int)pair["media$group"]["yt$duration"]["seconds"];
-                VideoLink = pair["link"][0]["href"].ToString().Split('&')[0];
-                //Updated = (DateTime) pair["updated"]["$t"];
-                Published = (DateTime)pair["published"]["$t"];
-                //Description = pair["content"]["$t"].ToString();    
-            }
-            else
-            {
-                MinProgress = 0;
-                MaxProgress = 100;
-                Title = pair["title"]["$t"].ToString();
-                ClearTitle = MakeValidFileName(Title);
-                var spraw = pair["id"]["$t"].ToString().Split('/');
-                VideoID = spraw[spraw.Length - 1];
-                ViewCount = (int)pair["yt$statistics"]["viewCount"];
-                Duration = (int)pair["media$group"]["yt$duration"]["seconds"];
-                VideoLink = pair["link"][0]["href"].ToString().Split('&')[0];
-                //Updated = (DateTime) pair["updated"]["$t"];
-                Published = (DateTime)pair["published"]["$t"];
-                Description = pair["content"]["$t"].ToString();    
-            }
+            MinProgress = 0;
+            MaxProgress = 100;
+            Title = pair["title"]["$t"].ToString();
+            ClearTitle = MakeValidFileName(Title);
+            var spraw = pair["id"]["$t"].ToString().Split('/');
+            VideoID = spraw[spraw.Length - 1];
+            ViewCount = (int)pair["yt$statistics"]["viewCount"];
+            Duration = (int)pair["media$group"]["yt$duration"]["seconds"];
+            VideoLink = pair["link"][0]["href"].ToString().Split('&')[0];
+            Published = (DateTime)pair["published"]["$t"];
+            Region = region;
+            if (!isPopular)
+                Description = pair["content"]["$t"].ToString();
         }
 
         public VideoItem(DbDataRecord record)
@@ -188,7 +173,12 @@ namespace YTub.Common
 
         public bool IsFileExist(VideoItem item)
         {
-            var path = Path.Combine(Subscribe.DownloadPath, item.VideoOwner, string.Format("{0}.mp4", item.ClearTitle));
+            string path;
+            if (!string.IsNullOrEmpty(item.VideoOwner))
+                path = Path.Combine(Subscribe.DownloadPath, item.VideoOwner, string.Format("{0}.mp4", item.ClearTitle));
+            else
+                path = Path.Combine(Subscribe.DownloadPath, string.Format("{0}.mp4", item.ClearTitle));
+
             var fn = new FileInfo(path);
             if (fn.Exists)
             {
