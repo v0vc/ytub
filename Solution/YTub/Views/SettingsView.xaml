@@ -1,7 +1,7 @@
 ﻿<Window x:Class="YTub.Views.SettingsView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Height="350" Width="380" ResizeMode="NoResize"
+        Height="376" Width="380" ResizeMode="NoResize"
         WindowStyle="ToolWindow"
         Title="Settings">
     <Grid>
@@ -173,6 +173,19 @@
                     <Label Content="Sync on start" MouseLeftButtonUp="SyncOnStart"></Label>
                     <CheckBox Name="CheckBoxFavor" VerticalAlignment="Center" Margin="25,0,0,0" IsChecked="{Binding IsOnlyFavorites, Mode=TwoWay}"></CheckBox>
                     <Label Content="Show only favorites" MouseLeftButtonUp="ShowFavorites"></Label>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox Name="CheckBoxPopular" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="{Binding IsPopular, Mode=TwoWay}"></CheckBox>
+                    <Label Content="Popular on start" MouseLeftButtonUp="GetPopular"></Label>
+                    <ComboBox Margin="10,0,0,0" Width="120" Height="22" 
+                              ItemsSource="{Binding Countries}"
+                              DisplayMemberPath="Key"
+                              SelectedValuePath="Value"
+                              SelectedIndex="0"
+                              VerticalContentAlignment="Center"
+                              IsEnabled="{Binding IsPopular}"
+                              SelectedItem="{Binding SelectedCountry}"
+                              />
                 </StackPanel>
                     <Label Content="{Binding Result}" VerticalAlignment="Top" HorizontalAlignment="Left" Foreground="ForestGreen"></Label>
             </StackPanel>

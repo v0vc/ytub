@@ -47,6 +47,12 @@ namespace YTub.Common
 
         private readonly BackgroundWorker _bgv = new BackgroundWorker();
 
+        private readonly List<VideoItem> _filterlist = new List<VideoItem>();
+
+        private Timer _timer;
+
+        private string _titleFilter;
+
         #region Fields
 
         public Chanel CurrentChanel
@@ -66,6 +72,8 @@ namespace YTub.Common
         public TimeSpan Synctime { get; set; }
 
         public bool IsSyncOnStart { get; set; }
+
+        public bool IsPopular { get; set; }
 
         public IList SelectedListChanels
         {
@@ -100,6 +108,17 @@ namespace YTub.Common
 
         public TrulyObservableCollection<VideoItem> ListPopularVideoItems { get; set; }
 
+        public string TitleFilter
+        {
+            get { return _titleFilter; }
+            set
+            {
+                _titleFilter = value;
+                OnPropertyChanged("TitleFilter");
+                Filter();
+            }
+        }
+
         #endregion
 
         public Subscribe()
@@ -119,6 +138,7 @@ namespace YTub.Common
                 MpcPath = Sqllite.GetSettingsValue(ChanelDb, "pathtompc");
                 IsSyncOnStart = Sqllite.GetSettingsIntValue(ChanelDb, "synconstart") != 0;
                 IsOnlyFavorites = Sqllite.GetSettingsIntValue(ChanelDb, "isonlyfavor") != 0;
+                IsPopular = Sqllite.GetSettingsIntValue(ChanelDb, "ispopular") != 0;
                 YoudlPath = Sqllite.GetSettingsValue(ChanelDb, "pathtoyoudl");
                 FfmpegPath = Sqllite.GetSettingsValue(ChanelDb, "pathtoffmpeg");
             }
@@ -126,23 +146,59 @@ namespace YTub.Common
             _bgv.RunWorkerCompleted += _bgv_RunWorkerCompleted;
         }
 
+        private void Filter()
+        {
+            if (string.IsNullOrEmpty(_titleFilter))
+            {
+                if (_filterlist.Any())
+                {
+                    ListPopularVideoItems.Clear();
+                    foreach (VideoItem item in _filterlist)
+                    {
+                        if (item.Title.Contains(_titleFilter))
+                            ListPopularVideoItems.Add(item);
+                    }
+                }
+            }
+            else
+            {
+                if (!_filterlist.Any())
+                    _filterlist.AddRange(ListPopularVideoItems);
+                ListPopularVideoItems.Clear();
+                foreach (VideoItem item in _filterlist)
+                {
+                    if (item.Title.ToLower().Contains(_titleFilter.ToLower()))
+                        ListPopularVideoItems.Add(item);
+                }
+            }
+        }
+
         void _bgv_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            Result = "Popular finished";
+            _timer.Dispose();
+            Result = string.Format("{0} synced in {1}", ViewModelLocator.MvViewModel.Model.SelectedCountry.Key, Synctime.Duration().ToString(@"mm\:ss"));
         }
 
         void _bgv_DoWork(object sender, DoWorkEventArgs e)
         {
+            var cul = e.Argument.ToString();
+            if (string.IsNullOrEmpty(cul))
+                cul = "RU";
             var wc = new WebClient { Encoding = Encoding.UTF8 };
-            var zap = string.Format("https://gdata.youtube.com/feeds/api/standardfeeds/RU/most_popular?v=2&alt=json");
+            var zap = string.Format("https://gdata.youtube.com/feeds/api/standardfeeds/{0}/most_popular?v=2&alt=json", cul);
             string s = wc.DownloadString(zap);
             var jsvideo = (JObject)JsonConvert.DeserializeObject(s);
             if (jsvideo == null)
                 return;
             foreach (JToken pair in jsvideo["feed"]["entry"])
             {
-                var v = new VideoItem(pair, true) { Num = ListPopularVideoItems.Count + 1, VideoOwner = "Popular" };
-                Application.Current.Dispatcher.Invoke(() => ListPopularVideoItems.Add(v));
+                var v = new VideoItem(pair, true, cul) {Num = ListPopularVideoItems.Count + 1};
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    ListPopularVideoItems.Add(v);
+                    v.IsHasFile = v.IsFileExist(v);
+                    v.IsSynced = true;
+                });
             }
         }
 
@@ -267,7 +323,21 @@ namespace YTub.Common
             if (IsSyncOnStart)
                 SyncChanel("SyncChanelAll");
 
-            _bgv.RunWorkerAsync();
+            if (IsPopular)
+            {
+                var culture = Sqllite.GetSettingsValue(ChanelDb, "culture");
+                ViewModelLocator.MvViewModel.Model.SelectedCountry = ViewModelLocator.MvViewModel.Model.Countries.First(x => x.Value == culture);
+            }
+        }
+
+        public void GetPopularVideos(string culture)
+        {
+            Synctime =new TimeSpan();
+            var tcb = new TimerCallback(tmr_Tick);
+            _timer = new Timer(tcb, null, 0, 1000);
+            ListPopularVideoItems.Clear();
+            if (!_bgv.IsBusy)
+                _bgv.RunWorkerAsync(culture);
         }
 
         public static void CheckFfmpegPath()
@@ -319,6 +389,11 @@ namespace YTub.Common
             }
             if (ChanelListToBind.Any())
                 CurrentChanel = ChanelListToBind[0];
+        }
+
+        void tmr_Tick(object o)
+        {
+            Synctime = Synctime.Add(TimeSpan.FromSeconds(1));
         }
 
         #region INotifyPropertyChanged

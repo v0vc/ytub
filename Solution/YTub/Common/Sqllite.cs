@@ -401,17 +401,17 @@ namespace YTub.Common
                                                         description TEXT,
                                                         cleartitle TEXT)", TableVideos);
                 lstcom.Add(zap);
-                var zapdir = string.Format("CREATE TABLE {0} (savepath TEXT, pathtompc TEXT, synconstart INT, pathtoyoudl TEXT, pathtoffmpeg TEXT, isonlyfavor INT)",
+                var zapdir = string.Format("CREATE TABLE {0} (savepath TEXT, pathtompc TEXT, synconstart INT, pathtoyoudl TEXT, pathtoffmpeg TEXT, isonlyfavor INT, ispopular INT, culture TEXT)",
                         TableSettings);
                 lstcom.Add(zapdir);
                 string insdir;
                 if (fnyoudl.Exists & fnffmpeg.Exists)
                 {
-                    insdir = string.Format(@"INSERT INTO '{0}' ('savepath', 'synconstart', 'isonlyfavor', 'pathtoyoudl', 'pathtoffmpeg') VALUES ('{1}', '0', '0', '{2}', '{3}')", TableSettings, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), fnyoudl.FullName, fnffmpeg.FullName);
+                    insdir = string.Format(@"INSERT INTO '{0}' ('savepath', 'synconstart', 'isonlyfavor', 'ispopular', 'pathtoyoudl', 'pathtoffmpeg', 'culture') VALUES ('{1}', '0', '0', '0', '{2}', '{3}', 'RU')", TableSettings, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), fnyoudl.FullName, fnffmpeg.FullName);
                 }
                 else
                 {
-                    insdir = string.Format(@"INSERT INTO '{0}' ('savepath', 'synconstart', 'isonlyfavor') VALUES ('{1}', '0', '0')", TableSettings, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));    
+                    insdir = string.Format(@"INSERT INTO '{0}' ('savepath', 'synconstart', 'isonlyfavor', 'ispopular', 'culture') VALUES ('{1}', '0', '0', '0', 'RU')", TableSettings, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));    
                 }
                 lstcom.Add(insdir);
                 using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))

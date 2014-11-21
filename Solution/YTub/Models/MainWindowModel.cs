@@ -4,8 +4,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Xml.Linq;
@@ -15,16 +15,74 @@ using YTub.Views;
 
 namespace YTub.Models
 {
-    public class MainWindowModel 
+    public class MainWindowModel
     {
+        private KeyValuePair<string, string> _selectedCountry;
+
         public Subscribe MySubscribe { get; set; }
 
         public ObservableCollection<string> LogCollection { get; set; }
+
+        public List<KeyValuePair<string, string>> Countries { get; set; }
+
+        public KeyValuePair<string, string> SelectedCountry
+        {
+            get { return _selectedCountry; }
+            set
+            {
+                _selectedCountry = value;
+                ViewModelLocator.MvViewModel.Model.MySubscribe.GetPopularVideos(SelectedCountry.Value);
+            }
+        }
 
         public MainWindowModel()
         {
             MySubscribe = new Subscribe();
             LogCollection = new ObservableCollection<string>();
+
+            Countries = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("Russia", "RU"),
+                new KeyValuePair<string, string>("Canada", "CA"),
+                new KeyValuePair<string, string>("Argentina", "AR"),
+                new KeyValuePair<string, string>("Australia", "AU"),
+                new KeyValuePair<string, string>("Austria", "AT"),
+                new KeyValuePair<string, string>("Belgium", "BE"),
+                new KeyValuePair<string, string>("Brazil", "BR"),
+                new KeyValuePair<string, string>("Chile", "CL"),
+                new KeyValuePair<string, string>("Colombia", "CO"),
+                new KeyValuePair<string, string>("Czech Republic", "CZ"),
+                new KeyValuePair<string, string>("Egypt", "EG"),
+                new KeyValuePair<string, string>("France", "FR"),
+                new KeyValuePair<string, string>("Germany", "DE"),
+                new KeyValuePair<string, string>("Great Britain", "GB"),
+                new KeyValuePair<string, string>("Hong Kong", "HK"),
+                new KeyValuePair<string, string>("Hungary", "HU"),
+                new KeyValuePair<string, string>("India", "IN"),
+                new KeyValuePair<string, string>("Ireland", "IE"),
+                new KeyValuePair<string, string>("Israel", "IL"),
+                new KeyValuePair<string, string>("Italy", "IT"),
+                new KeyValuePair<string, string>("Japan", "JP"),
+                new KeyValuePair<string, string>("Jordan", "JO"),
+                new KeyValuePair<string, string>("Malaysia", "MY"),
+                new KeyValuePair<string, string>("Mexico", "MX"),
+                new KeyValuePair<string, string>("Morocco", "MA"),
+                new KeyValuePair<string, string>("Netherlands", "NL"),
+                new KeyValuePair<string, string>("New Zealand", "NZ"),
+                new KeyValuePair<string, string>("Peru", "PE"),
+                new KeyValuePair<string, string>("Philippines", "PH"),
+                new KeyValuePair<string, string>("Poland", "PL"),
+                new KeyValuePair<string, string>("Saudi Arabia", "SA"),
+                new KeyValuePair<string, string>("Singapore", "SG"),
+                new KeyValuePair<string, string>("South Africa", "ZA"),
+                new KeyValuePair<string, string>("South Korea", "KR"),
+                new KeyValuePair<string, string>("Spain", "ES"),
+                new KeyValuePair<string, string>("Sweden", "SE"),
+                new KeyValuePair<string, string>("Switzerland", "CH"),
+                new KeyValuePair<string, string>("Taiwan", "TW"),
+                new KeyValuePair<string, string>("United Arab Emirates", "AE"),
+                new KeyValuePair<string, string>("United States", "US")
+            };
         }
 
         public void OpenSettings(object obj)
@@ -33,8 +91,10 @@ namespace YTub.Models
             var mpcpath = string.Empty;
             var synconstart = 0;
             var isonlyfavor = 0;
+            var ispopular = 0;
             var youpath = string.Empty;
             var ffpath = string.Empty;
+            var culture = string.Empty;
             var fn = new FileInfo(Subscribe.ChanelDb);
             if (fn.Exists)
             {
@@ -42,8 +102,10 @@ namespace YTub.Models
                 mpcpath = Sqllite.GetSettingsValue(fn.FullName, "pathtompc");
                 synconstart = Sqllite.GetSettingsIntValue(fn.FullName, "synconstart");
                 isonlyfavor = Sqllite.GetSettingsIntValue(fn.FullName, "isonlyfavor");
+                ispopular = Sqllite.GetSettingsIntValue(fn.FullName, "ispopular");
                 youpath = Sqllite.GetSettingsValue(fn.FullName, "pathtoyoudl");
                 ffpath = Sqllite.GetSettingsValue(fn.FullName, "pathtoffmpeg");
+                culture = Sqllite.GetSettingsValue(fn.FullName, "culture");
             }
             else
             {
@@ -52,7 +114,7 @@ namespace YTub.Models
 
             try
             {
-                var settingsModel = new SettingsModel(savepath, mpcpath, synconstart, youpath, ffpath, isonlyfavor);
+                var settingsModel = new SettingsModel(savepath, mpcpath, synconstart, youpath, ffpath, isonlyfavor, ispopular, culture, Countries);
                 var settingslView = new SettingsView
                 {
                     Owner = Application.Current.MainWindow,
@@ -102,8 +164,16 @@ namespace YTub.Models
                     Backup();
                     break;
 
-                case "restore":
-                    Restore();
+                case "restoreall":
+                    RestoreAll();
+                    break;
+
+                case "restorechanells":
+                    RestoreChanells();
+                    break;
+
+                case "restoresettings":
+                    RestoreSettings();
                     break;
             }
         }
@@ -146,7 +216,7 @@ namespace YTub.Models
             }
         }
 
-        private static void Restore()
+        private static void RestoreAll()
         {
             var opf = new OpenFileDialog {Filter = "XML documents (.xml)|*.xml"};
             var res = opf.ShowDialog();
@@ -183,6 +253,70 @@ namespace YTub.Models
                         }
                     }
 
+                    Subscribe.DownloadPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "savepath");
+                    Subscribe.MpcPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtompc");
+                    Subscribe.YoudlPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtoyoudl");
+                    Subscribe.FfmpegPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtoffmpeg");
+                }
+                catch (Exception ex)
+                {
+                    ViewModelLocator.MvViewModel.Model.MySubscribe.Result = ex.Message;
+                }
+            }
+        }
+
+        private static void RestoreChanells()
+        {
+            var opf = new OpenFileDialog { Filter = "XML documents (.xml)|*.xml" };
+            var res = opf.ShowDialog();
+            if (res == true)
+            {
+                try
+                {
+                    var doc = XDocument.Load(opf.FileName);
+                    var xElement1 = doc.Element("tables");
+                    if (xElement1 == null) return;
+                    var xElement = xElement1.Element("tblVideos");
+                    if (xElement == null) return;
+                    foreach (XElement element in xElement.Descendants("Chanell"))
+                    {
+                        var owner = element.Elements().FirstOrDefault(z => z.Name == "chanelowner");
+                        var name = element.Elements().FirstOrDefault(z => z.Name == "chanelname");
+                        if (owner != null & name != null)
+                        {
+                            ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(new Chanel(name.Value, owner.Value));
+                            ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites = false;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ViewModelLocator.MvViewModel.Model.MySubscribe.Result = ex.Message;
+                }
+            }
+        }
+
+        private static void RestoreSettings()
+        {
+            var opf = new OpenFileDialog { Filter = "XML documents (.xml)|*.xml" };
+            var res = opf.ShowDialog();
+            if (res == true)
+            {
+                try
+                {
+                    var doc = XDocument.Load(opf.FileName);
+                    var dicv = doc.Descendants("tblSettings").Elements().ToDictionary(setting => setting.Name.LocalName, setting => setting.Value);
+                    var dic = new Dictionary<string, string>();
+                    foreach (XElement element in doc.Descendants("tblSettings").Elements())
+                    {
+                        if (element.Name.LocalName == "synconstart" || element.Name.LocalName == "isonlyfavor" || element.Name.LocalName == "ispopular")
+                            dic.Add(element.Name.LocalName, "INT");
+                        else
+                            dic.Add(element.Name.LocalName, "TEXT");
+                    }
+                    Sqllite.DropTable(Subscribe.ChanelDb, "tblSettings");
+                    Sqllite.CreateTable(Subscribe.ChanelDb, "tblSettings", dic);
+                    Sqllite.CreateSettings(Subscribe.ChanelDb, "tblSettings", dicv);
                     Subscribe.DownloadPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "savepath");
                     Subscribe.MpcPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtompc");
                     Subscribe.YoudlPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtoyoudl");

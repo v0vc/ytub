@@ -54,5 +54,10 @@ namespace YTub.Views
         {
             CheckBoxFavor.IsChecked = !CheckBoxFavor.IsChecked;
         }
+
+        private void GetPopular(object sender, MouseButtonEventArgs e)
+        {
+            CheckBoxPopular.IsChecked = !CheckBoxPopular.IsChecked;
+        }
     }
 }

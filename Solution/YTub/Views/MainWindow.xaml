@@ -6,7 +6,8 @@
         DataContext="{Binding MvViewModel, Source={StaticResource ViewModelLocator}}"
         Loaded="MainWindow_OnLoaded"
         KeyUp="MainWindow_OnKeyUp"
-        Icon="../Images/ok.ico">
+        Icon="../Images/ok.ico"
+        Name="Window">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"></RowDefinition>
@@ -21,7 +22,11 @@
             </Menu.ItemsPanel>
             <MenuItem Header="File">
                 <MenuItem Header="Backup" Command="{Binding BackupRestoreCommand}" CommandParameter="backup"></MenuItem>
-                <MenuItem Header="Restore" Command="{Binding BackupRestoreCommand}" CommandParameter="restore"></MenuItem>
+                <MenuItem Header="Restore">
+                    <MenuItem Header="Chanells" Command="{Binding BackupRestoreCommand}" CommandParameter="restorechanells"></MenuItem>
+                    <MenuItem Header="Settings" Command="{Binding BackupRestoreCommand}" CommandParameter="restoresettings"></MenuItem>
+                    <MenuItem Header="All" Command="{Binding BackupRestoreCommand}" CommandParameter="restoreall"></MenuItem>
+                </MenuItem>
                 <Separator />
                 <MenuItem Header="Exit" Click="Exit_OnClick"></MenuItem>
             </MenuItem>
@@ -191,7 +196,8 @@
                             FontSize="14"
                             HeadersVisibility="Column"
                             RowHeaderWidth="0"
-                            RowHeight="27">
+                            RowHeight="27"
+                            VerticalScrollBarVisibility="Visible">
                         <DataGrid.Resources>
                             <ContextMenu x:Key="DataRowContextMenu">
                                 <MenuItem Header="Play Online" Click="PlayOnClick" CommandParameter="Online" />
@@ -256,11 +262,45 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Title" Width="*" SortMemberPath="Title">
+                            <DataGridTemplateColumn Width="*" SortMemberPath="Title">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
                                         <Setter Property="FontSize" Value="12"></Setter>
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Label Content="Title"></Label>
+                                                        <TextBox Width="150" Margin="10,0,0,0" Height="20" 
+                                                                 Text="{Binding Path = DataContext.Model.MySubscribe.CurrentChanel.TitleFilter, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}">
+                                                            <TextBox.Resources>
+                                                                <VisualBrush x:Key="HelpBrush" TileMode="None" Opacity="0.4" Stretch="None" AlignmentX="Left" AlignmentY="Center">
+                                                                    <VisualBrush.Visual>
+                                                                        <TextBlock FontStyle="Italic" Text="filter" FontSize="13" />
+                                                                    </VisualBrush.Visual>
+                                                                    <VisualBrush.Transform>
+                                                                        <ScaleTransform CenterX="150" ScaleX="0.99" />
+                                                                    </VisualBrush.Transform>
+                                                                </VisualBrush>
+                                                            </TextBox.Resources>
+                                                            <TextBox.Style>
+                                                                <Style TargetType="TextBox">
+                                                                    <Style.Triggers>
+                                                                        <Trigger Property="Text" Value="{x:Null}">
+                                                                            <Setter Property="Background" Value="{StaticResource HelpBrush}" />
+                                                                        </Trigger>
+                                                                        <Trigger Property="Text" Value="">
+                                                                            <Setter Property="Background" Value="{StaticResource HelpBrush}" />
+                                                                        </Trigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBox.Style>
+                                                        </TextBox>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
                                     </Style>
                                 </DataGridTemplateColumn.HeaderStyle>
                                 <DataGridTemplateColumn.CellTemplate>
@@ -385,7 +425,8 @@
                             FontSize="14"
                             HeadersVisibility="Column"
                             RowHeaderWidth="0"
-                            RowHeight="27">
+                            RowHeight="27"
+                            VerticalScrollBarVisibility="Visible">
                         <DataGrid.Resources>
                             <ContextMenu x:Key="DataRowContextMenu">
                                 <MenuItem Header="Play Online" Click="PlayOnClick" CommandParameter="Online" />
@@ -424,7 +465,7 @@
                             </Style>
                         </DataGrid.RowStyle>
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="S" Width="28" CanUserResize="False">
+                            <DataGridTemplateColumn Width="28" Header="S" CanUserResize="False">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -450,11 +491,69 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Title" Width="*" SortMemberPath="Title">
+                            <DataGridTemplateColumn Width="80" CanUserResize="False">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
                                         <Setter Property="FontSize" Value="12"></Setter>
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <ComboBox Width="70" HorizontalAlignment="Center" HorizontalContentAlignment="Stretch"
+                                                        ItemsSource="{Binding Path = DataContext.Model.Countries, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
+                                                              SelectedItem="{Binding Path=DataContext.Model.SelectedCountry, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
+                                                              DisplayMemberPath="Key"
+                                                              />
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Region}" HorizontalAlignment="Center" VerticalAlignment="Bottom" IsEnabled="False"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Width="*" SortMemberPath="Title">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FontSize" Value="12"></Setter>
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Label Content="Title"></Label>
+                                                        <TextBox Width="150" Margin="10,0,0,0" Height="20" 
+                                                                 Text="{Binding Path = DataContext.Model.MySubscribe.TitleFilter, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}">
+                                                            <TextBox.Resources>
+                                                                <VisualBrush x:Key="HelpBrush" TileMode="None" Opacity="0.4" Stretch="None" AlignmentX="Left" AlignmentY="Center">
+                                                                    <VisualBrush.Visual>
+                                                                        <TextBlock FontStyle="Italic" Text="filter" FontSize="13" />
+                                                                    </VisualBrush.Visual>
+                                                                    <VisualBrush.Transform>
+                                                                        <ScaleTransform CenterX="150" ScaleX="0.99" />
+                                                                    </VisualBrush.Transform>
+                                                                </VisualBrush>
+                                                            </TextBox.Resources>
+                                                            <TextBox.Style>
+                                                                <Style TargetType="TextBox">
+                                                                    <Style.Triggers>
+                                                                        <Trigger Property="Text" Value="{x:Null}">
+                                                                            <Setter Property="Background" Value="{StaticResource HelpBrush}" />
+                                                                        </Trigger>
+                                                                        <Trigger Property="Text" Value="">
+                                                                            <Setter Property="Background" Value="{StaticResource HelpBrush}" />
+                                                                        </Trigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBox.Style>
+                                                        </TextBox>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
                                     </Style>
                                 </DataGridTemplateColumn.HeaderStyle>
                                 <DataGridTemplateColumn.CellTemplate>
