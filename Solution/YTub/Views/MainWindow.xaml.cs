@@ -102,10 +102,7 @@ namespace YTub.Views
                     Clipboard.SetText(
                         ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.VideoLink);
                 }
-                catch
-                {
-                    //MessageBox.Show("SS");
-                }
+                catch{}
             }
         }
 
@@ -135,6 +132,20 @@ namespace YTub.Views
         {
             ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites =
                 !ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites;
+        }
+
+        private void CopyAuthorOnClick(object sender, RoutedEventArgs e)
+        {
+            if (ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel != null &&
+                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem != null)
+            {
+                try
+                {
+                    Clipboard.SetText(
+                        ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.VideoOwner);
+                }
+                catch{}
+            }
         }
     }
 }

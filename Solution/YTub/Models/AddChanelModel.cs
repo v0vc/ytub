@@ -13,6 +13,8 @@ namespace YTub.Models
     {
         private readonly bool _isedit;
 
+        public List<string> ServerList { get; set; }
+
         public RelayCommand AddChanelCommand { get; set; }
 
         public AddChanelView View { get; set; }
@@ -21,11 +23,16 @@ namespace YTub.Models
 
         public string ChanelOwner { get; set; }
 
-        public AddChanelModel(AddChanelView view, bool isedit)
+        public string ServerName { get; set; }
+
+        public AddChanelModel(AddChanelView view, bool isedit, List<string> serverList)
         {
             _isedit = isedit;
             View = view;
             AddChanelCommand = new RelayCommand(AddChanel);
+            ServerList = serverList;
+            if (ServerList.Any())
+                ServerName = ServerList[0];
             //Name = "Best of the Web";
             //User = "zapatou";
             //Name = "Den";
@@ -47,7 +54,7 @@ namespace YTub.Models
                 }
                 else
                 {
-                    var chanel = new Chanel(ChanelName, ChanelOwner);
+                    var chanel = new Chanel(ChanelName, ChanelOwner, ServerName);
                     ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(chanel);
                     ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelListToBind.Add(chanel);
                     //ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites = false;

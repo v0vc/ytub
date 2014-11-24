@@ -60,6 +60,8 @@ namespace YTub.Common
             }
         }
 
+        public string ServerName { get; set; }
+
         public bool IsReady
         {
             get { return _isReady; }
@@ -115,7 +117,7 @@ namespace YTub.Common
 
         #endregion
 
-        public Chanel(string name, string user)
+        public Chanel(string name, string user, string servername)
         {
             MaxResults = 25;
             MinRes = 1;
@@ -127,6 +129,7 @@ namespace YTub.Common
 
             ChanelName = name;
             ChanelOwner = user;
+            ServerName = servername;
             var res = Sqllite.GetVideoIntValue(Subscribe.ChanelDb, "isfavorite", "chanelowner", ChanelOwner);
             IsFavorite = res != 0;
             ListVideoItems = new TrulyObservableCollection<VideoItem>();
@@ -138,14 +141,14 @@ namespace YTub.Common
 
         private void Filter()
         {
-            if (string.IsNullOrEmpty(_titleFilter))
+            if (string.IsNullOrEmpty(TitleFilter))
             {
                 if (_filterlist.Any())
                 {
                     ListVideoItems.Clear();
                     foreach (VideoItem item in _filterlist)
                     {
-                        if (item.Title.Contains(_titleFilter))
+                        if (item.Title.Contains(TitleFilter))
                             ListVideoItems.Add(item);
                     }
                 }
@@ -157,7 +160,7 @@ namespace YTub.Common
                 ListVideoItems.Clear();
                 foreach (VideoItem item in _filterlist)
                 {
-                    if (item.Title.ToLower().Contains(_titleFilter.ToLower()))
+                    if (item.Title.ToLower().Contains(TitleFilter.ToLower()))
                         ListVideoItems.Add(item);
                 }
             }
@@ -195,7 +198,7 @@ namespace YTub.Common
 
                     foreach (VideoItem videoItem in ListVideoItems)
                     {
-                        Sqllite.InsertRecord(Subscribe.ChanelDb, videoItem.VideoID, ChanelOwner, ChanelName, 0, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount, videoItem.ViewCount, videoItem.Duration, videoItem.Published, videoItem.Description);
+                        Sqllite.InsertRecord(Subscribe.ChanelDb, videoItem.VideoID, ChanelOwner, ChanelName, ServerName, 0, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount, videoItem.ViewCount, videoItem.Duration, videoItem.Published, videoItem.Description);
                     }
 
                     break;
@@ -216,7 +219,7 @@ namespace YTub.Common
 
                         Sqllite.UpdateValue(Subscribe.ChanelDb, "viewcount", "v_id", item.VideoID, item.ViewCount);
                         if (item.IsSynced == false)
-                            Sqllite.InsertRecord(Subscribe.ChanelDb, item.VideoID, ChanelOwner, ChanelName, 0,
+                            Sqllite.InsertRecord(Subscribe.ChanelDb, item.VideoID, ChanelOwner, ChanelName, ServerName, 0,
                                 item.VideoLink, item.Title, item.ViewCount, item.ViewCount, item.Duration,
                                 item.Published, item.Description);
                     }
