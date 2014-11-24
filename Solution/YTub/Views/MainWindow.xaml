@@ -204,6 +204,7 @@
                                 <MenuItem Header="Play Local" Click="PlayOnClick" CommandParameter="Local" />
                                 <MenuItem Header="Download" Click="DownloadVideoOnClick" />
                                 <MenuItem Header="Copy Link" Click="CopyLinkOnClick"></MenuItem>
+                                <MenuItem Header="Copy Author" Click="CopyAuthorOnClick"></MenuItem>
                                 <MenuItem Header="Delete File" Click="DeleteOnClick"></MenuItem>
                             </ContextMenu>
                         </DataGrid.Resources>
@@ -433,6 +434,7 @@
                                 <MenuItem Header="Play Local" Click="PlayOnClick" CommandParameter="Local" />
                                 <MenuItem Header="Download" Click="DownloadVideoOnClick" />
                                 <MenuItem Header="Copy Link" Click="CopyLinkOnClick"></MenuItem>
+                                <MenuItem Header="Copy Author" Click="CopyAuthorOnClick"></MenuItem>
                                 <MenuItem Header="Delete File" Click="DeleteOnClick"></MenuItem>
                             </ContextMenu>
                         </DataGrid.Resources>

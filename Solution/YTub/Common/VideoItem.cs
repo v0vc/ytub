@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.Common;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -75,6 +76,8 @@ namespace YTub.Common
 
         public string Region { get; set; }
 
+        public string ServerName { get; set; }
+
         public DateTime Published { get; set; }
 
         public double MinProgress
@@ -144,15 +147,24 @@ namespace YTub.Common
             MaxProgress = 100;
             Title = pair["title"]["$t"].ToString();
             ClearTitle = MakeValidFileName(Title);
-            var spraw = pair["id"]["$t"].ToString().Split('/');
-            VideoID = spraw[spraw.Length - 1];
             ViewCount = (int)pair["yt$statistics"]["viewCount"];
             Duration = (int)pair["media$group"]["yt$duration"]["seconds"];
             VideoLink = pair["link"][0]["href"].ToString().Split('&')[0];
             Published = (DateTime)pair["published"]["$t"];
             Region = region;
+            var owner = pair["author"][0]["uri"]["$t"].ToString().Split('/');
+            VideoOwner = owner[owner.Length - 1];
             if (!isPopular)
+            {
+                var spraw = pair["id"]["$t"].ToString().Split('/');
+                VideoID = spraw[spraw.Length - 1];
                 Description = pair["content"]["$t"].ToString();
+            }
+            else
+            {
+                var spraw = pair["id"]["$t"].ToString().Split(':');
+                VideoID = spraw[spraw.Length - 1];
+            }
         }
 
         public VideoItem(DbDataRecord record)
