@@ -414,7 +414,7 @@ namespace YTub.Common
             {
                 Application.Current.Dispatcher.BeginInvoke((Action)(() =>
                 {
-                    o.IsHasFile = true;
+                    //o.IsHasFile = true;
                     o.FilePath = vd.SavePath;
                 }));
             }
@@ -436,15 +436,16 @@ namespace YTub.Common
                 return;
             }
 
-            Subscribe.CheckFfmpegPath();
+            //Subscribe.CheckFfmpegPath();
 
             foreach (VideoItem item in SelectedListVideoItems)
             {
                 YouWrapper youwr;
                 if (!string.IsNullOrEmpty(item.VideoOwner))
-                    youwr = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Path.Combine(Subscribe.DownloadPath, item.VideoOwner), item, Subscribe.IsPathContainFfmpeg);
+                    youwr = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Path.Combine(Subscribe.DownloadPath, item.VideoOwner), item);
+                        //, Subscribe.IsPathContainFfmpeg);
                 else
-                    youwr = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Subscribe.DownloadPath, item, Subscribe.IsPathContainFfmpeg);
+                    youwr = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Subscribe.DownloadPath, item);//, Subscribe.IsPathContainFfmpeg);
                 youwr.DownloadFile(false);
             }
         }
