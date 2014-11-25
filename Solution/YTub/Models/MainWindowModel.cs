@@ -122,6 +122,7 @@ namespace YTub.Models
                     WindowStartupLocation = WindowStartupLocation.CenterOwner
                 };
 
+                settingsModel.View = settingslView;
                 settingslView.ShowDialog();
             }
             catch (Exception ex)

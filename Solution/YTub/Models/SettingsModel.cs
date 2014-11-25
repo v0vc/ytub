@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Forms;
 using SevenZip;
 using YTub.Common;
+using YTub.Views;
 using MessageBox = System.Windows.MessageBox;
 using OpenFileDialog = System.Windows.Forms.OpenFileDialog;
 
@@ -45,6 +46,7 @@ namespace YTub.Models
 
         private string _ffheader;
 
+        public SettingsView View { get; set; }
         public RelayCommand SaveCommand { get; set; }
 
         public RelayCommand OpenDirCommand { get; set; }
@@ -266,25 +268,25 @@ namespace YTub.Models
                 var fn = new FileInfo(FfmpegPath);
                 if (fn.Exists && fn.DirectoryName != null)
                 {
-                    var winpath = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine);
-                    if (winpath != null && !winpath.Contains(fn.DirectoryName))
-                    {
-                        var res = winpath + ";" + fn.DirectoryName;
-                        try
-                        {
-                            Environment.SetEnvironmentVariable("PATH", res, EnvironmentVariableTarget.Machine);
-                            Subscribe.IsPathContainFfmpeg = true;
-                        }
-                        catch
-                        {
-                            Subscribe.IsPathContainFfmpeg = false;
-                            ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "Need admin rights to set ffmpeg into Windows PATH";
-                        }
-                    }
-                    else
-                    {
-                        Subscribe.IsPathContainFfmpeg = true;
-                    }
+                    //var winpath = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine);
+                    //if (winpath != null && !winpath.Contains(fn.DirectoryName))
+                    //{
+                    //    var res = winpath + ";" + fn.DirectoryName;
+                    //    try
+                    //    {
+                    //        Environment.SetEnvironmentVariable("PATH", res, EnvironmentVariableTarget.Machine);
+                    //        Subscribe.IsPathContainFfmpeg = true;
+                    //    }
+                    //    catch
+                    //    {
+                    //        Subscribe.IsPathContainFfmpeg = false;
+                    //        ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "Need admin rights to set ffmpeg into Windows PATH";
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    Subscribe.IsPathContainFfmpeg = true;
+                    //}
                     Sqllite.UpdateSetting(Subscribe.ChanelDb, "pathtoffmpeg", fn.FullName);
                     Subscribe.FfmpegPath = fn.FullName;
                     Result = "Saved";
@@ -294,6 +296,8 @@ namespace YTub.Models
                     Result = "Not saved, check Ffmpeg exe path";
                 }
             }
+
+            //View.Close();
         }
 
         private void OpenDir(object obj)

@@ -33,6 +33,8 @@ namespace YTub.Common
 
         private bool _isDownloading;
 
+        private string _filePath;
+
         #region Fields
         public int Num { get; set; }
 
@@ -70,7 +72,19 @@ namespace YTub.Common
 
         public string VideoLink { get; set; }
 
-        public string FilePath { get; set; }
+        public string FilePath
+        {
+            get { return _filePath; }
+            set
+            {
+                _filePath = value;
+                //if (!string.IsNullOrEmpty(_filePath))
+                //{
+                //    var fn = new FileInfo(_filePath);
+                //    IsHasFile = fn.Exists;
+                //}
+            }
+        }
 
         public string Description { get; set; }
 
@@ -145,26 +159,30 @@ namespace YTub.Common
         {
             MinProgress = 0;
             MaxProgress = 100;
-            Title = pair["title"]["$t"].ToString();
-            ClearTitle = MakeValidFileName(Title);
-            ViewCount = (int)pair["yt$statistics"]["viewCount"];
-            Duration = (int)pair["media$group"]["yt$duration"]["seconds"];
-            VideoLink = pair["link"][0]["href"].ToString().Split('&')[0];
-            Published = (DateTime)pair["published"]["$t"];
-            Region = region;
-            var owner = pair["author"][0]["uri"]["$t"].ToString().Split('/');
-            VideoOwner = owner[owner.Length - 1];
-            if (!isPopular)
+            try
             {
-                var spraw = pair["id"]["$t"].ToString().Split('/');
-                VideoID = spraw[spraw.Length - 1];
-                Description = pair["content"]["$t"].ToString();
+                Title = pair["title"]["$t"].ToString();
+                ClearTitle = MakeValidFileName(Title);
+                ViewCount = (int)pair["yt$statistics"]["viewCount"];
+                Duration = (int)pair["media$group"]["yt$duration"]["seconds"];
+                VideoLink = pair["link"][0]["href"].ToString().Split('&')[0];
+                Published = (DateTime)pair["published"]["$t"];
+                Region = region;
+                var owner = pair["author"][0]["uri"]["$t"].ToString().Split('/');
+                VideoOwner = owner[owner.Length - 1];
+                if (!isPopular)
+                {
+                    var spraw = pair["id"]["$t"].ToString().Split('/');
+                    VideoID = spraw[spraw.Length - 1];
+                    Description = pair["content"]["$t"].ToString();
+                }
+                else
+                {
+                    var spraw = pair["id"]["$t"].ToString().Split(':');
+                    VideoID = spraw[spraw.Length - 1];
+                }
             }
-            else
-            {
-                var spraw = pair["id"]["$t"].ToString().Split(':');
-                VideoID = spraw[spraw.Length - 1];
-            }
+            catch{}
         }
 
         public VideoItem(DbDataRecord record)
@@ -231,7 +249,7 @@ namespace YTub.Common
                         return;
                     }
                     var param = string.Format("{0} /play", VideoLink.Replace("https://", "http://"));
-                    var proc = System.Diagnostics.Process.Start(Subscribe.MpcPath, param);
+                    var proc = Process.Start(Subscribe.MpcPath, param);
                     if (proc != null) proc.Close();
                     break;
             }

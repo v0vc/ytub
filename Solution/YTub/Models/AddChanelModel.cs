@@ -55,8 +55,15 @@ namespace YTub.Models
                 else
                 {
                     var chanel = new Chanel(ChanelName, ChanelOwner, ServerName);
-                    ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(chanel);
-                    ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelListToBind.Add(chanel);
+                    if (!ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Select(z => z.ChanelOwner).Contains(ChanelOwner))
+                    {
+                        ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(chanel);
+                        ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelListToBind.Add(chanel);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Subscribe has already " + ChanelOwner, "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
                     //ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites = false;
                 }
                 View.Close();    

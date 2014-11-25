@@ -35,7 +35,7 @@ namespace YTub.Common
 
         public static string FfmpegPath;
 
-        public static bool IsPathContainFfmpeg;
+        //public static bool IsPathContainFfmpeg;
 
         private bool _isOnlyFavorites;
 
@@ -366,25 +366,25 @@ namespace YTub.Common
                 _bgv.RunWorkerAsync(culture);
         }
 
-        public static void CheckFfmpegPath()
-        {
-            if (string.IsNullOrEmpty(FfmpegPath))
-                IsPathContainFfmpeg = false;
-            else
-            {
-                var fn = new FileInfo(FfmpegPath);
-                if (fn.Exists && fn.DirectoryName != null)
-                {
-                    var winpath = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine);
-                    if (winpath != null && winpath.Contains(fn.DirectoryName))
-                        IsPathContainFfmpeg = true;
-                    else
-                        IsPathContainFfmpeg = false;
-                }
-                else
-                    IsPathContainFfmpeg = false;
-            }
-        }
+        //public static void CheckFfmpegPath()
+        //{
+        //    if (string.IsNullOrEmpty(FfmpegPath))
+        //        IsPathContainFfmpeg = false;
+        //    else
+        //    {
+        //        var fn = new FileInfo(FfmpegPath);
+        //        if (fn.Exists && fn.DirectoryName != null)
+        //        {
+        //            var winpath = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine);
+        //            if (winpath != null && winpath.Contains(fn.DirectoryName))
+        //                IsPathContainFfmpeg = true;
+        //            else
+        //                IsPathContainFfmpeg = false;
+        //        }
+        //        else
+        //            IsPathContainFfmpeg = false;
+        //    }
+        //}
 
         private static void ChanelSync(ICollection list)
         {
