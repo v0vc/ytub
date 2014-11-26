@@ -33,8 +33,6 @@ namespace YTub.Common
 
         private bool _isDownloading;
 
-        private string _filePath;
-
         #region Fields
         public int Num { get; set; }
 
@@ -72,19 +70,7 @@ namespace YTub.Common
 
         public string VideoLink { get; set; }
 
-        public string FilePath
-        {
-            get { return _filePath; }
-            set
-            {
-                _filePath = value;
-                //if (!string.IsNullOrEmpty(_filePath))
-                //{
-                //    var fn = new FileInfo(_filePath);
-                //    IsHasFile = fn.Exists;
-                //}
-            }
-        }
+        public string FilePath { get; set; }
 
         public string Description { get; set; }
 
@@ -199,6 +185,11 @@ namespace YTub.Common
             Duration = (int) record["duration"];
             Description = record["description"].ToString();
             Published = (DateTime) record["published"];
+        }
+
+        public VideoItem()
+        {
+            
         }
 
         public bool IsFileExist(VideoItem item)

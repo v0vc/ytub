@@ -60,7 +60,9 @@ namespace YTub.Common
             }
         }
 
-        public string ServerName { get; set; }
+        //public string ServerName { get; set; }
+
+        public ForumItem ChanelForum { get; set; }
 
         public bool IsReady
         {
@@ -129,7 +131,8 @@ namespace YTub.Common
 
             ChanelName = name;
             ChanelOwner = user;
-            ServerName = servername;
+            //ServerName = servername;
+            ChanelForum = ViewModelLocator.MvViewModel.Model.MySubscribe.ServerList.First(x => x.ForumName == servername);
             var res = Sqllite.GetVideoIntValue(Subscribe.ChanelDb, "isfavorite", "chanelowner", ChanelOwner);
             IsFavorite = res != 0;
             ListVideoItems = new TrulyObservableCollection<VideoItem>();
@@ -198,7 +201,7 @@ namespace YTub.Common
 
                     foreach (VideoItem videoItem in ListVideoItems)
                     {
-                        Sqllite.InsertRecord(Subscribe.ChanelDb, videoItem.VideoID, ChanelOwner, ChanelName, ServerName, 0, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount, videoItem.ViewCount, videoItem.Duration, videoItem.Published, videoItem.Description);
+                        Sqllite.InsertRecord(Subscribe.ChanelDb, videoItem.VideoID, ChanelOwner, ChanelName, ChanelForum.ForumName, 0, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount, videoItem.ViewCount, videoItem.Duration, videoItem.Published, videoItem.Description);
                     }
 
                     break;
@@ -219,7 +222,7 @@ namespace YTub.Common
 
                         Sqllite.UpdateValue(Subscribe.ChanelDb, "viewcount", "v_id", item.VideoID, item.ViewCount);
                         if (item.IsSynced == false)
-                            Sqllite.InsertRecord(Subscribe.ChanelDb, item.VideoID, ChanelOwner, ChanelName, ServerName, 0,
+                            Sqllite.InsertRecord(Subscribe.ChanelDb, item.VideoID, ChanelOwner, ChanelName, ChanelForum.ForumName, 0,
                                 item.VideoLink, item.Title, item.ViewCount, item.ViewCount, item.Duration,
                                 item.Published, item.Description);
                     }
@@ -271,30 +274,20 @@ namespace YTub.Common
 
         void _bgv_DoWork(object sender, DoWorkEventArgs e)
         {
-            while (true)
+            if (ChanelForum.ForumName == "YouTube")
             {
-                var wc = new WebClient { Encoding = Encoding.UTF8 };
-                var zap = string.Format("https://gdata.youtube.com/feeds/api/users/{0}/uploads?alt=json&start-index={1}&max-results={2}", ChanelOwner, MinRes, MaxResults);
-                string s = wc.DownloadString(zap);
-                var jsvideo = (JObject)JsonConvert.DeserializeObject(s);
-                if (jsvideo == null)
-                    return;
-                int total;
-                if (int.TryParse(jsvideo["feed"]["openSearch$totalResults"]["$t"].ToString(), out total))
-                {
-                    foreach (JToken pair in jsvideo["feed"]["entry"])
-                    {
-                        var v = new VideoItem(pair, false, "RU") { Num = ListVideoItems.Count + 1, VideoOwner = ChanelOwner };
-                        Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
-                    }
-                    if (total > ListVideoItems.Count)
-                    {
-                        MinRes = MinRes + MaxResults;
-                        continue;
-                    }
-                }
-                break;
-            } 
+                GetYouTubeVideosApiv2();
+            }
+
+            if (ChanelForum.ForumName == "RuTracker")
+            {
+                GetRuTrackerVideos();
+            }
+
+            if (ChanelForum.ForumName == "Tapochek")
+            {
+                GetTapochekVideos();
+            }
         }
 
         public void DeleteFiles()
@@ -448,6 +441,58 @@ namespace YTub.Common
                     youwr = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Subscribe.DownloadPath, item);//, Subscribe.IsPathContainFfmpeg);
                 youwr.DownloadFile(false);
             }
+        }
+
+        private void GetYouTubeVideosApiv2()
+        {
+            while (true)
+            {
+                var wc = new WebClient { Encoding = Encoding.UTF8 };
+                var zap = string.Format("https://gdata.youtube.com/feeds/api/users/{0}/uploads?alt=json&start-index={1}&max-results={2}",
+                    ChanelOwner, MinRes, MaxResults);
+                string s = wc.DownloadString(zap);
+                var jsvideo = (JObject)JsonConvert.DeserializeObject(s);
+                if (jsvideo == null)
+                    return;
+                int total;
+                if (int.TryParse(jsvideo["feed"]["openSearch$totalResults"]["$t"].ToString(), out total))
+                {
+                    foreach (JToken pair in jsvideo["feed"]["entry"])
+                    {
+                        var v = new VideoItem(pair, false, "RU")
+                        {
+                            Num = ListVideoItems.Count + 1,
+                            VideoOwner = ChanelOwner
+                        };
+                        Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
+                    }
+                    if (total > ListVideoItems.Count)
+                    {
+                        MinRes = MinRes + MaxResults;
+                        continue;
+                    }
+                }
+                break;
+            }
+        }
+
+        private void GetRuTrackerVideos()
+        {
+            //var wc = new WebClientEx(ChanelForum.GetSessionRt());
+            //var zap = string.Format("http://rutracker.org/forum/tracker.php?rid={0}", ChanelOwner);
+            //string s = wc.DownloadString(zap);
+            //Debug.WriteLine(s);
+
+            var v = new VideoItem {Title = "RuTracker not implemented yet"};
+            Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
+        }
+
+        private void GetTapochekVideos()
+        {
+            //var wc = new WebClientEx(ChanelForum.GetSessionTap());
+
+            var v = new VideoItem {Title = "Tapochek not implemented yet"};
+            Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
         }
 
         void tmr_Tick(object o)

@@ -59,6 +59,8 @@ namespace YTub.Models
 
         public KeyValuePair<string, string> SelectedCountry { get; set; }
 
+        public ObservableCollection<ForumItem> ListForums { get; set; }
+
         public string DirPath
         {
             get { return _dirpath; }
@@ -181,7 +183,7 @@ namespace YTub.Models
 
         #endregion
 
-        public SettingsModel(string savepath, string mpcpath, int synconstart, string youpath, string ffmegpath, int isonlyfavor, int ispopular, string culture, List<KeyValuePair<string, string>> countries)
+        public SettingsModel(string savepath, string mpcpath, int synconstart, string youpath, string ffmegpath, int isonlyfavor, int ispopular, string culture, List<KeyValuePair<string, string>> countries, ObservableCollection<ForumItem> forums)
         {
             MpcPath = string.Empty;
             YoudlPath = string.Empty;
@@ -203,6 +205,11 @@ namespace YTub.Models
             FfHeader = string.IsNullOrEmpty(FfmpegPath) ? "FFmpeg:" : string.Format("FFmpeg ({0})", Makeffversion(GetVersion(FfmpegPath, "-version")));
             Countries = countries;
             SelectedCountry = Countries.First(x => x.Value == culture);
+            ListForums = new ObservableCollection<ForumItem>();
+            foreach (ForumItem forum in forums.Where(forum => forum.ForumName != "YouTube"))
+            {
+                ListForums.Add(forum);
+            }
         }
 
         private void SaveSettings(object obj)
@@ -268,6 +275,7 @@ namespace YTub.Models
                 var fn = new FileInfo(FfmpegPath);
                 if (fn.Exists && fn.DirectoryName != null)
                 {
+                    #region Windows PATH
                     //var winpath = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine);
                     //if (winpath != null && !winpath.Contains(fn.DirectoryName))
                     //{
@@ -286,7 +294,9 @@ namespace YTub.Models
                     //else
                     //{
                     //    Subscribe.IsPathContainFfmpeg = true;
-                    //}
+                    //} 
+                    #endregion
+
                     Sqllite.UpdateSetting(Subscribe.ChanelDb, "pathtoffmpeg", fn.FullName);
                     Subscribe.FfmpegPath = fn.FullName;
                     Result = "Saved";
@@ -294,6 +304,20 @@ namespace YTub.Models
                 else
                 {
                     Result = "Not saved, check Ffmpeg exe path";
+                }
+            }
+
+            foreach (ForumItem forum in ListForums.Where(forum => !string.IsNullOrEmpty(forum.Login) & !string.IsNullOrEmpty(forum.Password)))
+            {
+                if (forum.ForumName == "RuTracker")
+                {
+                    Sqllite.UpdateSetting(Subscribe.ChanelDb, "rtlogin", forum.Login.Trim());
+                    Sqllite.UpdateSetting(Subscribe.ChanelDb, "rtpassword", forum.Password.Trim());
+                }
+                if (forum.ForumName == "Tapochek")
+                {
+                    Sqllite.UpdateSetting(Subscribe.ChanelDb, "taplogin", forum.Login.Trim());
+                    Sqllite.UpdateSetting(Subscribe.ChanelDb, "tappassword", forum.Password.Trim());
                 }
             }
 

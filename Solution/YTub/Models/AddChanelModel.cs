@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ namespace YTub.Models
     {
         private readonly bool _isedit;
 
-        public List<string> ServerList { get; set; }
+        public ObservableCollection<ForumItem> ServerList { get; set; }
 
         public RelayCommand AddChanelCommand { get; set; }
 
@@ -23,16 +24,16 @@ namespace YTub.Models
 
         public string ChanelOwner { get; set; }
 
-        public string ServerName { get; set; }
+        public ForumItem SelectedForumItem { get; set; }
 
-        public AddChanelModel(AddChanelView view, bool isedit, List<string> serverList)
+        public AddChanelModel(AddChanelView view, bool isedit, ObservableCollection<ForumItem> serverList)
         {
             _isedit = isedit;
             View = view;
             AddChanelCommand = new RelayCommand(AddChanel);
             ServerList = serverList;
             if (ServerList.Any())
-                ServerName = ServerList[0];
+                SelectedForumItem = ServerList[0];
             //Name = "Best of the Web";
             //User = "zapatou";
             //Name = "Den";
@@ -54,7 +55,7 @@ namespace YTub.Models
                 }
                 else
                 {
-                    var chanel = new Chanel(ChanelName, ChanelOwner, ServerName);
+                    var chanel = new Chanel(ChanelName, ChanelOwner, SelectedForumItem.ForumName);
                     if (!ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Select(z => z.ChanelOwner).Contains(ChanelOwner))
                     {
                         ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(chanel);

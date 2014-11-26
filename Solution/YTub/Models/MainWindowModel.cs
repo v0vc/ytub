@@ -95,6 +95,7 @@ namespace YTub.Models
             var youpath = string.Empty;
             var ffpath = string.Empty;
             var culture = string.Empty;
+            
             var fn = new FileInfo(Subscribe.ChanelDb);
             if (fn.Exists)
             {
@@ -114,7 +115,7 @@ namespace YTub.Models
 
             try
             {
-                var settingsModel = new SettingsModel(savepath, mpcpath, synconstart, youpath, ffpath, isonlyfavor, ispopular, culture, Countries);
+                var settingsModel = new SettingsModel(savepath, mpcpath, synconstart, youpath, ffpath, isonlyfavor, ispopular, culture, Countries, ViewModelLocator.MvViewModel.Model.MySubscribe.ServerList);
                 var settingslView = new SettingsView
                 {
                     Owner = Application.Current.MainWindow,
