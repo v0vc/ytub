@@ -69,7 +69,7 @@ namespace YTub.Common
 
         public ObservableCollection<Chanel> ChanelListToBind { get; set; }
 
-        public List<string> ServerList { get; set; }
+        public ObservableCollection<ForumItem> ServerList { get; set; }
 
         public TimeSpan Synctime { get; set; }
 
@@ -143,10 +143,15 @@ namespace YTub.Common
                 IsPopular = Sqllite.GetSettingsIntValue(ChanelDb, "ispopular") != 0;
                 YoudlPath = Sqllite.GetSettingsValue(ChanelDb, "pathtoyoudl");
                 FfmpegPath = Sqllite.GetSettingsValue(ChanelDb, "pathtoffmpeg");
+                ServerList = new ObservableCollection<ForumItem>
+                {
+                    new ForumItem("YouTube", string.Empty, string.Empty),
+                    new ForumItem("RuTracker", Sqllite.GetSettingsValue(fn.FullName, "rtlogin"), Sqllite.GetSettingsValue(fn.FullName, "rtpassword")),
+                    new ForumItem("Tapochek", Sqllite.GetSettingsValue(fn.FullName, "taplogin"),Sqllite.GetSettingsValue(fn.FullName, "tappassword"))
+                };
             }
             _bgv.DoWork += _bgv_DoWork;
             _bgv.RunWorkerCompleted += _bgv_RunWorkerCompleted;
-            ServerList = new List<string> { "YouTube", "RuTracker" };
         }
 
         private void Filter()
@@ -231,7 +236,7 @@ namespace YTub.Common
                 {
                     addChanelModel.ChanelOwner = CurrentChanel.ChanelOwner;
                     addChanelModel.ChanelName = CurrentChanel.ChanelName;
-                    addChanelModel.ServerName = CurrentChanel.ServerName;
+                    addChanelModel.SelectedForumItem = ServerList.First(z => z.ForumName == CurrentChanel.ChanelForum.ForumName);
                 }
 
                 var addChanelView = new AddChanelView

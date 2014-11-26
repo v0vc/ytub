@@ -21,7 +21,9 @@ namespace YTub.Common
 
         private readonly BackgroundWorker _bgv;
 
-        private List<string> _destList = new List<string>();
+        private readonly List<string> _destList = new List<string>();
+
+        private bool _isAudio;
 
         #region Fields
 
@@ -30,8 +32,6 @@ namespace YTub.Common
         public string Ffmpeg { get; set; }
 
         public string SavePath { get; set; }
-
-        //public string FilePath { get; set; }
 
         public VideoItem Item { get; set; }
 
@@ -90,40 +90,9 @@ namespace YTub.Common
         {
             if (Item != null)
                 Item.IsDownLoading = true;
+            _isAudio = isAudio;
             _bgv.RunWorkerAsync(isAudio);
         }
-
-        //private void DownloadFileBgv(bool isAudio, bool isffpeginpath)
-        //{
-        //    string param;
-        //    if (isAudio)
-        //        param = String.Format("-f bestaudio -o {0}\\%(title)s.%(ext)s {1} --no-check-certificate --console-title", SavePath, VideoLink);
-        //    else
-        //        param = String.Format("-f bestvideo+bestaudio -o {0}\\%(title)s.%(ext)s {1} --no-check-certificate --console-title", SavePath, VideoLink);
-
-        //    var startInfo = new ProcessStartInfo(Youdl, param)
-        //    {
-        //        WindowStyle = ProcessWindowStyle.Hidden,
-        //        UseShellExecute = false,
-        //        RedirectStandardOutput = true,
-        //        CreateNoWindow = true
-        //    };
-
-        //    var process = Process.Start(startInfo);
-        //    if (process != null)
-        //    {
-        //        process.OutputDataReceived += (sender, e) => SetLogAndPercentage(e.Data);
-        //        process.BeginOutputReadLine();
-        //        process.Start();
-        //        process.WaitForExit();
-        //        //process.Close();
-        //    }
-
-        //    if (Item == null) return;
-        //    var filename = SettingsModel.GetVersion(Youdl, String.Format("--get-filename -o \"%(title)s.%(ext)s\" {0}", VideoLink));
-        //    if (!string.IsNullOrEmpty(filename))
-        //        FilePath = Path.Combine(SavePath, filename);
-        //}
 
         private void DownloadFileBgv(bool isAudio)
         {
@@ -142,7 +111,7 @@ namespace YTub.Common
                 else
                     param =
                         String.Format(
-                            "-f bestvideo,bestaudio -o {0}\\%(title)s.%(ext)s {1} --no-check-certificate --console-title",
+                            "-f bestvideo,bestaudio -o {0}\\%(title)s.%(ext)s {1} --no-check-certificate --console-title --restrict-filenames",
                             SavePath, VideoLink);
 
                 var startInfo = new ProcessStartInfo(Youdl, param)
@@ -156,14 +125,10 @@ namespace YTub.Common
                 var process = Process.Start(startInfo);
                 if (process != null)
                 {
-                    process.EnableRaisingEvents = true;
-                    if (!isAudio)
-                        process.Exited += processDownload_Exited;
                     process.OutputDataReceived += (sender, e) => SetLogAndPercentage(e.Data);
-                    process.BeginOutputReadLine();
                     process.Start();
+                    process.BeginOutputReadLine();
                     process.WaitForExit();
-                    //process.Close();
                 }
             }
             else
@@ -178,47 +143,22 @@ namespace YTub.Common
             }
         }
 
-        private void processDownload_Exited(object sender, EventArgs e)
+        private void processDownload_Exited()
         {
-            var fndl = _destList.Select(s => new FileInfo(s)).Where(fn => fn.Exists).ToList();
-            if (fndl.Count == 1)
+            if (_isAudio)
             {
-                var files = new DirectoryInfo(SavePath).GetFiles("*.*", SearchOption.TopDirectoryOnly);
-                foreach (FileInfo file in files)
-                {
-                    if (file.Name.StartsWith(Path.GetFileNameWithoutExtension(fndl[0].Name)) &&
-                        Path.GetExtension(file.Name) != Path.GetExtension(fndl[0].Name))
-                    {
-                        fndl.Add(file);
-                        break;
-                    }
-                }
+                ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "Audio OK: " + VideoLink;
+                return;
             }
 
-            if (fndl.Count != 2)
-            {
-                var filename = SettingsModel.GetVersion(Youdl, String.Format("--get-filename -o \"%(title)s.%(ext)s\" {0}", VideoLink));
-                var files = new DirectoryInfo(SavePath).GetFiles("*.*", SearchOption.TopDirectoryOnly);
-                var dlfile = VideoItem.MakeValidFileName(Path.GetFileNameWithoutExtension(filename));
-                if (dlfile == null) return;
-                fndl =
-                    (from file in files
-                        let clearname = VideoItem.MakeValidFileName(file.Name)
-                        where clearname.StartsWith(dlfile)
-                        select file).ToList();
-                //var fndl = files.Where(x => x.Name.StartsWith(dlfile)).ToList();
-                if (fndl.Count == 0)
-                {
-                    dlfile = dlfile.Replace("и", "й");
-                    fndl = files.Where(x => dlfile != null && x.Name.StartsWith(dlfile)).ToList();
-                }
-            }
+            var fndl = _destList.Select(s => new FileInfo(s)).Where(fn => fn.Exists).ToList();
 
             if (fndl.Count() != 2 || String.IsNullOrEmpty(Ffmpeg))
             {
-                ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "Can't merge";
+                ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "Can't merge" + VideoLink;
                 return;
             }
+            
             //var fnvid = fndl.First(x => x.Length == fndl.Max(z => z.Length));
             //var fnaud = fndl.First(x => x.Length == fndl.Min(z => z.Length));
             var fnvid = fndl.First(x => Path.GetExtension(x.Name) == ".mp4");
@@ -235,14 +175,6 @@ namespace YTub.Common
             if (fnvid.DirectoryName == null)
                 return;
             var vfolder = fnvid.DirectoryName;
-            var cleanvid = Path.Combine(fnvid.DirectoryName, VideoItem.MakeValidFileName(fnvid.Name));
-            var cleanaud = Path.Combine(fnvid.DirectoryName, VideoItem.MakeValidFileName(fnaud.Name));
-
-            File.Move(fnvid.FullName, cleanvid);
-            File.Move(fnaud.FullName, cleanaud);
-
-            fnvid = new FileInfo(cleanvid);
-            fnaud = new FileInfo(cleanaud);
 
             var tempname = Path.Combine(vfolder, "." + fnvid.Name);
             var param = String.Format("-i \"{0}\" -i \"{1}\" -vcodec copy -acodec copy \"{2}\" -y", fnvid.FullName,
@@ -260,111 +192,61 @@ namespace YTub.Common
             Application.Current.Dispatcher.BeginInvoke((Action) (() => ViewModelLocator.MvViewModel.Model.LogCollection.Add(logg)));
 
             var process = Process.Start(startInfo);
+
             if (process != null)
             {
                 process.EnableRaisingEvents = true;
                 process.Exited += delegate { processFfmeg_Exited(tempname, fnvid, fnaud); };
-                //process.BeginOutputReadLine();
                 process.Start();
                 process.WaitForExit();
-                process.Close();
             }
         }
 
         private void processFfmeg_Exited(string tempname, FileInfo fnvid, FileInfo fnaud)
         {
-            Thread.Sleep(5);
             var fnres = new FileInfo(tempname);
             if (fnres.Exists && fnres.DirectoryName != null)
             {
-                fnvid.Delete();
-                fnaud.Delete();
-                var fnn = new FileInfo(Path.Combine(fnres.DirectoryName, fnvid.Name));
+                FileInfo fnn;
+                if (string.IsNullOrEmpty(ClearTitle))
+                {
+                    var filename = SettingsModel.GetVersion(Youdl, String.Format("--get-filename -o \"%(title)s.%(ext)s\" {0}", VideoLink));
+                    fnn = new FileInfo(Path.Combine(fnres.DirectoryName, filename));
+                }
+                else
+                {
+                    fnn = new FileInfo(Path.Combine(fnres.DirectoryName, ClearTitle + Path.GetExtension(fnvid.Name)));
+                }
+
                 File.Move(fnres.FullName, fnn.FullName);
-                Item.FilePath = fnn.FullName;
-                Application.Current.Dispatcher.BeginInvoke((Action) (() => Item.IsHasFile = true));
-                //Application.Current.Dispatcher.BeginInvoke((Action) (() => Item.IsHasFile = Item.IsFileExist(Item)));
+                //Application.Current.Dispatcher.BeginInvoke((Action) (() => ViewModelLocator.MvViewModel.Model.LogCollection.Add(fnn.FullName + " OK")));
+                if (Item != null)
+                {
+                    Item.FilePath = fnn.FullName;
+                    Application.Current.Dispatcher.BeginInvoke((Action) (() => Item.IsHasFile = true));
+                }
+                try
+                {
+                    fnvid.Delete();
+                    fnaud.Delete();
+                }
+                catch{}
             }
         }
-
-        //private void processFfmeg_Exited(object sender, EventArgs e)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //private string MergeVideos(string ffmpeg, FileInfo fnvid, FileInfo fnaud, string cleartitle)
-        //{
-        //    var res = string.Empty;
-        //    if (fnvid.DirectoryName == null)
-        //        return res;
-        //    var tempname = Path.Combine(fnvid.DirectoryName, "." + fnvid.Name);
-        //    var param = String.Format("-i \"{0}\" -i \"{1}\" -vcodec copy -acodec copy \"{2}\" -y", fnvid.FullName, fnaud.FullName, tempname);
-
-        //    var startInfo = new ProcessStartInfo(ffmpeg, param)
-        //    {
-        //        WindowStyle = ProcessWindowStyle.Hidden,
-        //        UseShellExecute = false,
-        //        RedirectStandardOutput = true,
-        //        CreateNoWindow = true
-        //    };
-
-        //    var logg = "Merging:" + Environment.NewLine + fnvid.Name + Environment.NewLine + fnaud.Name;
-        //    Application.Current.Dispatcher.BeginInvoke((Action)(() => ViewModelLocator.MvViewModel.Model.LogCollection.Add(logg)));
-
-        //    var process = Process.Start(startInfo);
-        //    if (process != null)
-        //    {
-        //        process.OutputDataReceived += (sender, e) => SetLogAndPercentage(e.Data);
-        //        process.BeginOutputReadLine();
-        //        process.Start();
-        //        process.WaitForExit();
-        //        process.Close();
-        //    }
-
-        //    //var proc = Process.Start(ffmpeg, param);
-        //    //if (proc != null)
-        //    //{
-        //    //    proc.WaitForExit();
-        //    //    proc.Close();
-        //    //}
-
-        //    var fnres = new FileInfo(tempname);
-        //    if (fnres.Exists && fnres.DirectoryName != null)
-        //    {
-        //        fnvid.Delete();
-        //        fnaud.Delete();
-        //        var fnn = new FileInfo(Path.Combine(fnres.DirectoryName, fnvid.Name));
-        //        File.Move(fnres.FullName, fnn.FullName);
-        //        res = fnn.FullName;
-
-        //        //if (string.IsNullOrEmpty(cleartitle))
-        //        //{
-        //        //    var fnn = new FileInfo(Path.Combine(fnres.DirectoryName, fnvid.Name.Replace('_', ' ')));
-        //        //    File.Move(fnres.FullName, fnn.FullName);
-        //        //    res = fnn.FullName;
-        //        //}
-        //        //else
-        //        //{
-        //        //    var fnn = new FileInfo(Path.Combine(fnres.DirectoryName, cleartitle + fnvid.Extension));
-        //        //    File.Move(fnres.FullName, fnn.FullName);
-        //        //    res = fnn.FullName;
-        //        //}
-        //    }
-        //    return res;
-        //}
 
         private void SetLogAndPercentage(string data)
         {
             if (data == null)
+            {
+                processDownload_Exited();
                 return;
-            //Thread.Sleep(5);
+            }
             Task t = Task.Run(() =>
             {
                 var dest = GetDestination(data);
                 if (!string.IsNullOrEmpty(dest))
                     _destList.Add(dest);
-                Application.Current.Dispatcher.BeginInvoke(
-                    (Action) (() => ViewModelLocator.MvViewModel.Model.LogCollection.Add(data)));
+                Application.Current.Dispatcher.BeginInvoke((Action) (() => ViewModelLocator.MvViewModel.Model.LogCollection.Add(data)));
                 if (Item == null)
                     return;
                 var percent = GetPercentFromYoudlOutput(data);
@@ -433,5 +315,98 @@ namespace YTub.Common
                 return string.Empty;
             }
         }
+
+        //private string MergeVideos(string ffmpeg, FileInfo fnvid, FileInfo fnaud, string cleartitle)
+        //{
+        //    var res = string.Empty;
+        //    if (fnvid.DirectoryName == null)
+        //        return res;
+        //    var tempname = Path.Combine(fnvid.DirectoryName, "." + fnvid.Name);
+        //    var param = String.Format("-i \"{0}\" -i \"{1}\" -vcodec copy -acodec copy \"{2}\" -y", fnvid.FullName, fnaud.FullName, tempname);
+
+        //    var startInfo = new ProcessStartInfo(ffmpeg, param)
+        //    {
+        //        WindowStyle = ProcessWindowStyle.Hidden,
+        //        UseShellExecute = false,
+        //        RedirectStandardOutput = true,
+        //        CreateNoWindow = true
+        //    };
+
+        //    var logg = "Merging:" + Environment.NewLine + fnvid.Name + Environment.NewLine + fnaud.Name;
+        //    Application.Current.Dispatcher.BeginInvoke((Action)(() => ViewModelLocator.MvViewModel.Model.LogCollection.Add(logg)));
+
+        //    var process = Process.Start(startInfo);
+        //    if (process != null)
+        //    {
+        //        process.OutputDataReceived += (sender, e) => SetLogAndPercentage(e.Data);
+        //        process.BeginOutputReadLine();
+        //        process.Start();
+        //        process.WaitForExit();
+        //        process.Close();
+        //    }
+
+        //    //var proc = Process.Start(ffmpeg, param);
+        //    //if (proc != null)
+        //    //{
+        //    //    proc.WaitForExit();
+        //    //    proc.Close();
+        //    //}
+
+        //    var fnres = new FileInfo(tempname);
+        //    if (fnres.Exists && fnres.DirectoryName != null)
+        //    {
+        //        fnvid.Delete();
+        //        fnaud.Delete();
+        //        var fnn = new FileInfo(Path.Combine(fnres.DirectoryName, fnvid.Name));
+        //        File.Move(fnres.FullName, fnn.FullName);
+        //        res = fnn.FullName;
+
+        //        //if (string.IsNullOrEmpty(cleartitle))
+        //        //{
+        //        //    var fnn = new FileInfo(Path.Combine(fnres.DirectoryName, fnvid.Name.Replace('_', ' ')));
+        //        //    File.Move(fnres.FullName, fnn.FullName);
+        //        //    res = fnn.FullName;
+        //        //}
+        //        //else
+        //        //{
+        //        //    var fnn = new FileInfo(Path.Combine(fnres.DirectoryName, cleartitle + fnvid.Extension));
+        //        //    File.Move(fnres.FullName, fnn.FullName);
+        //        //    res = fnn.FullName;
+        //        //}
+        //    }
+        //    return res;
+        //}
+
+        //private void DownloadFileBgv(bool isAudio, bool isffpeginpath)
+        //{
+        //    string param;
+        //    if (isAudio)
+        //        param = String.Format("-f bestaudio -o {0}\\%(title)s.%(ext)s {1} --no-check-certificate --console-title", SavePath, VideoLink);
+        //    else
+        //        param = String.Format("-f bestvideo+bestaudio -o {0}\\%(title)s.%(ext)s {1} --no-check-certificate --console-title", SavePath, VideoLink);
+
+        //    var startInfo = new ProcessStartInfo(Youdl, param)
+        //    {
+        //        WindowStyle = ProcessWindowStyle.Hidden,
+        //        UseShellExecute = false,
+        //        RedirectStandardOutput = true,
+        //        CreateNoWindow = true
+        //    };
+
+        //    var process = Process.Start(startInfo);
+        //    if (process != null)
+        //    {
+        //        process.OutputDataReceived += (sender, e) => SetLogAndPercentage(e.Data);
+        //        process.BeginOutputReadLine();
+        //        process.Start();
+        //        process.WaitForExit();
+        //        //process.Close();
+        //    }
+
+        //    if (Item == null) return;
+        //    var filename = SettingsModel.GetVersion(Youdl, String.Format("--get-filename -o \"%(title)s.%(ext)s\" {0}", VideoLink));
+        //    if (!string.IsNullOrEmpty(filename))
+        //        FilePath = Path.Combine(SavePath, filename);
+        //}
     }
 }
