@@ -35,7 +35,12 @@ namespace YTub.Common
 
         public static string FfmpegPath;
 
-        //public static bool IsPathContainFfmpeg;
+        public static bool IsAsyncDl;
+
+        public static bool IsPopular;
+
+        public static bool IsSyncOnStart;
+
 
         private bool _isOnlyFavorites;
 
@@ -72,10 +77,6 @@ namespace YTub.Common
         public ObservableCollection<ForumItem> ServerList { get; set; }
 
         public TimeSpan Synctime { get; set; }
-
-        public bool IsSyncOnStart { get; set; }
-
-        public bool IsPopular { get; set; }
 
         public IList SelectedListChanels
         {
@@ -139,6 +140,7 @@ namespace YTub.Common
                 DownloadPath = Sqllite.GetSettingsValue(ChanelDb, "savepath");
                 MpcPath = Sqllite.GetSettingsValue(ChanelDb, "pathtompc");
                 IsSyncOnStart = Sqllite.GetSettingsIntValue(ChanelDb, "synconstart") != 0;
+                IsAsyncDl = Sqllite.GetSettingsIntValue(ChanelDb, "asyncdl") != 0;
                 IsOnlyFavorites = Sqllite.GetSettingsIntValue(ChanelDb, "isonlyfavor") != 0;
                 IsPopular = Sqllite.GetSettingsIntValue(ChanelDb, "ispopular") != 0;
                 YoudlPath = Sqllite.GetSettingsValue(ChanelDb, "pathtoyoudl");
@@ -146,8 +148,19 @@ namespace YTub.Common
                 ServerList = new ObservableCollection<ForumItem>
                 {
                     new ForumItem("YouTube", string.Empty, string.Empty),
-                    new ForumItem("RuTracker", Sqllite.GetSettingsValue(fn.FullName, "rtlogin"), Sqllite.GetSettingsValue(fn.FullName, "rtpassword")),
-                    new ForumItem("Tapochek", Sqllite.GetSettingsValue(fn.FullName, "taplogin"),Sqllite.GetSettingsValue(fn.FullName, "tappassword"))
+                    new ForumItem("RuTracker", Sqllite.GetSettingsValue(fn.FullName, "rtlogin"),
+                        Sqllite.GetSettingsValue(fn.FullName, "rtpassword")),
+                    new ForumItem("Tapochek", Sqllite.GetSettingsValue(fn.FullName, "taplogin"),
+                        Sqllite.GetSettingsValue(fn.FullName, "tappassword"))
+                };
+            }
+            else
+            {
+                ServerList = new ObservableCollection<ForumItem>
+                {
+                    new ForumItem("YouTube", string.Empty, string.Empty),
+                    new ForumItem("RuTracker", string.Empty, string.Empty),
+                    new ForumItem("Tapochek", string.Empty, string.Empty)
                 };
             }
             _bgv.DoWork += _bgv_DoWork;

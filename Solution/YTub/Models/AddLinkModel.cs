@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -69,6 +70,7 @@ namespace YTub.Models
                 //Subscribe.CheckFfmpegPath();
 
                 var youdl = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Subscribe.DownloadPath, Link, null);//, Subscribe.IsPathContainFfmpeg);
+                //var sync = new ManualResetEvent(false); 
                 youdl.DownloadFile(IsAudio);
             }
             else

@@ -26,6 +26,8 @@ namespace YTub.Common
 
         private bool _isFavorite;
 
+        private int _step;
+
         private string _chanelName;
 
         private IList _selectedListVideoItems = new ArrayList();
@@ -41,6 +43,8 @@ namespace YTub.Common
         private string _titleFilter;
 
         private readonly List<VideoItem> _filterlist = new List<VideoItem>();
+
+        private readonly List<VideoItem> _selectedListVideoItemsList = new List<VideoItem>();
 
         #region Fields
         public int MaxResults { get; set; }
@@ -429,18 +433,88 @@ namespace YTub.Common
                 return;
             }
 
+            if (Subscribe.IsAsyncDl)
+                GetVideosASync();
+            else
+                GetVideosSync();
+
+
             //Subscribe.CheckFfmpegPath();
 
+            //foreach (VideoItem item in SelectedListVideoItems)
+            //{
+            //    _selectedListVideoItemsList.Add(item);
+            //}
+
+            //GetVideosSync();
+
+
+            //foreach (VideoItem item in SelectedListVideoItems)
+            //{
+            //    YouWrapper youwr;
+            //    if (!string.IsNullOrEmpty(item.VideoOwner))
+            //        youwr = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Path.Combine(Subscribe.DownloadPath, item.VideoOwner), item);
+            //    else
+            //        youwr = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Subscribe.DownloadPath, item);
+
+            //    youwr.DownloadFile(false);
+            //}
+
+            //Task.Factory.StartNew(() =>
+            //{
+            //    Parallel.ForEach((IEnumerable<VideoItem>) SelectedListVideoItems,
+            //        new ParallelOptions
+            //        {
+            //            MaxDegreeOfParallelism = 10 // limit number of parallel threads here 
+            //        },
+            //        file =>
+            //        {
+
+            //        });
+            //});
+
+            //Parallel.ForEach((IEnumerable<VideoItem>) SelectedListVideoItems, x => { });
+        }
+
+        private void GetVideosASync()
+        {
             foreach (VideoItem item in SelectedListVideoItems)
             {
                 YouWrapper youwr;
                 if (!string.IsNullOrEmpty(item.VideoOwner))
                     youwr = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Path.Combine(Subscribe.DownloadPath, item.VideoOwner), item);
-                        //, Subscribe.IsPathContainFfmpeg);
                 else
-                    youwr = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Subscribe.DownloadPath, item);//, Subscribe.IsPathContainFfmpeg);
+                    youwr = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Subscribe.DownloadPath, item);
+
                 youwr.DownloadFile(false);
             }
+        }
+
+        private void GetVideosSync()
+        {
+            _selectedListVideoItemsList.Clear();
+            foreach (VideoItem item in SelectedListVideoItems)
+            {
+                _selectedListVideoItemsList.Add(item);
+            }
+
+            GetVideos();
+        }
+
+        private void GetVideos()
+        {
+            YouWrapper youwr = !string.IsNullOrEmpty(_selectedListVideoItemsList[_step].VideoOwner)
+                ? new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Path.Combine(Subscribe.DownloadPath, _selectedListVideoItemsList[_step].VideoOwner), _selectedListVideoItemsList[_step]) 
+                : new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Subscribe.DownloadPath, _selectedListVideoItemsList[_step]);
+            youwr.Activate += youwr_nextstep;
+            youwr.DownloadFile(false);
+            _step++;
+        }
+
+        private void youwr_nextstep()
+        {
+            if (_step < _selectedListVideoItemsList.Count)
+                GetVideos();
         }
 
         private void GetYouTubeVideosApiv2()

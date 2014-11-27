@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -25,8 +25,6 @@ namespace YTub.Common
 
         private bool _isAudio;
 
-        public delegate void MyEventHandler();
-
         #region Fields
 
         public string Youdl { get; set; }
@@ -40,8 +38,6 @@ namespace YTub.Common
         public string VideoLink { get; set; }
 
         public string ClearTitle { get; set; }
-
-        public event MyEventHandler Activate;
 
         #endregion
 
@@ -74,21 +70,15 @@ namespace YTub.Common
 
         private void _bgv_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            if (e.Error == null)
+            if (Item != null)
             {
-                if (Item != null && !string.IsNullOrEmpty(Item.FilePath))
-                {
-                    ViewModelLocator.MvViewModel.Model.LogCollection.Add(Item.FilePath + " Finished");
-                    ViewModelLocator.MvViewModel.Model.MySubscribe.Result = Item.FilePath + " Finished";
-                }
+                Application.Current.Dispatcher.BeginInvoke(
+                    (Action) (() =>
+                    {
+                        ViewModelLocator.MvViewModel.Model.LogCollection.Add(Item.FilePath + " finished");
+                        ViewModelLocator.MvViewModel.Model.MySubscribe.Result = Item.FilePath + " finished";
+                    }));
             }
-            else
-            {
-                ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "Error: " + e.Error.Message;
-            }
-
-            if (Activate != null)
-                Activate.Invoke();
         }
 
         private void _bgv_DoWork(object sender, DoWorkEventArgs e)
@@ -166,7 +156,7 @@ namespace YTub.Common
 
             if (fndl.Count() != 2 || String.IsNullOrEmpty(Ffmpeg))
             {
-                ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "Can't merge " + VideoLink;
+                ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "Can't merge" + VideoLink;
                 return;
             }
             
@@ -229,22 +219,27 @@ namespace YTub.Common
                 {
                     fnn = new FileInfo(Path.Combine(fnres.DirectoryName, ClearTitle + Path.GetExtension(fnvid.Name)));
                 }
-
                 try
                 {
-                    FileHelper.RenameFile(fnres, fnn);
-                    fnvid.Delete();
-                    fnaud.Delete();
-                    if (Item != null)
-                    {
-                        Item.FilePath = fnn.FullName;
-                        Application.Current.Dispatcher.BeginInvoke((Action) (() => Item.IsHasFile = true));
-                    }
+                    File.Move(fnres.FullName, fnn.FullName);
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception(ex.Message);
+                    Application.Current.Dispatcher.BeginInvoke((Action)(() => ViewModelLocator.MvViewModel.Model.LogCollection.Add(ex.Message)));
                 }
+                
+                //Application.Current.Dispatcher.BeginInvoke((Action) (() => ViewModelLocator.MvViewModel.Model.LogCollection.Add(fnn.FullName + " OK")));
+                if (Item != null)
+                {
+                    Item.FilePath = fnn.FullName;
+                    Application.Current.Dispatcher.BeginInvoke((Action) (() => Item.IsHasFile = true));
+                }
+                try
+                {
+                    fnvid.Delete();
+                    fnaud.Delete();
+                }
+                catch{}
             }
         }
 
@@ -255,8 +250,8 @@ namespace YTub.Common
                 processDownload_Exited();
                 return;
             }
-            //Task t = Task.Run(() =>
-            //{
+            Task t = Task.Run(() =>
+            {
                 var dest = GetDestination(data);
                 if (!string.IsNullOrEmpty(dest))
                     _destList.Add(dest);
@@ -268,8 +263,8 @@ namespace YTub.Common
                 {
                     Application.Current.Dispatcher.BeginInvoke((Action) (() => { Item.PercentDownloaded = percent; }));
                 }
-            //});
-            //t.Wait();
+            });
+            t.Wait();
         }
 
         private static double GetPercentFromYoudlOutput(string input)
@@ -306,19 +301,19 @@ namespace YTub.Common
         {
             try
             {
-                var regex = new Regex(@"(\[download\] Destination: )(.+?)(\.(mp4|m4a|webm|flv|mp3))(.+)?");
-                var match = regex.Match(input);
-                if (match.Success)
+                var res = string.Empty;
+                if (input.StartsWith("[download]"))
                 {
-                    return regex.Replace(input, "$2$3");
+                    if (input.EndsWith("has already been downloaded"))
+                    {
+                        res = input.Remove(input.Length - 28).Remove(0, 10).Trim();
+                    }
+                    else
+                    {
+                        res = input.Substring(input.IndexOf(':') + 1);
+                    }
                 }
-                regex = new Regex(@"(\[download\])(.+?)(\.(mp4|m4a|webm|flv|mp3))(.+)?");
-                match = regex.Match(input);
-                if (match.Success)
-                {
-                    return regex.Replace(input, "$2$3");
-                }
-                return string.Empty;
+                return res;
             }
             catch (Exception ex)
             {

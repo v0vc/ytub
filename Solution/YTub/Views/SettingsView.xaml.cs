@@ -59,5 +59,10 @@ namespace YTub.Views
         {
             CheckBoxPopular.IsChecked = !CheckBoxPopular.IsChecked;
         }
+
+        private void AsynkDl(object sender, MouseButtonEventArgs e)
+        {
+            CheckBoxAsync.IsChecked = !CheckBoxAsync.IsChecked;
+        }
     }
 }

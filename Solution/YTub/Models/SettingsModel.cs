@@ -45,6 +45,7 @@ namespace YTub.Models
         private string _youheader;
 
         private string _ffheader;
+        private bool _isAsync;
 
         public SettingsView View { get; set; }
         public RelayCommand SaveCommand { get; set; }
@@ -121,6 +122,16 @@ namespace YTub.Models
             }
         }
 
+        public bool IsAsync
+        {
+            get { return _isAsync; }
+            set
+            {
+                _isAsync = value;
+                OnPropertyChanged("IsAsync");
+            }
+        }
+
         public bool IsPopular
         {
             get { return _isPopular; }
@@ -183,7 +194,7 @@ namespace YTub.Models
 
         #endregion
 
-        public SettingsModel(string savepath, string mpcpath, int synconstart, string youpath, string ffmegpath, int isonlyfavor, int ispopular, string culture, List<KeyValuePair<string, string>> countries, ObservableCollection<ForumItem> forums)
+        public SettingsModel(string savepath, string mpcpath, int synconstart, string youpath, string ffmegpath, int isonlyfavor, int ispopular, int isasync, string culture, List<KeyValuePair<string, string>> countries, ObservableCollection<ForumItem> forums)
         {
             MpcPath = string.Empty;
             YoudlPath = string.Empty;
@@ -198,6 +209,7 @@ namespace YTub.Models
             IsSyncOnStart = synconstart == 1;
             IsOnlyFavorites = isonlyfavor == 1;
             IsPopular = ispopular == 1;
+            IsAsync = isasync == 1;
             SaveCommand = new RelayCommand(SaveSettings);
             OpenDirCommand = new RelayCommand(OpenDir);
             UpdateFileCommand = new RelayCommand(UpdateFile);
@@ -220,8 +232,14 @@ namespace YTub.Models
             var favor = IsOnlyFavorites ? 1 : 0;
             Sqllite.UpdateSetting(Subscribe.ChanelDb, "isonlyfavor", favor);
 
+
             var popular = IsPopular ? 1 : 0;
             Sqllite.UpdateSetting(Subscribe.ChanelDb, "ispopular", popular);
+            Subscribe.IsPopular = IsPopular;
+
+            var asyncdl = IsAsync ? 1 : 0;
+            Sqllite.UpdateSetting(Subscribe.ChanelDb, "asyncdl", asyncdl);
+            Subscribe.IsAsyncDl = IsAsync;
 
             if (IsPopular)
             {

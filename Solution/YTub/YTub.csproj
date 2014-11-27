@@ -119,6 +119,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Common\CustomDataGrid.cs" />
+    <Compile Include="Common\FileHelper.cs" />
     <Compile Include="Common\ForumItem.cs" />
     <Compile Include="Common\VS2012WindowStyle.cs" />
     <Compile Include="Common\WebClientEx.cs">

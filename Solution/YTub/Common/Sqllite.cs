@@ -413,6 +413,7 @@ namespace YTub.Common
                                                             pathtoffmpeg TEXT, 
                                                             isonlyfavor INT, 
                                                             ispopular INT,
+                                                            asyncdl INT,
                                                             culture TEXT,
                                                             rtlogin TEXT,
                                                             rtpassword TEXT,
@@ -423,14 +424,14 @@ namespace YTub.Common
                 string insdir;
                 if (fnyoudl.Exists & fnffmpeg.Exists)
                 {
-                    insdir = string.Format(@"INSERT INTO '{0}' ('savepath', 'synconstart', 'isonlyfavor', 'ispopular', 'pathtoyoudl', 'pathtoffmpeg', 'culture') 
-                                                VALUES ('{1}', '0', '0', '0', '{2}', '{3}', 'RU')", 
+                    insdir = string.Format(@"INSERT INTO '{0}' ('savepath', 'synconstart', 'isonlyfavor', 'ispopular', 'asyncdl', 'pathtoyoudl', 'pathtoffmpeg', 'culture') 
+                                                VALUES ('{1}', '0', '0', '0', '0', '{2}', '{3}', 'RU')", 
                                                 TableSettings, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), fnyoudl.FullName, fnffmpeg.FullName);
                 }
                 else
                 {
-                    insdir = string.Format(@"INSERT INTO '{0}' ('savepath', 'synconstart', 'isonlyfavor', 'ispopular', 'culture') 
-                                                VALUES ('{1}', '0', '0', '0', 'RU')", 
+                    insdir = string.Format(@"INSERT INTO '{0}' ('savepath', 'synconstart', 'isonlyfavor', 'ispopular', 'asyncdl', 'culture') 
+                                                VALUES ('{1}', '0', '0', '0', '1', 'RU')",
                                                 TableSettings, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));    
                 }
                 lstcom.Add(insdir);
