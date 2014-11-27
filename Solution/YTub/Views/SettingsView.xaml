@@ -171,14 +171,14 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
-                            <CheckBox Name="CheckBoxSync" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="{Binding IsSyncOnStart, Mode=TwoWay}"></CheckBox>
-                            <Label Content="Sync on start" MouseLeftButtonUp="SyncOnStart"></Label>
-                            <CheckBox Name="CheckBoxFavor" VerticalAlignment="Center" Margin="25,0,0,0" IsChecked="{Binding IsOnlyFavorites, Mode=TwoWay}"></CheckBox>
-                            <Label Content="Show only favorites" MouseLeftButtonUp="ShowFavorites"></Label>
+                            <CheckBox Name="CheckBoxSync" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="{Binding IsSyncOnStart, Mode=TwoWay}" />
+                            <Label Content="Sync on start" MouseLeftButtonUp="SyncOnStart" />
+                            <CheckBox Name="CheckBoxFavor" VerticalAlignment="Center" Margin="25,0,0,0" IsChecked="{Binding IsOnlyFavorites, Mode=TwoWay}" />
+                            <Label Content="Show only favorites" MouseLeftButtonUp="ShowFavorites" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <CheckBox Name="CheckBoxPopular" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="{Binding IsPopular, Mode=TwoWay}"></CheckBox>
-                            <Label Content="Popular on start" MouseLeftButtonUp="GetPopular"></Label>
+                            <CheckBox Name="CheckBoxPopular" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="{Binding IsPopular, Mode=TwoWay}" />
+                            <Label Content="Popular on start" MouseLeftButtonUp="GetPopular" />
                             <ComboBox Margin="10,0,0,0" Width="120" Height="22"
                               ItemsSource="{Binding Countries}"
                               DisplayMemberPath="Key"
@@ -188,14 +188,19 @@
                               IsEnabled="{Binding IsPopular}"
                               SelectedItem="{Binding SelectedCountry}" />
                         </StackPanel>
-                        <Label Content="{Binding Result}" VerticalAlignment="Top" HorizontalAlignment="Left" Foreground="ForestGreen"></Label>
+                        <Label Content="{Binding Result}" VerticalAlignment="Top" HorizontalAlignment="Left" Foreground="ForestGreen" />
                     </StackPanel>
-                    <Button Grid.Column="1" Width="80" Content="Save" Height="22"
-                    Command="{Binding SaveCommand}"
-                    Name="ButtonSave"
-                    HorizontalAlignment="Right"
-                    Margin="9">
-                    </Button>
+                    <StackPanel Grid.Column="1" Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal" IsEnabled="True">
+                            <CheckBox Name="CheckBoxAsync" VerticalAlignment="Center" Margin="8,0,0,0" IsChecked="{Binding IsAsync, Mode=TwoWay}" />
+                            <Label Content="Async DL" MouseLeftButtonUp="AsynkDl" />
+                        </StackPanel>
+                        <Button Width="80" Content="Save" Height="25"
+                            Command="{Binding SaveCommand}"
+                            Name="ButtonSave"
+                            HorizontalAlignment="Right"
+                            Margin="0,0,10,0" />
+                    </StackPanel>
                 </Grid>
                 <StatusBar Grid.Row="5">
                     <ProgressBar Width="370" Height="20" Value="{Binding PrValue}" Minimum="0" Maximum="100">

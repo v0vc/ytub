@@ -92,6 +92,7 @@ namespace YTub.Models
             var synconstart = 0;
             var isonlyfavor = 0;
             var ispopular = 0;
+            var isasync = 0;
             var youpath = string.Empty;
             var ffpath = string.Empty;
             var culture = string.Empty;
@@ -104,6 +105,7 @@ namespace YTub.Models
                 synconstart = Sqllite.GetSettingsIntValue(fn.FullName, "synconstart");
                 isonlyfavor = Sqllite.GetSettingsIntValue(fn.FullName, "isonlyfavor");
                 ispopular = Sqllite.GetSettingsIntValue(fn.FullName, "ispopular");
+                isasync = Sqllite.GetSettingsIntValue(fn.FullName, "asyncdl");
                 youpath = Sqllite.GetSettingsValue(fn.FullName, "pathtoyoudl");
                 ffpath = Sqllite.GetSettingsValue(fn.FullName, "pathtoffmpeg");
                 culture = Sqllite.GetSettingsValue(fn.FullName, "culture");
@@ -115,7 +117,7 @@ namespace YTub.Models
 
             try
             {
-                var settingsModel = new SettingsModel(savepath, mpcpath, synconstart, youpath, ffpath, isonlyfavor, ispopular, culture, Countries, ViewModelLocator.MvViewModel.Model.MySubscribe.ServerList);
+                var settingsModel = new SettingsModel(savepath, mpcpath, synconstart, youpath, ffpath, isonlyfavor, ispopular, isasync, culture, Countries, ViewModelLocator.MvViewModel.Model.MySubscribe.ServerList);
                 var settingslView = new SettingsView
                 {
                     Owner = Application.Current.MainWindow,
