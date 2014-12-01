@@ -60,7 +60,12 @@
                                            RowHeight="25"
                                            IsReadOnly="True"
                                            SelectedItem="{Binding Model.MySubscribe.CurrentChanel}"
-                                           x:Name="DataGridChanels">
+                                           x:Name="DataGridChanels"
+                                           MouseLeftButtonUp="OnMouseLeftButtonUpChanells"
+                                           MouseMove="OnMouseMoveChanells"
+                                           PreviewMouseLeftButtonDown="OnMouseLeftButtonDownChanells"
+                                           CellEditEnding="OnEndEditChanells"
+                                           BeginningEdit="OnBeginEditChanells">
                         <DataGrid.CellStyle>
                             <Style TargetType="{x:Type DataGridCell}">
                                 <Setter Property="Foreground" Value="Black" />
@@ -273,7 +278,7 @@
                                                 <DataTemplate>
                                                     <StackPanel Orientation="Horizontal">
                                                         <Label Content="Title"></Label>
-                                                        <TextBox Width="150" Margin="10,0,0,0" Height="20" 
+                                                        <TextBox Width="150" Margin="10,0,0,0" Height="20"
                                                                  Text="{Binding Path = DataContext.Model.MySubscribe.CurrentChanel.TitleFilter, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}">
                                                             <TextBox.Resources>
                                                                 <VisualBrush x:Key="HelpBrush" TileMode="None" Opacity="0.4" Stretch="None" AlignmentX="Left" AlignmentY="Center">
@@ -493,7 +498,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Width="80" CanUserResize="False">
+                            <DataGridTemplateColumn Width="80" CanUserResize="False" SortMemberPath="Region">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -504,8 +509,7 @@
                                                     <ComboBox Width="70" HorizontalAlignment="Center" HorizontalContentAlignment="Stretch"
                                                         ItemsSource="{Binding Path = DataContext.Model.Countries, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
                                                               SelectedItem="{Binding Path=DataContext.Model.SelectedCountry, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
-                                                              DisplayMemberPath="Key"
-                                                              />
+                                                              DisplayMemberPath="Key" />
                                                 </DataTemplate>
                                             </Setter.Value>
                                         </Setter>
@@ -513,10 +517,10 @@
                                 </DataGridTemplateColumn.HeaderStyle>
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Region}" HorizontalAlignment="Center" VerticalAlignment="Bottom" IsEnabled="False"/>
+                                        <TextBlock Text="{Binding Region}" HorizontalAlignment="Center" VerticalAlignment="Bottom" IsEnabled="False" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
+                            </DataGridTemplateColumn>
                             <DataGridTemplateColumn Width="*" SortMemberPath="Title">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
@@ -527,7 +531,7 @@
                                                 <DataTemplate>
                                                     <StackPanel Orientation="Horizontal">
                                                         <Label Content="Title"></Label>
-                                                        <TextBox Width="150" Margin="10,0,0,0" Height="20" 
+                                                        <TextBox Width="150" Margin="10,0,0,0" Height="20"
                                                                  Text="{Binding Path = DataContext.Model.MySubscribe.TitleFilter, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}">
                                                             <TextBox.Resources>
                                                                 <VisualBrush x:Key="HelpBrush" TileMode="None" Opacity="0.4" Stretch="None" AlignmentX="Left" AlignmentY="Center">

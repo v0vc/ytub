@@ -78,8 +78,9 @@ namespace YTub.Common
             {
                 if (Item != null && !string.IsNullOrEmpty(Item.FilePath))
                 {
-                    ViewModelLocator.MvViewModel.Model.LogCollection.Add(Item.FilePath + " Finished");
-                    ViewModelLocator.MvViewModel.Model.MySubscribe.Result = Item.FilePath + " Finished";
+                    var res = "Finished " + Item.FilePath;
+                    ViewModelLocator.MvViewModel.Model.LogCollection.Add(res);
+                    ViewModelLocator.MvViewModel.Model.MySubscribe.Result = res;
                 }
             }
             else
@@ -206,23 +207,28 @@ namespace YTub.Common
 
             if (process != null)
             {
-                process.EnableRaisingEvents = true;
-                process.Exited += delegate { processFfmeg_Exited(tempname, fnvid, fnaud); };
+                //process.EnableRaisingEvents = true;
+                //process.Exited += delegate { processFfmeg_Exited(tempname, fnvid, fnaud, string.Empty); };
+                process.OutputDataReceived += (sender, e) => processFfmeg_Exited(tempname, fnvid, fnaud, e.Data);
                 process.Start();
+                process.BeginOutputReadLine();
                 process.WaitForExit();
                 process.Close();
             }
         }
 
-        private void processFfmeg_Exited(string tempname, FileInfo fnvid, FileInfo fnaud)
+        private void processFfmeg_Exited(string tempname, FileInfo fnvid, FileInfo fnaud, string data)
         {
+            if (data != null) 
+                return;
             var fnres = new FileInfo(tempname);
             if (fnres.Exists && fnres.DirectoryName != null)
             {
                 FileInfo fnn;
                 if (string.IsNullOrEmpty(ClearTitle))
                 {
-                    var filename = SettingsModel.GetVersion(Youdl, String.Format("--get-filename -o \"%(title)s.%(ext)s\" {0}", VideoLink));
+                    var filename = SettingsModel.GetVersion(Youdl,
+                        String.Format("--get-filename -o \"%(title)s.%(ext)s\" {0}", VideoLink));
                     fnn = new FileInfo(Path.Combine(fnres.DirectoryName, filename));
                 }
                 else
@@ -255,8 +261,8 @@ namespace YTub.Common
                 processDownload_Exited();
                 return;
             }
-            //Task t = Task.Run(() =>
-            //{
+            Task t = Task.Run(() =>
+            {
                 var dest = GetDestination(data);
                 if (!string.IsNullOrEmpty(dest))
                     _destList.Add(dest);
@@ -268,8 +274,8 @@ namespace YTub.Common
                 {
                     Application.Current.Dispatcher.BeginInvoke((Action) (() => { Item.PercentDownloaded = percent; }));
                 }
-            //});
-            //t.Wait();
+            });
+            t.Wait();
         }
 
         private static double GetPercentFromYoudlOutput(string input)

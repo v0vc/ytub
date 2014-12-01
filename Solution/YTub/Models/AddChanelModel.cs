@@ -55,7 +55,8 @@ namespace YTub.Models
                 }
                 else
                 {
-                    var chanel = new Chanel(ChanelName, ChanelOwner, SelectedForumItem.ForumName);
+                    var ordernum = ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Count;
+                    var chanel = new Chanel(ChanelName, ChanelOwner, SelectedForumItem.ForumName, ordernum);
                     if (!ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Select(z => z.ChanelOwner).Contains(ChanelOwner))
                     {
                         ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(chanel);
