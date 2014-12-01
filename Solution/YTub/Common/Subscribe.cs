@@ -122,6 +122,7 @@ namespace YTub.Common
             }
         }
 
+
         #endregion
 
         public Subscribe()
@@ -222,7 +223,7 @@ namespace YTub.Common
                 });
             }
 
-            zap = string.Format("https://gdata.youtube.com/feeds/api/standardfeeds/{0}/most_popular?time=all_time&v=2&alt=json", cul);
+            zap = string.Format("https://gdata.youtube.com/feeds/api/standardfeeds/{0}/most_popular?&v=2&alt=json", cul);
             s = wc.DownloadString(zap);
             jsvideo = (JObject)JsonConvert.DeserializeObject(s);
             if (jsvideo == null)
@@ -346,7 +347,8 @@ namespace YTub.Common
 
             foreach (KeyValuePair<string, string> pair in Sqllite.GetDistinctValues(ChanelDb, "chanelowner", "chanelname"))
             {
-                ChanelList.Add(new Chanel(pair.Value.Split(':')[0], pair.Key, pair.Value.Split(':')[1]));
+                var sp = pair.Value.Split(':');
+                ChanelList.Add(new Chanel(sp[0], pair.Key, sp[1], Convert.ToInt32(sp[2])));
             }
 
             foreach (Chanel chanel in ChanelList)
@@ -384,25 +386,7 @@ namespace YTub.Common
                 _bgv.RunWorkerAsync(culture);
         }
 
-        //public static void CheckFfmpegPath()
-        //{
-        //    if (string.IsNullOrEmpty(FfmpegPath))
-        //        IsPathContainFfmpeg = false;
-        //    else
-        //    {
-        //        var fn = new FileInfo(FfmpegPath);
-        //        if (fn.Exists && fn.DirectoryName != null)
-        //        {
-        //            var winpath = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine);
-        //            if (winpath != null && winpath.Contains(fn.DirectoryName))
-        //                IsPathContainFfmpeg = true;
-        //            else
-        //                IsPathContainFfmpeg = false;
-        //        }
-        //        else
-        //            IsPathContainFfmpeg = false;
-        //    }
-        //}
+
 
         private static void ChanelSync(ICollection list)
         {
@@ -439,6 +423,26 @@ namespace YTub.Common
         {
             Synctime = Synctime.Add(TimeSpan.FromSeconds(1));
         }
+
+        //public static void CheckFfmpegPath()
+        //{
+        //    if (string.IsNullOrEmpty(FfmpegPath))
+        //        IsPathContainFfmpeg = false;
+        //    else
+        //    {
+        //        var fn = new FileInfo(FfmpegPath);
+        //        if (fn.Exists && fn.DirectoryName != null)
+        //        {
+        //            var winpath = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine);
+        //            if (winpath != null && winpath.Contains(fn.DirectoryName))
+        //                IsPathContainFfmpeg = true;
+        //            else
+        //                IsPathContainFfmpeg = false;
+        //        }
+        //        else
+        //            IsPathContainFfmpeg = false;
+        //    }
+        //}
 
         #region INotifyPropertyChanged
 

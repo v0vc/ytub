@@ -60,7 +60,9 @@ namespace YTub.Common
         public CookieContainer GetSessionRt()
         {
             var cc = new CookieContainer();
+            cc.Add(new Cookie("tr_simple", "1", "", "rutracker.org"));
             var req = (HttpWebRequest)WebRequest.Create("http://login.rutracker.org/forum/login.php");
+            req.CookieContainer = cc;
             req.Method = "POST";
             req.Host = "login.rutracker.org";
             req.KeepAlive = true;

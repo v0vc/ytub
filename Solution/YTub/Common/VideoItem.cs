@@ -198,7 +198,12 @@ namespace YTub.Common
             if (!string.IsNullOrEmpty(item.VideoOwner))
                 path = Path.Combine(Subscribe.DownloadPath, item.VideoOwner, string.Format("{0}.mp4", item.ClearTitle));
             else
-                path = Path.Combine(Subscribe.DownloadPath, string.Format("{0}.mp4", item.ClearTitle));
+            {
+                if (!string.IsNullOrEmpty(item.ClearTitle))
+                    path = Path.Combine(Subscribe.DownloadPath, string.Format("{0}.mp4", item.ClearTitle));
+                else
+                    path = string.Empty;
+            }
 
             var fn = new FileInfo(path);
             if (fn.Exists)

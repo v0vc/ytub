@@ -14,6 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using HtmlAgilityPack;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using YoutubeExtractor;
@@ -64,7 +65,7 @@ namespace YTub.Common
             }
         }
 
-        //public string ServerName { get; set; }
+        public int OrderNum { get; set; }
 
         public ForumItem ChanelForum { get; set; }
 
@@ -123,7 +124,7 @@ namespace YTub.Common
 
         #endregion
 
-        public Chanel(string name, string user, string servername)
+        public Chanel(string name, string user, string servername, int ordernum)
         {
             MaxResults = 25;
             MinRes = 1;
@@ -135,7 +136,7 @@ namespace YTub.Common
 
             ChanelName = name;
             ChanelOwner = user;
-            //ServerName = servername;
+            OrderNum = ordernum;
             ChanelForum = ViewModelLocator.MvViewModel.Model.MySubscribe.ServerList.First(x => x.ForumName == servername);
             var res = Sqllite.GetVideoIntValue(Subscribe.ChanelDb, "isfavorite", "chanelowner", ChanelOwner);
             IsFavorite = res != 0;
@@ -205,7 +206,7 @@ namespace YTub.Common
 
                     foreach (VideoItem videoItem in ListVideoItems)
                     {
-                        Sqllite.InsertRecord(Subscribe.ChanelDb, videoItem.VideoID, ChanelOwner, ChanelName, ChanelForum.ForumName, 0, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount, videoItem.ViewCount, videoItem.Duration, videoItem.Published, videoItem.Description);
+                        Sqllite.InsertRecord(Subscribe.ChanelDb, videoItem.VideoID, ChanelOwner, ChanelName, ChanelForum.ForumName, OrderNum, 0, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount, videoItem.ViewCount, videoItem.Duration, videoItem.Published, videoItem.Description);
                     }
 
                     break;
@@ -226,7 +227,7 @@ namespace YTub.Common
 
                         Sqllite.UpdateValue(Subscribe.ChanelDb, "viewcount", "v_id", item.VideoID, item.ViewCount);
                         if (item.IsSynced == false)
-                            Sqllite.InsertRecord(Subscribe.ChanelDb, item.VideoID, ChanelOwner, ChanelName, ChanelForum.ForumName, 0,
+                            Sqllite.InsertRecord(Subscribe.ChanelDb, item.VideoID, ChanelOwner, ChanelName, ChanelForum.ForumName, OrderNum, 0,
                                 item.VideoLink, item.Title, item.ViewCount, item.ViewCount, item.Duration,
                                 item.Published, item.Description);
                     }
@@ -437,43 +438,6 @@ namespace YTub.Common
                 GetVideosASync();
             else
                 GetVideosSync();
-
-
-            //Subscribe.CheckFfmpegPath();
-
-            //foreach (VideoItem item in SelectedListVideoItems)
-            //{
-            //    _selectedListVideoItemsList.Add(item);
-            //}
-
-            //GetVideosSync();
-
-
-            //foreach (VideoItem item in SelectedListVideoItems)
-            //{
-            //    YouWrapper youwr;
-            //    if (!string.IsNullOrEmpty(item.VideoOwner))
-            //        youwr = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Path.Combine(Subscribe.DownloadPath, item.VideoOwner), item);
-            //    else
-            //        youwr = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Subscribe.DownloadPath, item);
-
-            //    youwr.DownloadFile(false);
-            //}
-
-            //Task.Factory.StartNew(() =>
-            //{
-            //    Parallel.ForEach((IEnumerable<VideoItem>) SelectedListVideoItems,
-            //        new ParallelOptions
-            //        {
-            //            MaxDegreeOfParallelism = 10 // limit number of parallel threads here 
-            //        },
-            //        file =>
-            //        {
-
-            //        });
-            //});
-
-            //Parallel.ForEach((IEnumerable<VideoItem>) SelectedListVideoItems, x => { });
         }
 
         private void GetVideosASync()
@@ -552,13 +516,19 @@ namespace YTub.Common
 
         private void GetRuTrackerVideos()
         {
-            //var wc = new WebClientEx(ChanelForum.GetSessionRt());
-            //var zap = string.Format("http://rutracker.org/forum/tracker.php?rid={0}", ChanelOwner);
-            //string s = wc.DownloadString(zap);
-            //Debug.WriteLine(s);
+            var wc = new WebClientEx(ChanelForum.GetSessionRt());
+            var zap = string.Format("http://rutracker.org/forum/tracker.php?rid={0}", ChanelOwner);
+            string s = wc.DownloadString(zap);
+            var doc = new HtmlDocument();
+            doc.LoadHtml(s);
+            foreach (HtmlNode link in doc.DocumentNode.SelectNodes("//a[@href]"))
+            {
+                var att = link.Attributes["href"].Value;
+                Debug.WriteLine(att);
+            }
 
-            var v = new VideoItem {Title = "RuTracker not implemented yet"};
-            Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
+            //var v = new VideoItem {Title = "RuTracker not implemented yet"};
+            //Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
         }
 
         private void GetTapochekVideos()

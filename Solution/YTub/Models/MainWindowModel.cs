@@ -216,8 +216,12 @@ namespace YTub.Models
                     {
                         foreach (KeyValuePair<string, string> pair in Sqllite.GetDistinctValues(Subscribe.ChanelDb, "chanelowner", "chanelname"))
                         {
-                            xElement.Add(new XElement("Chanell",
-                                new XElement("chanelowner", pair.Key), new XElement("chanelname", pair.Value.Split(':')[0]), new XElement("servername", pair.Value.Split(':')[1])));
+                            var sp = pair.Value.Split(':');
+                            xElement.Add(new XElement("Chanell", 
+                                new XElement("chanelowner", pair.Key), 
+                                new XElement("chanelname", sp[0]), 
+                                new XElement("servername", sp[1]),
+                                new XElement("ordernum", sp[2])));
                         }
                     }
                 }
@@ -257,9 +261,10 @@ namespace YTub.Models
                         var owner = element.Elements().FirstOrDefault(z => z.Name == "chanelowner");
                         var name = element.Elements().FirstOrDefault(z => z.Name == "chanelname");
                         var server = element.Elements().FirstOrDefault(z => z.Name == "servername");
-                        if (owner != null & name != null & server != null)
+                        var ordernum = element.Elements().FirstOrDefault(z => z.Name == "ordernum");
+                        if (owner != null & name != null & server != null & ordernum != null)
                         {
-                            ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(new Chanel(name.Value, owner.Value, server.Value));
+                            ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(new Chanel(name.Value, owner.Value, server.Value, Convert.ToInt32(ordernum.Value)));
                             ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites = false;
                         }
                     }
@@ -294,9 +299,10 @@ namespace YTub.Models
                         var owner = element.Elements().FirstOrDefault(z => z.Name == "chanelowner");
                         var name = element.Elements().FirstOrDefault(z => z.Name == "chanelname");
                         var server = element.Elements().FirstOrDefault(z => z.Name == "servername");
-                        if (owner != null & name != null & server != null)
+                        var ordernum = element.Elements().FirstOrDefault(z => z.Name == "ordernum");
+                        if (owner != null & name != null & server != null & ordernum != null)
                         {
-                            ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(new Chanel(name.Value, owner.Value, server.Value));
+                            ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(new Chanel(name.Value, owner.Value, server.Value, Convert.ToInt32(ordernum.Value)));
                             ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites = false;
                         }
                     }
