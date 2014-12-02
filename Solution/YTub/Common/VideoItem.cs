@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
+using HtmlAgilityPack;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -143,8 +144,8 @@ namespace YTub.Common
 
         public VideoItem(JToken pair, bool isPopular, string region)
         {
-            MinProgress = 0;
-            MaxProgress = 100;
+            //MinProgress = 0;
+            //MaxProgress = 100;
             try
             {
                 Title = pair["title"]["$t"].ToString();
@@ -173,8 +174,8 @@ namespace YTub.Common
 
         public VideoItem(DbDataRecord record)
         {
-            MinProgress = 0;
-            MaxProgress = 100;
+            //MinProgress = 0;
+            //MaxProgress = 100;
             Title = record["title"].ToString().Replace("''", "'");
             ClearTitle = MakeValidFileName(Title);
             VideoID = record["v_id"].ToString();
@@ -189,7 +190,41 @@ namespace YTub.Common
 
         public VideoItem()
         {
-            
+            MinProgress = 0;
+            MaxProgress = 100;
+        }
+
+        public VideoItem(HtmlNode node)
+        {
+            var counts = node.Descendants("a").Where(d =>d.Attributes.Contains("class") && d.Attributes["class"].Value.Equals("med tLink hl-tags bold"));
+            foreach (HtmlNode htmlNode in counts)
+            {
+                Title = htmlNode.InnerText;
+                VideoLink = htmlNode.Attributes["href"].Value;     
+                break;
+            }
+
+            var prov = node.Descendants("p").Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Equals("small nowrap"));
+            foreach (HtmlNode htmlNode in prov)
+            {
+                var data = ForumItem.GetDataFromRtTorrent(htmlNode.InnerText);
+                Published = Convert.ToDateTime(data);
+                break;
+            }
+
+            var seemed = node.Descendants("span").Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Equals("seedmed"));
+            foreach (HtmlNode htmlNode in seemed)
+            {
+                ViewCount = Convert.ToInt32(htmlNode.InnerText);
+                break;
+            }
+
+            var med = node.Descendants("span").Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Equals("med"));
+            foreach (HtmlNode htmlNode in med)
+            {
+                Duration = Convert.ToInt32(htmlNode.InnerText);
+                break;
+            }
         }
 
         public bool IsFileExist(VideoItem item)
@@ -202,7 +237,9 @@ namespace YTub.Common
                 if (!string.IsNullOrEmpty(item.ClearTitle))
                     path = Path.Combine(Subscribe.DownloadPath, string.Format("{0}.mp4", item.ClearTitle));
                 else
-                    path = string.Empty;
+                {
+                    return false;
+                }
             }
 
             var fn = new FileInfo(path);
@@ -230,7 +267,7 @@ namespace YTub.Common
                     var fn = new FileInfo(FilePath);
                     if (fn.Exists)
                     {
-                        System.Diagnostics.Process.Start(fn.FullName);
+                        Process.Start(fn.FullName);
                     }
                     else
                     {

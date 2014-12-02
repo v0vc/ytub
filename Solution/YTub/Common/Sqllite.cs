@@ -445,7 +445,7 @@ namespace YTub.Common
                 if (fnyoudl.Exists & fnffmpeg.Exists)
                 {
                     insdir = string.Format(@"INSERT INTO '{0}' ('savepath', 'synconstart', 'isonlyfavor', 'ispopular', 'asyncdl', 'pathtoyoudl', 'pathtoffmpeg', 'culture') 
-                                                VALUES ('{1}', '0', '0', '0', '0', '{2}', '{3}', 'RU')", 
+                                                VALUES ('{1}', '0', '0', '0', '1', '{2}', '{3}', 'RU')", 
                                                 TableSettings, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), fnyoudl.FullName, fnffmpeg.FullName);
                 }
                 else

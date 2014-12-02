@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
@@ -23,6 +25,8 @@ namespace YTub.Common
         }
 
         #endregion
+
+        private const string Cname = "rtcookie.ck";
 
         private string _password;
 
@@ -125,6 +129,67 @@ namespace YTub.Common
             }
 
             return cc;
+        }
+
+        public static void WriteCookiesToDiskBinary(CookieContainer cookieJar)
+        {
+            var fn = new FileInfo(Path.Combine(Sqllite.AppDir, Cname));
+            if (fn.Exists)
+            {
+                try
+                {
+                    fn.Delete();
+                }
+                catch (Exception e)
+                {
+                    ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "WriteCookiesToDiskBinary: " + e.Message;
+                }
+            }
+            using (Stream stream = File.Create(fn.FullName))
+            {
+                try
+                {
+                    var formatter = new BinaryFormatter();
+                    formatter.Serialize(stream, cookieJar);
+                }
+                catch (Exception e)
+                {
+                    ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "WriteCookiesToDiskBinary: " + e.Message;
+                }
+            }
+        }
+
+        public static CookieContainer ReadCookiesFromDiskBinary()
+        {
+            try
+            {
+                var fn = new FileInfo(Path.Combine(Sqllite.AppDir, Cname));
+
+                using (Stream stream = File.Open(fn.FullName, FileMode.Open))
+                {
+                    var formatter = new BinaryFormatter();
+                    return (CookieContainer)formatter.Deserialize(stream);
+                }
+            }
+            catch (Exception e)
+            {
+                ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "ReadCookiesFromDiskBinary: " + e.Message;
+            }
+            return null;
+        }
+
+        public static string GetDataFromRtTorrent(string input)
+        {
+            var sp = input.Split(':');
+            if (sp.Length == 3)
+            {
+                var sp1 = sp[1].Split(';');
+                if (sp1.Length == 4)
+                {
+                    return sp1[1].Replace("&nbsp", string.Empty);
+                }
+            }
+            return string.Empty;
         }
     }
 }
