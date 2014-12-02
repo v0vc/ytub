@@ -467,6 +467,8 @@ namespace YTub.Common
 
         private void GetVideos()
         {
+            if (SelectedListVideoItems.Count == 1)
+                _step = 0;
             YouWrapper youwr = !string.IsNullOrEmpty(_selectedListVideoItemsList[_step].VideoOwner)
                 ? new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Path.Combine(Subscribe.DownloadPath, _selectedListVideoItemsList[_step].VideoOwner), _selectedListVideoItemsList[_step]) 
                 : new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Subscribe.DownloadPath, _selectedListVideoItemsList[_step]);
@@ -516,19 +518,51 @@ namespace YTub.Common
 
         private void GetRuTrackerVideos()
         {
-            var wc = new WebClientEx(ChanelForum.GetSessionRt());
+            //var rtcookie = ChanelForum.GetSessionRt();
+            //if (rtcookie.Count > 0)
+            //    ForumItem.WriteCookiesToDiskBinary(rtcookie);
+
+            var rtcookie = ForumItem.ReadCookiesFromDiskBinary();
+            var wc = new WebClientEx(rtcookie);
             var zap = string.Format("http://rutracker.org/forum/tracker.php?rid={0}", ChanelOwner);
             string s = wc.DownloadString(zap);
             var doc = new HtmlDocument();
             doc.LoadHtml(s);
-            foreach (HtmlNode link in doc.DocumentNode.SelectNodes("//a[@href]"))
+            var results = doc.DocumentNode.Descendants("tr").Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Equals("tCenter hl-tr"));
+            foreach (HtmlNode node in results)
             {
-                var att = link.Attributes["href"].Value;
-                Debug.WriteLine(att);
+                var v = new VideoItem(node);
+                if (!ListVideoItems.Contains(v) && !string.IsNullOrEmpty(v.Title))
+                {
+                    v.Num = ListVideoItems.Count + 1;
+                    Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
+                }
             }
+
+            //var serchlinks = GetAllSearchLinks(doc);
+            //foreach (string link in serchlinks)
+            //{
+            //    Debug.WriteLine(link);
+            //}
 
             //var v = new VideoItem {Title = "RuTracker not implemented yet"};
             //Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
+        }
+
+        private IEnumerable<string> GetAllSearchLinks(HtmlDocument doc)
+        {
+            var hrefTags = new List<string>();
+
+            var counts = doc.DocumentNode.Descendants("a").Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Equals("pg"));
+            
+            foreach (HtmlNode link in counts)
+            {
+                HtmlAttribute att = link.Attributes["href"];
+                if (att.Value != null && !hrefTags.Contains(att.Value)) 
+                    hrefTags.Add(att.Value);
+            }
+
+            return hrefTags;
         }
 
         private void GetTapochekVideos()
