@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Xml.Linq;
 using Microsoft.Win32;
+using YTub.Chanell;
 using YTub.Common;
 using YTub.Views;
 
@@ -264,7 +265,14 @@ namespace YTub.Models
                         var ordernum = element.Elements().FirstOrDefault(z => z.Name == "ordernum");
                         if (owner != null & name != null & server != null & ordernum != null)
                         {
-                            ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(new Chanel(name.Value, owner.Value, server.Value, Convert.ToInt32(ordernum.Value)));
+                            ChanelBase chanel = null;
+                            if (server.Value == "YouTube")
+                                chanel = new ChanelYou(server.Value, "TODO", "TODO", name.Value, owner.Value, Convert.ToInt32(ordernum.Value));
+                            if (server.Value == "RuTracker")
+                                chanel = new ChanelRt(server.Value, "TODO", "TODO", name.Value, owner.Value, Convert.ToInt32(ordernum.Value));
+                            if (server.Value == "Tapochek")
+                                chanel = new ChanelTap(server.Value, "TODO", "TODO", name.Value, owner.Value, Convert.ToInt32(ordernum.Value));
+                            ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(chanel);
                             ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites = false;
                         }
                     }
@@ -302,7 +310,14 @@ namespace YTub.Models
                         var ordernum = element.Elements().FirstOrDefault(z => z.Name == "ordernum");
                         if (owner != null & name != null & server != null & ordernum != null)
                         {
-                            ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(new Chanel(name.Value, owner.Value, server.Value, Convert.ToInt32(ordernum.Value)));
+                            ChanelBase chanel = null;
+                            if (server.Value == "YouTube")
+                                chanel = new ChanelYou(server.Value, "TODO", "TODO", name.Value, owner.Value, Convert.ToInt32(ordernum.Value));
+                            if (server.Value == "RuTracker")
+                                chanel = new ChanelRt(server.Value, "TODO", "TODO", name.Value, owner.Value, Convert.ToInt32(ordernum.Value));
+                            if (server.Value == "Tapochek")
+                                chanel = new ChanelTap(server.Value, "TODO", "TODO", name.Value, owner.Value, Convert.ToInt32(ordernum.Value));
+                            ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(chanel);
                             ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites = false;
                         }
                     }

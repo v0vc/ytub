@@ -121,10 +121,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Chanell\ChanelBase.cs" />
+    <Compile Include="Chanell\ChanelRt.cs" />
+    <Compile Include="Chanell\ChanelTap.cs" />
+    <Compile Include="Chanell\ChanelYou.cs" />
     <Compile Include="Common\CustomDataGrid.cs" />
     <Compile Include="Common\FileHelper.cs" />
-    <Compile Include="Common\ForumItem.cs" />
     <Compile Include="Common\UIHelpers.cs" />
+    <Compile Include="Video\VideoItemBase.cs" />
+    <Compile Include="Video\VideoItemRt.cs" />
+    <Compile Include="Video\VideoItemTap.cs" />
+    <Compile Include="Video\VideoItemYou.cs" />
     <Compile Include="Common\VS2012WindowStyle.cs" />
     <Compile Include="Common\WebClientEx.cs">
       <SubType>Component</SubType>
@@ -158,14 +165,12 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Common\Chanel.cs" />
     <Compile Include="Common\NinjectContainer.cs" />
     <Compile Include="Common\NinjectModuleViewModels.cs" />
     <Compile Include="Common\RelayCommand.cs" />
     <Compile Include="Common\Sqllite.cs" />
     <Compile Include="Common\Subscribe.cs" />
     <Compile Include="Common\TrulyObservableCollection.cs" />
-    <Compile Include="Common\VideoItem.cs" />
     <Compile Include="Models\AddChanelModel.cs" />
     <Compile Include="Models\MainWindowModel.cs" />
     <Compile Include="ViewModelLocator.cs" />

@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using YoutubeExtractor;
+using YTub.Chanell;
 using YTub.Common;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 
@@ -18,14 +19,14 @@ namespace YTub.Views
     /// </summary>
     public partial class MainWindow : Window
     {
-        public static readonly DependencyProperty DraggedItemProperty = DependencyProperty.Register("DraggedItem", typeof(Chanel), typeof(Window));
+        public static readonly DependencyProperty DraggedItemProperty = DependencyProperty.Register("DraggedItem", typeof(ChanelBase), typeof(Window));
         public bool IsDragging { get; set; }
 
         public bool IsEditing { get; set; }
 
-        public Chanel DraggedItem
+        public ChanelBase DraggedItem
         {
-            get { return (Chanel)GetValue(DraggedItemProperty); }
+            get { return (ChanelBase)GetValue(DraggedItemProperty); }
             set { SetValue(DraggedItemProperty, value); }
         }
 
@@ -51,7 +52,14 @@ namespace YTub.Views
 
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
-            ViewModelLocator.MvViewModel.Model.MySubscribe.GetChanelsFromDb();
+            try
+            {
+                ViewModelLocator.MvViewModel.Model.MySubscribe.GetChanelsFromDb();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
             //DataGridChanels.UnselectAll();
         }
 
@@ -72,49 +80,63 @@ namespace YTub.Views
         private void DownloadVideoOnClick(object sender, RoutedEventArgs e)
         {
             var sndr = sender as MenuItem;
-            if (sndr == null)
-                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.DownloadVideoInternal();
-            else
-                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.DownloadVideoExternal();
+            var cchanel = ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel;
+            if (cchanel is ChanelYou)
+            {
+                var c = cchanel as ChanelYou;
+                if (sndr == null)
+                {
+                    c.DownloadVideoInternal();
+                }
+                else
+                {
+                    c.DownloadVideoExternal();
+                }
+            }
         }
 
         private void PlayOnClick(object sender, RoutedEventArgs e)
         {
             var sndr = sender as MenuItem;
-            if (ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel != null)
+            var cchanel = ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel;
+            if (cchanel != null)
             {
                 if (sndr == null)
                 {
-                    if (ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.IsHasFile)
-                        ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.RunFile("Local");
+                    if (cchanel.CurrentVideoItem.IsHasFile)
+                        cchanel.CurrentVideoItem.RunFile("Local");
                     else
-                        ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.RunFile("Online");
+                        cchanel.CurrentVideoItem.RunFile("Online");
                 }
                 else
                 {
-                    ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.RunFile(
-                        sndr.CommandParameter.ToString());
+                    cchanel.CurrentVideoItem.RunFile(sndr.CommandParameter.ToString());
                 }
             }
         }
 
         private void PlayLocalButton_OnClick(object sender, RoutedEventArgs e)
         {
-            if (ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.IsHasFile)
-                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.RunFile("Local");
+            var cchanel = ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel;
+            if (cchanel.CurrentVideoItem.IsHasFile)
+                cchanel.CurrentVideoItem.RunFile("Local");
             else
-                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.DownloadVideoExternal();
+            {
+                if (cchanel is ChanelYou)
+                {
+                    (cchanel as ChanelYou).DownloadVideoExternal();
+                }
+            }
         }
 
         private void CopyLinkOnClick(object sender, RoutedEventArgs e)
         {
-            if (ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel != null &&
-                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem != null)
+            var cchanel = ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel;
+            if (cchanel != null && cchanel.CurrentVideoItem != null)
             {
                 try
                 {
-                    Clipboard.SetText(
-                        ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.VideoLink);
+                    Clipboard.SetText(cchanel.CurrentVideoItem.VideoLink);
                 }
                 catch{}
             }
@@ -122,18 +144,19 @@ namespace YTub.Views
 
         private void DeleteOnClick(object sender, RoutedEventArgs e)
         {
-            if (ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel != null &&
-                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem != null)
+            var cchanel = ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel;
+            if (cchanel != null && cchanel.CurrentVideoItem != null)
             {
-                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.DeleteFiles();
+                cchanel.DeleteFiles();
             }
         }
 
         private void Favour_OnMouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel != null)
+            var cchanel = ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel;
+            if (cchanel != null)
             {
-                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.AddToFavorites();
+                cchanel.AddToFavorites();
             }
         }
 
@@ -144,19 +167,17 @@ namespace YTub.Views
 
         private void ButtonShowHideFavor_OnClick(object sender, RoutedEventArgs e)
         {
-            ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites =
-                !ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites;
+            ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites = !ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites;
         }
 
         private void CopyAuthorOnClick(object sender, RoutedEventArgs e)
         {
-            if (ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel != null &&
-                ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem != null)
+            var cchanel = ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel;
+            if (cchanel != null && cchanel.CurrentVideoItem != null)
             {
                 try
                 {
-                    Clipboard.SetText(
-                        ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.CurrentVideoItem.VideoOwner);
+                    Clipboard.SetText(cchanel.CurrentVideoItem.VideoOwner);
                 }
                 catch{}
             }
@@ -170,9 +191,9 @@ namespace YTub.Views
             }
 
             //get the target item
-            Chanel targetItem = ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel;
+            var cchanel = ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel;
 
-            if (targetItem == null || !ReferenceEquals(DraggedItem, targetItem))
+            if (cchanel == null || !ReferenceEquals(DraggedItem, cchanel))
             {
                 var draggedIndex = ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelListToBind.IndexOf(DraggedItem);
 
@@ -180,7 +201,7 @@ namespace YTub.Views
                 ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelListToBind.Remove(DraggedItem);
 
                 //get target index
-                var targetIndex = ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelListToBind.IndexOf(targetItem);
+                var targetIndex = ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelListToBind.IndexOf(cchanel);
 
                 if (targetIndex < draggedIndex)
                 {
@@ -196,10 +217,10 @@ namespace YTub.Views
 
                 //update db
                 draggedIndex = ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelListToBind.IndexOf(DraggedItem);
-                targetIndex = ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelListToBind.IndexOf(targetItem);
+                targetIndex = ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelListToBind.IndexOf(cchanel);
                 Sqllite.UpdateChanelOrder(Subscribe.ChanelDb, DraggedItem.ChanelOwner, draggedIndex);
-                if (targetItem != null)
-                    Sqllite.UpdateChanelOrder(Subscribe.ChanelDb, targetItem.ChanelOwner, targetIndex);
+                if (cchanel != null)
+                    Sqllite.UpdateChanelOrder(Subscribe.ChanelDb, cchanel.ChanelOwner, targetIndex);
 
                 //select the dropped item
                 ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel = DraggedItem;
@@ -244,7 +265,7 @@ namespace YTub.Views
 
             //set flag that indicates we're capturing mouse movements
             IsDragging = true;
-            DraggedItem = (Chanel)row.Item;
+            DraggedItem = (ChanelBase)row.Item;
         }
 
         private void OnEndEditChanells(object sender, DataGridCellEditEndingEventArgs e)
