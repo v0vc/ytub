@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using YTub.Models;
+using YTub.Video;
 
 namespace YTub.Common
 {
@@ -35,7 +36,7 @@ namespace YTub.Common
 
         public string SavePath { get; set; }
 
-        public VideoItem Item { get; set; }
+        public VideoItemBase Item { get; set; }
 
         public string VideoLink { get; set; }
 
@@ -45,7 +46,7 @@ namespace YTub.Common
 
         #endregion
 
-        public YouWrapper(string youdl, string ffmpeg, string savepath, VideoItem item)
+        public YouWrapper(string youdl, string ffmpeg, string savepath, VideoItemBase item)
         {
             _bgv = new BackgroundWorker();
             _bgv.DoWork += _bgv_DoWork;

@@ -13,7 +13,9 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Forms;
 using SevenZip;
+using YTub.Chanell;
 using YTub.Common;
+using YTub.Video;
 using YTub.Views;
 using MessageBox = System.Windows.MessageBox;
 using OpenFileDialog = System.Windows.Forms.OpenFileDialog;
@@ -60,7 +62,7 @@ namespace YTub.Models
 
         public KeyValuePair<string, string> SelectedCountry { get; set; }
 
-        public ObservableCollection<ForumItem> ListForums { get; set; }
+        public ObservableCollection<ChanelBase> ListForums { get; set; }
 
         public string DirPath
         {
@@ -194,7 +196,7 @@ namespace YTub.Models
 
         #endregion
 
-        public SettingsModel(string savepath, string mpcpath, int synconstart, string youpath, string ffmegpath, int isonlyfavor, int ispopular, int isasync, string culture, List<KeyValuePair<string, string>> countries, ObservableCollection<ForumItem> forums)
+        public SettingsModel(string savepath, string mpcpath, int synconstart, string youpath, string ffmegpath, int isonlyfavor, int ispopular, int isasync, string culture, List<KeyValuePair<string, string>> countries, IEnumerable<ChanelBase> forums)
         {
             MpcPath = string.Empty;
             YoudlPath = string.Empty;
@@ -217,8 +219,8 @@ namespace YTub.Models
             FfHeader = string.IsNullOrEmpty(FfmpegPath) ? "FFmpeg:" : string.Format("FFmpeg ({0})", Makeffversion(GetVersion(FfmpegPath, "-version")));
             Countries = countries;
             SelectedCountry = Countries.First(x => x.Value == culture);
-            ListForums = new ObservableCollection<ForumItem>();
-            foreach (ForumItem forum in forums.Where(forum => forum.ForumName != "YouTube"))
+            ListForums = new ObservableCollection<ChanelBase>();
+            foreach (ChanelBase forum in forums.Where(forum => forum.ChanelType != "YouTube"))
             {
                 ListForums.Add(forum);
             }
@@ -325,14 +327,14 @@ namespace YTub.Models
                 }
             }
 
-            foreach (ForumItem forum in ListForums.Where(forum => !string.IsNullOrEmpty(forum.Login) & !string.IsNullOrEmpty(forum.Password)))
+            foreach (ChanelBase forum in ListForums.Where(forum => !string.IsNullOrEmpty(forum.Login) & !string.IsNullOrEmpty(forum.Password)))
             {
-                if (forum.ForumName == "RuTracker")
+                if (forum.ChanelType == "RuTracker")
                 {
                     Sqllite.UpdateSetting(Subscribe.ChanelDb, "rtlogin", forum.Login.Trim());
                     Sqllite.UpdateSetting(Subscribe.ChanelDb, "rtpassword", forum.Password.Trim());
                 }
-                if (forum.ForumName == "Tapochek")
+                if (forum.ChanelType == "Tapochek")
                 {
                     Sqllite.UpdateSetting(Subscribe.ChanelDb, "taplogin", forum.Login.Trim());
                     Sqllite.UpdateSetting(Subscribe.ChanelDb, "tappassword", forum.Password.Trim());
@@ -514,7 +516,7 @@ namespace YTub.Models
             pProcess.Start();
             var res = pProcess.StandardOutput.ReadToEnd();
             pProcess.Close();
-            return VideoItem.MakeValidFileName(res);
+            return VideoItemBase.MakeValidFileName(res);
         }
 
         private static string Makeffversion(string ver)
@@ -528,7 +530,7 @@ namespace YTub.Models
             match = regex2.Match(ver);
             if (match.Success)
             {
-                var sp = VideoItem.MakeValidFileName(match.Value).Split(' ');
+                var sp = VideoItemBase.MakeValidFileName(match.Value).Split(' ');
                 if (sp.Length == 7)
                 {
                     var sb = new StringBuilder(sp[3]);

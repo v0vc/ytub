@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using YTub.Chanell;
 using YTub.Common;
 using YTub.Views;
 
@@ -14,7 +15,7 @@ namespace YTub.Models
     {
         private readonly bool _isedit;
 
-        public ObservableCollection<ForumItem> ServerList { get; set; }
+        public ObservableCollection<ChanelBase> ServerList { get; set; }
 
         public RelayCommand AddChanelCommand { get; set; }
 
@@ -24,9 +25,9 @@ namespace YTub.Models
 
         public string ChanelOwner { get; set; }
 
-        public ForumItem SelectedForumItem { get; set; }
+        public ChanelBase SelectedForumItem { get; set; }
 
-        public AddChanelModel(AddChanelView view, bool isedit, ObservableCollection<ForumItem> serverList)
+        public AddChanelModel(AddChanelView view, bool isedit, ObservableCollection<ChanelBase> serverList)
         {
             _isedit = isedit;
             View = view;
@@ -56,7 +57,13 @@ namespace YTub.Models
                 else
                 {
                     var ordernum = ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Count;
-                    var chanel = new Chanel(ChanelName, ChanelOwner, SelectedForumItem.ForumName, ordernum);
+                    ChanelBase chanel = null;
+                    if (SelectedForumItem.ChanelType == "YouTube")
+                        chanel = new ChanelYou(SelectedForumItem.ChanelType, SelectedForumItem.Login, SelectedForumItem.Password,ChanelName, ChanelOwner, ordernum);
+                    if (SelectedForumItem.ChanelType == "RuTracker")
+                        chanel = new ChanelRt(SelectedForumItem.ChanelType, SelectedForumItem.Login, SelectedForumItem.Password, ChanelName, ChanelOwner, ordernum);
+                    if (SelectedForumItem.ChanelType == "Tapochek")
+                        chanel = new ChanelTap(SelectedForumItem.ChanelType, SelectedForumItem.Login, SelectedForumItem.Password, ChanelName, ChanelOwner, ordernum);
                     if (!ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Select(z => z.ChanelOwner).Contains(ChanelOwner))
                     {
                         ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(chanel);

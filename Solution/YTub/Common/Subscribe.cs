@@ -18,7 +18,9 @@ using System.Windows.Threading;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SevenZip;
+using YTub.Chanell;
 using YTub.Models;
+using YTub.Video;
 using YTub.Views;
 
 namespace YTub.Common
@@ -46,13 +48,13 @@ namespace YTub.Common
 
         private string _result;
 
-        private Chanel _currentChanel;
+        private ChanelBase _currentChanel;
 
         private IList _selectedListChanels = new ArrayList();
 
         private readonly BackgroundWorker _bgv = new BackgroundWorker();
 
-        private readonly List<VideoItem> _filterlist = new List<VideoItem>();
+        private readonly List<VideoItemBase> _filterlist = new List<VideoItemBase>();
 
         private Timer _timer;
 
@@ -60,7 +62,7 @@ namespace YTub.Common
 
         #region Fields
 
-        public Chanel CurrentChanel
+        public ChanelBase CurrentChanel
         {
             get { return _currentChanel; }
             set
@@ -70,11 +72,11 @@ namespace YTub.Common
             }
         }
 
-        public ObservableCollection<Chanel> ChanelList { get; set; }
+        public ObservableCollection<ChanelBase> ChanelList { get; set; }
 
-        public ObservableCollection<Chanel> ChanelListToBind { get; set; }
+        public ObservableCollection<ChanelBase> ChanelListToBind { get; set; }
 
-        public ObservableCollection<ForumItem> ServerList { get; set; }
+        public ObservableCollection<ChanelBase> ServerList { get; set; }
 
         public TimeSpan Synctime { get; set; }
 
@@ -109,7 +111,7 @@ namespace YTub.Common
             }
         }
 
-        public TrulyObservableCollection<VideoItem> ListPopularVideoItems { get; set; }
+        public TrulyObservableCollection<VideoItemBase> ListPopularVideoItems { get; set; }
 
         public string TitleFilter
         {
@@ -131,9 +133,9 @@ namespace YTub.Common
             if (dir == null) return;
             Sqllite.AppDir = dir;
             ChanelDb = Path.Combine(dir, "ytub.db");
-            ChanelList = new ObservableCollection<Chanel>();
-            ChanelListToBind = new ObservableCollection<Chanel>();
-            ListPopularVideoItems = new TrulyObservableCollection<VideoItem>();
+            ChanelList = new ObservableCollection<ChanelBase>();
+            ChanelListToBind = new ObservableCollection<ChanelBase>();
+            ListPopularVideoItems = new TrulyObservableCollection<VideoItemBase>();
             SevenZipBase.SetLibraryPath(Path.Combine(dir, "7z.dll"));
             var fn = new FileInfo(ChanelDb);
             if (fn.Exists)
@@ -146,22 +148,22 @@ namespace YTub.Common
                 IsPopular = Sqllite.GetSettingsIntValue(ChanelDb, "ispopular") != 0;
                 YoudlPath = Sqllite.GetSettingsValue(ChanelDb, "pathtoyoudl");
                 FfmpegPath = Sqllite.GetSettingsValue(ChanelDb, "pathtoffmpeg");
-                ServerList = new ObservableCollection<ForumItem>
+                ServerList = new ObservableCollection<ChanelBase>
                 {
-                    new ForumItem("YouTube", string.Empty, string.Empty),
-                    new ForumItem("RuTracker", Sqllite.GetSettingsValue(fn.FullName, "rtlogin"),
-                        Sqllite.GetSettingsValue(fn.FullName, "rtpassword")),
-                    new ForumItem("Tapochek", Sqllite.GetSettingsValue(fn.FullName, "taplogin"),
-                        Sqllite.GetSettingsValue(fn.FullName, "tappassword"))
+                    new ChanelYou("YouTube", string.Empty, string.Empty, "YouTube", string.Empty, 0),
+                    new ChanelRt("RuTracker", Sqllite.GetSettingsValue(fn.FullName, "rtlogin"),
+                        Sqllite.GetSettingsValue(fn.FullName, "rtpassword"), "RuTracker", string.Empty, 0),
+                    new ChanelTap("Tapochek", Sqllite.GetSettingsValue(fn.FullName, "taplogin"),
+                        Sqllite.GetSettingsValue(fn.FullName, "tappassword"), "Tapochek", string.Empty, 0)
                 };
             }
             else
             {
-                ServerList = new ObservableCollection<ForumItem>
+                ServerList = new ObservableCollection<ChanelBase>
                 {
-                    new ForumItem("YouTube", string.Empty, string.Empty),
-                    new ForumItem("RuTracker", string.Empty, string.Empty),
-                    new ForumItem("Tapochek", string.Empty, string.Empty)
+                    new ChanelYou("YouTube", string.Empty, string.Empty, "YouTube", string.Empty, 0),
+                    new ChanelRt("RuTracker", string.Empty, string.Empty, "RuTracker", string.Empty, 0),
+                    new ChanelTap("Tapochek", string.Empty, string.Empty, "Tapochek", string.Empty, 0)
                 };
             }
             _bgv.DoWork += _bgv_DoWork;
@@ -175,7 +177,7 @@ namespace YTub.Common
                 if (_filterlist.Any())
                 {
                     ListPopularVideoItems.Clear();
-                    foreach (VideoItem item in _filterlist)
+                    foreach (VideoItemBase item in _filterlist)
                     {
                         if (item.Title.Contains(TitleFilter))
                             ListPopularVideoItems.Add(item);
@@ -187,7 +189,7 @@ namespace YTub.Common
                 if (!_filterlist.Any())
                     _filterlist.AddRange(ListPopularVideoItems);
                 ListPopularVideoItems.Clear();
-                foreach (VideoItem item in _filterlist)
+                foreach (VideoItemBase item in _filterlist)
                 {
                     if (item.Title.ToLower().Contains(TitleFilter.ToLower()))
                         ListPopularVideoItems.Add(item);
@@ -214,27 +216,27 @@ namespace YTub.Common
                 return;
             foreach (JToken pair in jsvideo["feed"]["entry"])
             {
-                var v = new VideoItem(pair, true, cul + " now") {Num = ListPopularVideoItems.Count + 1};
+                var v = new VideoItemYou(pair, true, cul + " now") { Num = ListPopularVideoItems.Count + 1 };
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     ListPopularVideoItems.Add(v);
-                    v.IsHasFile = v.IsFileExist(v);
+                    v.IsHasFile = v.IsFileExist();
                     v.IsSynced = true;
                 });
             }
 
-            zap = string.Format("https://gdata.youtube.com/feeds/api/standardfeeds/{0}/most_popular?&v=2&alt=json", cul);
+            zap = string.Format("https://gdata.youtube.com/feeds/api/standardfeeds/{0}/most_popular?time=all_time&v=2&alt=json", cul);
             s = wc.DownloadString(zap);
             jsvideo = (JObject)JsonConvert.DeserializeObject(s);
             if (jsvideo == null)
                 return;
             foreach (JToken pair in jsvideo["feed"]["entry"])
             {
-                var v = new VideoItem(pair, true, cul + " all") {Num = ListPopularVideoItems.Count + 1};
+                var v = new VideoItemYou(pair, true, cul + " all") {Num = ListPopularVideoItems.Count + 1};
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     ListPopularVideoItems.Add(v);
-                    v.IsHasFile = v.IsFileExist(v);
+                    v.IsHasFile = v.IsFileExist();
                     v.IsSynced = true;
                 });
             }
@@ -250,7 +252,7 @@ namespace YTub.Common
                 {
                     addChanelModel.ChanelOwner = CurrentChanel.ChanelOwner;
                     addChanelModel.ChanelName = CurrentChanel.ChanelName;
-                    addChanelModel.SelectedForumItem = ServerList.First(z => z.ForumName == CurrentChanel.ChanelForum.ForumName);
+                    addChanelModel.SelectedForumItem = ServerList.First(z => z.ChanelType == CurrentChanel.ChanelType);
                 }
 
                 var addChanelView = new AddChanelView
@@ -286,7 +288,7 @@ namespace YTub.Common
             if (SelectedListChanels.Count > 0)
             {
                 var sb = new StringBuilder();
-                foreach (Chanel chanel in SelectedListChanels)
+                foreach (ChanelBase chanel in SelectedListChanels)
                 {
                     sb.Append(chanel.ChanelName).Append(Environment.NewLine);
                 }
@@ -295,7 +297,7 @@ namespace YTub.Common
                 {
                     for (var i = SelectedListChanels.Count; i > 0; i--)
                     {
-                        var chanel = SelectedListChanels[i - 1] as Chanel;
+                        var chanel = SelectedListChanels[i - 1] as ChanelBase;
                         if (chanel == null) continue;
                         Sqllite.RemoveChanelFromDb(ChanelDb, chanel.ChanelOwner);
                         ChanelList.Remove(chanel);
@@ -348,12 +350,21 @@ namespace YTub.Common
             foreach (KeyValuePair<string, string> pair in Sqllite.GetDistinctValues(ChanelDb, "chanelowner", "chanelname"))
             {
                 var sp = pair.Value.Split(':');
-                ChanelList.Add(new Chanel(sp[0], pair.Key, sp[1], Convert.ToInt32(sp[2])));
+
+                ChanelBase chanel = null;
+                if (sp[1] == "YouTube")
+                    chanel = new ChanelYou(sp[1], "TODO", "TODO", sp[0], pair.Key, Convert.ToInt32(sp[2]));
+                if (sp[1] == "RuTracker")
+                    chanel = new ChanelRt(sp[1], "TODO", "TODO", sp[0], pair.Key, Convert.ToInt32(sp[2]));
+                if (sp[1] == "Tapochek")
+                    chanel = new ChanelTap(sp[1], "TODO", "TODO", sp[0], pair.Key, Convert.ToInt32(sp[2]));
+
+                ChanelList.Add(chanel);
             }
 
-            foreach (Chanel chanel in ChanelList)
+            foreach (ChanelBase chanel in ChanelList)
             {
-                chanel.GetChanelVideoItemsFromDb(ChanelDb);
+                chanel.GetItemsFromDb();
             }
 
             if (ChanelList.Any())
@@ -392,9 +403,9 @@ namespace YTub.Common
         {
             if (list == null || list.Count <= 0) return;
 
-            foreach (Chanel chanel in list)
+            foreach (ChanelBase chanel in list)
             {
-                chanel.GetChanelVideoItems();
+                chanel.GetItemsFromNet();
             }
         }
 
@@ -403,14 +414,14 @@ namespace YTub.Common
             ChanelListToBind.Clear();
             if (IsOnlyFavorites)
             {
-                foreach (Chanel chanel in ChanelList.Where(x=>x.IsFavorite))
+                foreach (ChanelBase chanel in ChanelList.Where(x => x.IsFavorite))
                 {
                     ChanelListToBind.Add(chanel);
                 }
             }
             else
             {
-                foreach (Chanel chanel in ChanelList)
+                foreach (ChanelBase chanel in ChanelList)
                 {
                     ChanelListToBind.Add(chanel);
                 }

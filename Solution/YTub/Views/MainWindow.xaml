@@ -319,7 +319,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Views" SortMemberPath="ViewCount">
+                            <DataGridTemplateColumn Header="Views" SortMemberPath="ViewCount" Width="Auto">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -336,7 +336,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Published" SortMemberPath="Published" Width="78">
+                            <DataGridTemplateColumn Header="Published" SortMemberPath="Published" Width="78" CanUserResize="False">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -349,7 +349,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Duration" SortMemberPath="Duration" Width="56">
+                            <DataGridTemplateColumn Header="Duration" SortMemberPath="Duration" Width="56" CanUserResize="False">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -572,7 +572,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Views" SortMemberPath="ViewCount">
+                            <DataGridTemplateColumn Header="Views" SortMemberPath="ViewCount" Width="Auto">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -589,7 +589,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Published" SortMemberPath="Published" Width="78">
+                            <DataGridTemplateColumn Header="Published" SortMemberPath="Published" Width="78" CanUserResize="False">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -602,7 +602,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Duration" SortMemberPath="Duration" Width="56">
+                            <DataGridTemplateColumn Header="Duration" SortMemberPath="Duration" Width="56" CanUserResize="False">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />

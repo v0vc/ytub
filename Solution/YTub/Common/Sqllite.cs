@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using YTub.Video;
 
 namespace YTub.Common
 {
@@ -52,7 +53,7 @@ namespace YTub.Common
             string url, string title, int viewcount, int previewcount, int duration, DateTime published,
             string description)
         {
-            Task.Run(() =>
+            Task t = Task.Run(() =>
             {
                 title = title.Replace("'", "''");
                 chanelowner = chanelowner.Replace("'", "''");
@@ -81,12 +82,13 @@ namespace YTub.Common
                     sqlcommand.Parameters.AddWithValue("@duration", duration);
                     sqlcommand.Parameters.AddWithValue("@published", published);
                     sqlcommand.Parameters.AddWithValue("@description", description);
-                    sqlcommand.Parameters.AddWithValue("@cleartitle", VideoItem.MakeValidFileName(title));
+                    sqlcommand.Parameters.AddWithValue("@cleartitle", VideoItemBase.MakeValidFileName(title));
                     sqlcon.Open();
                     sqlcommand.ExecuteNonQuery();
                     sqlcon.Close();
                 }
             });
+            t.Wait();
         }
 
         public static bool IsTableHasRecord(string dbfile, string id)
@@ -261,7 +263,7 @@ namespace YTub.Common
 
         public static void UpdateSetting(string dbfile, string settingname, object settingvalue)
         {
-            Task.Run(() =>
+            Task t = Task.Run(() =>
             {
                 var zap = string.Format("UPDATE {0} SET {1}='{2}'", TableSettings, settingname, settingvalue);
                 using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
@@ -272,11 +274,12 @@ namespace YTub.Common
                     sqlcon.Close();
                 }
             });
+            t.Wait();
         }
 
         public static void UpdateChanelOrder(string dbfile, string chanelowner, int neworder)
         {
-            Task.Run(() =>
+            Task t = Task.Run(() =>
             {
                 var zap = string.Format("UPDATE {0} SET ordernum='{1}' WHERE chanelowner='{2}'", TableVideos, neworder,
                     chanelowner);
@@ -290,6 +293,7 @@ namespace YTub.Common
                     sqlcon.Close();
                 }
             });
+            t.Wait();
         }
 
         public static void CreateSettings(string dbfile, string tablename, Dictionary<string, string> columns)
@@ -322,7 +326,7 @@ namespace YTub.Common
 
         public static void UpdateValue(string dbfile, string valuename, string keyfield, string key, object value)
         {
-            Task.Run(() =>
+            Task t = Task.Run(() =>
             {
                 var zap = string.Format("UPDATE {0} SET {1}='{2}' WHERE {3}='{4}'", TableVideos, valuename, value,
                     keyfield, key);
@@ -334,11 +338,12 @@ namespace YTub.Common
                     sqlcon.Close();
                 }
             });
+            t.Wait();
         }
 
         public static void RemoveChanelFromDb(string dbfile, string chanelowner)
         {
-            Task.Run(() =>
+            Task t = Task.Run(() =>
             {
                 var zap = string.Format("DELETE FROM {0} WHERE chanelowner='{1}'", TableVideos, chanelowner);
                 using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
@@ -349,11 +354,12 @@ namespace YTub.Common
                     sqlcon.Close();
                 }
             });
+            t.Wait();
         }
 
         public static void UpdateChanelName(string dbfile, string newname, string chanelowner)
         {
-            Task.Run(() =>
+            Task t = Task.Run(() =>
             {
                 var zap = string.Format("UPDATE {0} SET chanelname='{1}' WHERE chanelowner='{2}'", TableVideos, newname, chanelowner);
                 using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
@@ -364,6 +370,7 @@ namespace YTub.Common
                     sqlcon.Close();
                 }
             });
+            t.Wait();
         }
 
         public static void DropTable(string dbfile, string tablename)
@@ -384,7 +391,7 @@ namespace YTub.Common
 
         public static void CreateTable(string dbfile, string tablename, Dictionary<string, string> columns)
         {
-            Task t =Task.Run(() =>
+            Task t = Task.Run(() =>
             {
                 var sb = new StringBuilder(string.Format("CREATE TABLE {0} (", tablename));
                 foreach (KeyValuePair<string, string> column in columns)
@@ -405,7 +412,7 @@ namespace YTub.Common
 
         public static void CreateDb(string dbfile)
         {
-            Task.Run(() =>
+            Task t = Task.Run(() =>
             {
                 var fnyoudl = new FileInfo(Path.Combine(AppDir, "youtube-dl", "youtube-dl.exe"));
                 var fnffmpeg = new FileInfo(Path.Combine(AppDir, "ffmpeg", "ffmpeg.exe"));
@@ -466,6 +473,7 @@ namespace YTub.Common
                     }
                 }
             });
+            t.Wait();
         }
     }
 }
