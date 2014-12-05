@@ -157,6 +157,7 @@ namespace YTub.Video
             VideoID = record["v_id"].ToString();
             VideoOwner = record["chanelowner"].ToString();
             VideoLink = record["url"].ToString();
+            ServerName = record["servername"].ToString();
             ViewCount = (int) record["viewcount"];
             PrevViewCount = (int)record["previewcount"];
             Duration = (int) record["duration"];

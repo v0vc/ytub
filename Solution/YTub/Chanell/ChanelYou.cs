@@ -120,14 +120,20 @@ namespace YTub.Chanell
 
         public override void GetItemsFromNet()
         {
+            if (_bgv.IsBusy)
+                return;
             Synctime = new TimeSpan();
             ViewModelLocator.MvViewModel.Model.MySubscribe.Synctime = Synctime;
             var tcb = new TimerCallback(tmr_Tick);
-            Timer = new Timer(tcb, null, 0, 1000);
+            TimerCommon = new Timer(tcb, null, 0, 1000);
             ListVideoItems.Clear();
-            if (!_bgv.IsBusy)
-                _bgv.RunWorkerAsync();
+            _bgv.RunWorkerAsync();
 
+        }
+
+        public override void AutorizeChanel()
+        {
+            return;
         }
 
         #region YouTubeExtractor
@@ -253,5 +259,59 @@ namespace YTub.Chanell
         {
             Synctime = Synctime.Add(TimeSpan.FromSeconds(1));
         }
+
+        //public void GetChanelVideoItemsWithoutGoogle()
+        //{
+        //    ListVideoItems.Clear();
+        //    var web = new HtmlWeb
+        //    {
+        //        AutoDetectEncoding = false,
+        //        OverrideEncoding = Encoding.UTF8,
+        //    };
+        //    var chanelDoc = web.Load(ChanelLink.AbsoluteUri);
+        //    if (chanelDoc == null)
+        //        throw new HtmlWebException("Can't load page: " + Environment.NewLine + ChanelLink.AbsoluteUri);
+        //    //var i = 0;
+        //    foreach (HtmlNode link in chanelDoc.DocumentNode.SelectNodes("//a[@href]"))
+        //    {
+        //        var att = link.Attributes["href"];
+        //        string parsed;
+        //        if (!IsLinkCorrectYouTube(att.Value, out parsed))
+        //            continue;
+        //        var parsedtrim = parsed.TrimEnd('&');
+        //        var sp = parsedtrim.Split('=');
+        //        if (sp.Length == 2 && sp[1].Length == 11)
+        //        {
+        //            var v = new VideoItem(parsedtrim, sp[1]);
+        //            //var removedBreaksname = link.InnerText.Trim().Replace("\r\n", string.Empty).Replace("\n", string.Empty).Replace("\r", string.Empty);
+        //            //v.VideoName = removedBreaksname;
+        //            if (!ListVideoItems.Select(x => x.RawUrl).ToList().Contains(v.RawUrl))
+        //            {
+        //                ListVideoItems.Add(v);
+        //                //i++;
+        //            }
+        //        }
+        //    }
+        //}
+
+        //private static bool IsLinkCorrectYouTube(string input, out string parsedres)
+        //{
+        //    var res = false;
+        //    parsedres = string.Empty;
+        //    var regExp = new Regex(@"(watch\?.)(.+?)(?:[^-a-zA-Z0-9]|$)");
+        //    //var regExp = new Regex(@"(?:youtu\.be\/|youtube.com\/(?:watch\?.*\bv=|embed\/|v\/)|ytimg\.com\/vi\/)(.+?)(?:[^-a-zA-Z0-9]|$)");
+        //    //var regExp = new Regex(@"/^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/");
+        //    //var regExp = new Regex(@"/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/");
+        //    //var regExp = new Regex(@"/(?:https?://)?(?:www\.)?youtu(?:be\.com/watch\?(?:.*?&(?:amp;)?)?v=|\.be/)([\w‌​\-]+)(?:&(?:amp;)?[\w\?=]*)?/");
+        //    //var regExp = new Regex(@"http://(?:www\.)?youtu(?:be\.com/watch\?v=|\.be/)(\w*)(&(amp;)?[\w\?=]*)?");
+        //    //var regExp = new Regex(@"(?:(?:watch\?.*\bv=|embed\/|v\/)|ytimg\.com\/vi\/)(.+?)(?:[^-a-zA-Z0-9]|$)");
+        //    var match = regExp.Match(input);
+        //    if (match.Success)
+        //    {
+        //        parsedres = match.Value;
+        //        res = true;
+        //    }
+        //    return res;
+        //}
     }
 }

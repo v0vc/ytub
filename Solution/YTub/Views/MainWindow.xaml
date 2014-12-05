@@ -80,6 +80,7 @@
                         <DataGrid.Resources>
                             <ContextMenu x:Key="DataRowContextMenu">
                                 <MenuItem Header="Sync" Click="SyncChanelOnClick" />
+                                <MenuItem Header="Autorize" Click="AutorizeChanelOnClick" />
                                 <MenuItem Header="Remove" Click="RemoveChanelOnClick" />
                                 <MenuItem Header="Edit" Click="EditChanelOnClick"></MenuItem>
                             </ContextMenu>
