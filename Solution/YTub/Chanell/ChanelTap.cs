@@ -53,5 +53,10 @@ namespace YTub.Chanell
             return;
             throw new NotImplementedException();
         }
+
+        public override void AutorizeChanel()
+        {
+            return;
+        }
     }
 }

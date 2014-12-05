@@ -58,6 +58,8 @@ namespace YTub.Models
                 {
                     var ordernum = ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Count;
                     ChanelBase chanel = null;
+                    if (string.IsNullOrEmpty(ChanelName))
+                        ChanelName = ChanelOwner;
                     if (SelectedForumItem.ChanelType == "YouTube")
                         chanel = new ChanelYou(SelectedForumItem.ChanelType, SelectedForumItem.Login, SelectedForumItem.Password,ChanelName, ChanelOwner, ordernum);
                     if (SelectedForumItem.ChanelType == "RuTracker")

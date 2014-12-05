@@ -29,7 +29,7 @@ namespace YTub.Chanell
         } 
         #endregion
 
-        private const string Cname = "rtcookie.ck";
+        
 
         private string _password;
 
@@ -41,7 +41,7 @@ namespace YTub.Chanell
 
         private string _chanelName;
 
-        public Timer Timer;
+        public Timer TimerCommon;
 
         private IList _selectedListVideoItems = new ArrayList();
 
@@ -167,7 +167,7 @@ namespace YTub.Chanell
             var subs = ViewModelLocator.MvViewModel.Model.MySubscribe;
             if (e.Error == null)
             {
-                Timer.Dispose();
+                TimerCommon.Dispose();
                 var glSync = subs.Synctime;
                 glSync = glSync.Add(Synctime.Duration());
                 subs.Result = string.Format("Total: {0}. {1} synced in {2}", glSync.ToString(@"mm\:ss"), ChanelName, Synctime.Duration().ToString(@"mm\:ss"));
@@ -220,14 +220,23 @@ namespace YTub.Chanell
 
         public abstract void GetItemsFromNet();
 
-        public virtual void GetItemsFromDb()
+        public abstract void AutorizeChanel();
+
+        public void GetItemsFromDb()
         {
             var res = Sqllite.GetChanelVideos(Subscribe.ChanelDb, ChanelOwner);
             foreach (DbDataRecord record in res)
             {
-
-                var v = new VideoItemYou(record) { Num = ListVideoItems.Count + 1 };
-                ListVideoItems.Add(v);
+                VideoItemBase v = null;
+                var servname = record["servername"].ToString();
+                if (servname == "YouTube")
+                    v = new VideoItemYou(record) { Num = ListVideoItems.Count + 1 };
+                if (servname == "RuTracker")
+                    v = new VideoItemRt(record) {Num = ListVideoItems.Count + 1};
+                if (servname == "Tapochek")
+                    v = new VideoItemTap(record) { Num = ListVideoItems.Count + 1 };
+                if (v != null && !ListVideoItems.Contains(v))
+                    ListVideoItems.Add(v);
             }
             var lst = new List<VideoItemBase>(ListVideoItems.Count);
             lst.AddRange(ListVideoItems);
@@ -242,10 +251,10 @@ namespace YTub.Chanell
             }
         }
 
-        public static void WriteCookiesToDiskBinary(CookieContainer cookieJar)
+        public static void WriteCookiesToDiskBinary(CookieContainer cookieJar, string filename)
         {
             var subs = ViewModelLocator.MvViewModel.Model.MySubscribe;
-            var fn = new FileInfo(Path.Combine(Sqllite.AppDir, Cname));
+            var fn = new FileInfo(Path.Combine(Sqllite.AppDir, filename));
             if (fn.Exists)
             {
                 try
@@ -271,11 +280,11 @@ namespace YTub.Chanell
             }
         }
 
-        public static CookieContainer ReadCookiesFromDiskBinary()
+        public static CookieContainer ReadCookiesFromDiskBinary(string filename)
         {
             try
             {
-                var fn = new FileInfo(Path.Combine(Sqllite.AppDir, Cname));
+                var fn = new FileInfo(Path.Combine(Sqllite.AppDir, filename));
 
                 using (Stream stream = File.Open(fn.FullName, FileMode.Open))
                 {

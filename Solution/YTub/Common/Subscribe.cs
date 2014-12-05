@@ -37,6 +37,14 @@ namespace YTub.Common
 
         public static string FfmpegPath;
 
+        public static string RtLogin;
+
+        public static string RtPass;
+
+        public static string TapLogin;
+
+        public static string TapPass;
+
         public static bool IsAsyncDl;
 
         public static bool IsPopular;
@@ -140,6 +148,11 @@ namespace YTub.Common
             var fn = new FileInfo(ChanelDb);
             if (fn.Exists)
             {
+                RtLogin = Sqllite.GetSettingsValue(fn.FullName, "rtlogin");
+                RtPass = Sqllite.GetSettingsValue(fn.FullName, "rtpassword");
+                TapLogin = Sqllite.GetSettingsValue(fn.FullName, "taplogin");
+                TapPass = Sqllite.GetSettingsValue(fn.FullName, "tappassword");
+
                 DownloadPath = Sqllite.GetSettingsValue(ChanelDb, "savepath");
                 MpcPath = Sqllite.GetSettingsValue(ChanelDb, "pathtompc");
                 IsSyncOnStart = Sqllite.GetSettingsIntValue(ChanelDb, "synconstart") != 0;
@@ -151,10 +164,8 @@ namespace YTub.Common
                 ServerList = new ObservableCollection<ChanelBase>
                 {
                     new ChanelYou("YouTube", string.Empty, string.Empty, "YouTube", string.Empty, 0),
-                    new ChanelRt("RuTracker", Sqllite.GetSettingsValue(fn.FullName, "rtlogin"),
-                        Sqllite.GetSettingsValue(fn.FullName, "rtpassword"), "RuTracker", string.Empty, 0),
-                    new ChanelTap("Tapochek", Sqllite.GetSettingsValue(fn.FullName, "taplogin"),
-                        Sqllite.GetSettingsValue(fn.FullName, "tappassword"), "Tapochek", string.Empty, 0)
+                    new ChanelRt("RuTracker", RtLogin, RtPass, "RuTracker", string.Empty, 0),
+                    new ChanelTap("Tapochek", TapLogin, TapPass, "Tapochek", string.Empty, 0)
                 };
             }
             else
@@ -350,14 +361,14 @@ namespace YTub.Common
             foreach (KeyValuePair<string, string> pair in Sqllite.GetDistinctValues(ChanelDb, "chanelowner", "chanelname"))
             {
                 var sp = pair.Value.Split(':');
-
+                
                 ChanelBase chanel = null;
                 if (sp[1] == "YouTube")
                     chanel = new ChanelYou(sp[1], "TODO", "TODO", sp[0], pair.Key, Convert.ToInt32(sp[2]));
                 if (sp[1] == "RuTracker")
-                    chanel = new ChanelRt(sp[1], "TODO", "TODO", sp[0], pair.Key, Convert.ToInt32(sp[2]));
+                    chanel = new ChanelRt(sp[1], RtLogin, RtPass, sp[0], pair.Key, Convert.ToInt32(sp[2]));
                 if (sp[1] == "Tapochek")
-                    chanel = new ChanelTap(sp[1], "TODO", "TODO", sp[0], pair.Key, Convert.ToInt32(sp[2]));
+                    chanel = new ChanelTap(sp[1], TapLogin, TapPass, sp[0], pair.Key, Convert.ToInt32(sp[2]));
 
                 ChanelList.Add(chanel);
             }

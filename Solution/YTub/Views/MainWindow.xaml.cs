@@ -50,6 +50,11 @@ namespace YTub.Views
             ViewModelLocator.MvViewModel.Model.MySubscribe.SyncChanel("SyncChanelSelected");
         }
 
+        private void AutorizeChanelOnClick(object sender, RoutedEventArgs e)
+        {
+            ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.AutorizeChanel();
+        }
+
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
             try
