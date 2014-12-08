@@ -346,6 +346,8 @@ namespace YTub.Models
 
         private void OpenDir(object obj)
         {
+            if (obj == null) return;
+
             switch (obj.ToString())
             {
                 case "DirPath":
@@ -391,6 +393,8 @@ namespace YTub.Models
 
         private void UpdateFile(object obj)
         {
+            if (obj == null) return;
+
             switch (obj.ToString())
             {
                 case "youtube-dl":

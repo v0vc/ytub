@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -63,7 +64,7 @@ namespace YTub.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(ex.GetBaseException().Message);
             }
             //DataGridChanels.UnselectAll();
         }
