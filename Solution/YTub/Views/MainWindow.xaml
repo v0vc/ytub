@@ -25,7 +25,7 @@
                 <MenuItem Header="Restore">
                     <MenuItem Header="Chanells" Command="{Binding BackupRestoreCommand}" CommandParameter="restorechanells"></MenuItem>
                     <MenuItem Header="Settings" Command="{Binding BackupRestoreCommand}" CommandParameter="restoresettings"></MenuItem>
-                    <MenuItem Header="All" Command="{Binding BackupRestoreCommand}" CommandParameter="restoreall"></MenuItem>
+                    <!--<MenuItem Header="All" Command="{Binding BackupRestoreCommand}" CommandParameter="restoreall"></MenuItem>-->
                 </MenuItem>
                 <Separator />
                 <MenuItem Header="Exit" Click="Exit_OnClick"></MenuItem>

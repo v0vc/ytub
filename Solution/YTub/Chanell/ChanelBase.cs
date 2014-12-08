@@ -155,11 +155,15 @@ namespace YTub.Chanell
             ChanelName = chanelname;
             ChanelOwner = chanelowner;
             OrderNum = ordernum;
-            var res = Sqllite.GetVideoIntValue(Subscribe.ChanelDb, "isfavorite", "chanelowner", ChanelOwner);
-            IsFavorite = res != 0;
             ListVideoItems = new TrulyObservableCollection<VideoItemBase>();
             Bgvdb.DoWork += _bgvdb_DoWork;
             Bgvdb.RunWorkerCompleted += _bgvdb_RunWorkerCompleted;
+            var fn = new FileInfo(Subscribe.ChanelDb);
+            if (fn.Exists)
+            {
+                var res = Sqllite.GetVideoIntValue(Subscribe.ChanelDb, "isfavorite", "chanelowner", ChanelOwner);
+                IsFavorite = res != 0;    
+            }
         }
 
         void _bgvdb_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)

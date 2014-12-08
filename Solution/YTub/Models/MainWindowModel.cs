@@ -169,10 +169,10 @@ namespace YTub.Models
                     Backup();
                     break;
 
-                case "restoreall":
-                    RestoreAll();
-                    ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "Restore completed";
-                    break;
+                //case "restoreall":
+                //    RestoreAll();
+                //    ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "Restore completed";
+                //    break;
 
                 case "restorechanells":
                     RestoreChanells();
@@ -204,9 +204,14 @@ namespace YTub.Models
                     new XElement("synconstart", Sqllite.GetSettingsIntValue(Subscribe.ChanelDb, "synconstart")),
                     new XElement("isonlyfavor", Sqllite.GetSettingsIntValue(Subscribe.ChanelDb, "isonlyfavor")),
                     new XElement("ispopular", Sqllite.GetSettingsIntValue(Subscribe.ChanelDb, "ispopular")),
+                    new XElement("asyncdl", Sqllite.GetSettingsIntValue(Subscribe.ChanelDb, "asyncdl")),
                     new XElement("culture", Sqllite.GetSettingsValue(Subscribe.ChanelDb, "culture")),
                     new XElement("pathtoyoudl", Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtoyoudl")),
-                    new XElement("pathtoffmpeg", Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtoffmpeg"))
+                    new XElement("pathtoffmpeg", Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtoffmpeg")),
+                    new XElement("rtlogin", Sqllite.GetSettingsValue(Subscribe.ChanelDb, "rtlogin")),
+                    new XElement("rtpassword", Sqllite.GetSettingsValue(Subscribe.ChanelDb, "rtpassword")),
+                    new XElement("taplogin", Sqllite.GetSettingsValue(Subscribe.ChanelDb, "taplogin")),
+                    new XElement("tappassword", Sqllite.GetSettingsValue(Subscribe.ChanelDb, "tappassword"))
                     ), new XElement("tblVideos")));
 
                 var element = doc.Element("tables");
@@ -231,63 +236,63 @@ namespace YTub.Models
             }
         }
 
-        private static void RestoreAll()
-        {
-            var opf = new OpenFileDialog {Filter = "XML documents (.xml)|*.xml"};
-            var res = opf.ShowDialog();
-            if (res == true)
-            {
-                try
-                {
-                    var doc = XDocument.Load(opf.FileName);
-                    var dicv = doc.Descendants("tblSettings").Elements().ToDictionary(setting => setting.Name.LocalName, setting => setting.Value);
-                    var dic = new Dictionary<string, string>();
-                    foreach (XElement element in doc.Descendants("tblSettings").Elements())
-                    {
-                        if (element.Name.LocalName == "synconstart" || element.Name.LocalName == "isonlyfavor" || element.Name.LocalName == "ispopular")
-                            dic.Add(element.Name.LocalName, "INT");
-                        else
-                            dic.Add(element.Name.LocalName, "TEXT");
-                    }
-                    Sqllite.DropTable(Subscribe.ChanelDb, "tblSettings");
-                    Sqllite.CreateTable(Subscribe.ChanelDb, "tblSettings", dic);
-                    Sqllite.CreateSettings(Subscribe.ChanelDb, "tblSettings", dicv);
+        //private static void RestoreAll()
+        //{
+        //    var opf = new OpenFileDialog {Filter = "XML documents (.xml)|*.xml"};
+        //    var res = opf.ShowDialog();
+        //    if (res == true)
+        //    {
+        //        try
+        //        {
+        //            var doc = XDocument.Load(opf.FileName);
+        //            var dicv = doc.Descendants("tblSettings").Elements().ToDictionary(setting => setting.Name.LocalName, setting => setting.Value);
+        //            var dic = new Dictionary<string, string>();
+        //            foreach (XElement element in doc.Descendants("tblSettings").Elements())
+        //            {
+        //                if (element.Name.LocalName == "synconstart" || element.Name.LocalName == "isonlyfavor" || element.Name.LocalName == "ispopular")
+        //                    dic.Add(element.Name.LocalName, "INT");
+        //                else
+        //                    dic.Add(element.Name.LocalName, "TEXT");
+        //            }
+        //            Sqllite.DropTable(Subscribe.ChanelDb, "tblSettings");
+        //            Sqllite.CreateTable(Subscribe.ChanelDb, "tblSettings", dic);
+        //            Sqllite.CreateSettings(Subscribe.ChanelDb, "tblSettings", dicv);
 
-                    var xElement1 = doc.Element("tables");
-                    if (xElement1 == null) return;
-                    var xElement = xElement1.Element("tblVideos");
-                    if (xElement == null) return;
-                    foreach (XElement element in xElement.Descendants("Chanell"))
-                    {
-                        var owner = element.Elements().FirstOrDefault(z => z.Name == "chanelowner");
-                        var name = element.Elements().FirstOrDefault(z => z.Name == "chanelname");
-                        var server = element.Elements().FirstOrDefault(z => z.Name == "servername");
-                        var ordernum = element.Elements().FirstOrDefault(z => z.Name == "ordernum");
-                        if (owner != null & name != null & server != null & ordernum != null)
-                        {
-                            ChanelBase chanel = null;
-                            if (server.Value == "YouTube")
-                                chanel = new ChanelYou(server.Value, "TODO", "TODO", name.Value, owner.Value, Convert.ToInt32(ordernum.Value));
-                            if (server.Value == "RuTracker")
-                                chanel = new ChanelRt(server.Value, "TODO", "TODO", name.Value, owner.Value, Convert.ToInt32(ordernum.Value));
-                            if (server.Value == "Tapochek")
-                                chanel = new ChanelTap(server.Value, "TODO", "TODO", name.Value, owner.Value, Convert.ToInt32(ordernum.Value));
-                            ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(chanel);
-                            ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites = false;
-                        }
-                    }
+        //            var xElement1 = doc.Element("tables");
+        //            if (xElement1 == null) return;
+        //            var xElement = xElement1.Element("tblVideos");
+        //            if (xElement == null) return;
+        //            foreach (XElement element in xElement.Descendants("Chanell"))
+        //            {
+        //                var owner = element.Elements().FirstOrDefault(z => z.Name == "chanelowner");
+        //                var name = element.Elements().FirstOrDefault(z => z.Name == "chanelname");
+        //                var server = element.Elements().FirstOrDefault(z => z.Name == "servername");
+        //                var ordernum = element.Elements().FirstOrDefault(z => z.Name == "ordernum");
+        //                if (owner != null & name != null & server != null & ordernum != null)
+        //                {
+        //                    ChanelBase chanel = null;
+        //                    if (server.Value == "YouTube")
+        //                        chanel = new ChanelYou(server.Value, "TODO", "TODO", name.Value, owner.Value, Convert.ToInt32(ordernum.Value));
+        //                    if (server.Value == "RuTracker")
+        //                        chanel = new ChanelRt(server.Value, "TODO", "TODO", name.Value, owner.Value, Convert.ToInt32(ordernum.Value));
+        //                    if (server.Value == "Tapochek")
+        //                        chanel = new ChanelTap(server.Value, "TODO", "TODO", name.Value, owner.Value, Convert.ToInt32(ordernum.Value));
+        //                    ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(chanel);
+        //                    ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites = false;
+        //                }
+        //            }
 
-                    Subscribe.DownloadPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "savepath");
-                    Subscribe.MpcPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtompc");
-                    Subscribe.YoudlPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtoyoudl");
-                    Subscribe.FfmpegPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtoffmpeg");
-                }
-                catch (Exception ex)
-                {
-                    ViewModelLocator.MvViewModel.Model.MySubscribe.Result = ex.Message;
-                }
-            }
-        }
+        //            Subscribe.DownloadPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "savepath");
+        //            Subscribe.MpcPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtompc");
+        //            Subscribe.YoudlPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtoyoudl");
+        //            Subscribe.FfmpegPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtoffmpeg");
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            ViewModelLocator.MvViewModel.Model.MySubscribe.Result = ex.Message;
+        //        }
+        //    }
+        //}
 
         private static void RestoreChanells()
         {
@@ -342,7 +347,10 @@ namespace YTub.Models
                     var dic = new Dictionary<string, string>();
                     foreach (XElement element in doc.Descendants("tblSettings").Elements())
                     {
-                        if (element.Name.LocalName == "synconstart" || element.Name.LocalName == "isonlyfavor" || element.Name.LocalName == "ispopular")
+                        if (element.Name.LocalName == "synconstart" 
+                            || element.Name.LocalName == "isonlyfavor" 
+                            || element.Name.LocalName == "ispopular"
+                            || element.Name.LocalName == "asyncdl")
                             dic.Add(element.Name.LocalName, "INT");
                         else
                             dic.Add(element.Name.LocalName, "TEXT");
@@ -361,5 +369,11 @@ namespace YTub.Models
                 }
             }
         }
+
+        //private static bool? ShowOpenDialog(string filter)
+        //{
+        //    var opf = new OpenFileDialog { Filter = filter };
+        //    return opf.ShowDialog();
+        //}
     }
 }
