@@ -41,7 +41,7 @@ namespace YTub.Chanell
             var results = doc.DocumentNode.Descendants("tr").Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Equals("tCenter hl-tr"));
             foreach (HtmlNode node in results)
             {
-                var v = new VideoItemRt(node);
+                var v = new VideoItemRt(node) {VideoOwner = ChanelOwner, VideoOwnerName = ChanelName};
                 if (!ListVideoItems.Contains(v) && !string.IsNullOrEmpty(v.Title))
                 {
                     v.Num = ListVideoItems.Count + 1;
@@ -59,7 +59,7 @@ namespace YTub.Chanell
                 results = doc.DocumentNode.Descendants("tr").Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Equals("tCenter hl-tr"));
                 foreach (HtmlNode node in results)
                 {
-                    var v = new VideoItemRt(node);
+                    var v = new VideoItemRt(node) {VideoOwner = ChanelOwner, VideoOwnerName = ChanelName};
                     if (!ListVideoItems.Contains(v) && !string.IsNullOrEmpty(v.Title))
                     {
                         v.Num = ListVideoItems.Count + 1;
@@ -93,14 +93,14 @@ namespace YTub.Chanell
                 {
                     foreach (VideoItemBase item in ListVideoItems)
                     {
-                        //item.IsHasFile = item.IsFileExist();
+                        item.IsHasFile = item.IsFileExist();
                     }
                 }
                 else
                 {
                     foreach (VideoItemBase item in ListVideoItems)
                     {
-                        //item.IsHasFile = item.IsFileExist();
+                        item.IsHasFile = item.IsFileExist();
                         item.IsSynced = Sqllite.IsTableHasRecord(Subscribe.ChanelDb, item.VideoID);
                     }
                     IsReady = !ListVideoItems.Select(x => x.IsSynced).Contains(false);
@@ -114,18 +114,17 @@ namespace YTub.Chanell
         {
             var cc = new CookieContainer();
             //cc.Add(new Cookie("tr_simple", "1", "", "rutracker.org"));
-            cc.Add(new Cookie("bb_t", "a%3A2%3A%7Bi%3A4878398%3Bi%3A1417096232%3Bi%3A4877083%3Bi%3A1417068939%3B%7D", "", "rutracker.org"));
+            //cc.Add(new Cookie("bb_t", "a%3A2%3A%7Bi%3A4878398%3Bi%3A1417096232%3Bi%3A4877083%3Bi%3A1417068939%3B%7D", "", "rutracker.org"));
             var req = (HttpWebRequest)WebRequest.Create("http://login.rutracker.org/forum/login.php");
             req.CookieContainer = cc;
-            req.Method = "POST";
+            req.Method = WebRequestMethods.Http.Post;
             req.Host = "login.rutracker.org";
             req.KeepAlive = true;
             var postData = string.Format("login_username={0}&login_password={1}&login=%C2%F5%EE%E4", Uri.EscapeDataString(Login), Uri.EscapeDataString(Password));
             var data = Encoding.ASCII.GetBytes(postData);
             req.ContentLength = data.Length;
             req.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
-            req.UserAgent = "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.110 Safari/537.36 CoolNovo/2.0.9.20";
-            //req.UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko";
+            req.UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko";
             req.ContentType = "application/x-www-form-urlencoded";
             req.Headers.Add("Cache-Control", "max-age=0");
             req.Headers.Add("Origin", @"http://rutracker.org");
@@ -165,6 +164,48 @@ namespace YTub.Chanell
             _rtcookie = GetSession();
             if (_rtcookie.Count > 0)
                 WriteCookiesToDiskBinary(_rtcookie, Cname);
+        }
+
+        public override void DownloadItem()
+        {
+            _rtcookie = ReadCookiesFromDiskBinary(Cname);
+
+            // Construct HTTP request to get the file
+            var httpRequest = (HttpWebRequest)WebRequest.Create(CurrentVideoItem.VideoLink);
+            httpRequest.Method = WebRequestMethods.Http.Post;
+            httpRequest.Referer = string.Format("http://rutracker.org/forum/viewtopic.php?t={0}", CurrentVideoItem.VideoID);
+            httpRequest.CookieContainer = _rtcookie;
+
+            // Include post data in the HTTP request
+            const string postData = "dummy=";
+            httpRequest.ContentLength = postData.Length;
+            httpRequest.ContentType = "application/x-www-form-urlencoded";
+
+            // Write the post data to the HTTP request
+            var requestWriter = new StreamWriter(httpRequest.GetRequestStream(), Encoding.ASCII);
+            requestWriter.Write(postData);
+            requestWriter.Close();
+
+            var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
+            Stream httpResponseStream = httpResponse.GetResponseStream();
+
+            const int bufferSize = 1024;
+            var buffer = new byte[bufferSize];
+            int bytesRead;
+
+            // Read from response and write to file
+            var ddir = new DirectoryInfo(Path.Combine(Subscribe.DownloadPath, string.Format("rt-{0}({1})", ChanelName, ChanelOwner)));
+            if (!ddir.Exists)
+                ddir.Create();
+            var dpath = Path.Combine(ddir.FullName, CurrentVideoItem.ClearTitle + ".torrent");
+            FileStream fileStream = File.Create(dpath);
+            while (httpResponseStream != null && (bytesRead = httpResponseStream.Read(buffer, 0, bufferSize)) != 0)
+            {
+                fileStream.Write(buffer, 0, bytesRead);
+            } // end while
+
+            CurrentVideoItem.IsHasFile = CurrentVideoItem.IsFileExist();
+            ViewModelLocator.MvViewModel.Model.MySubscribe.Result = CurrentVideoItem.Title + " downloaded";
         }
 
         private static IEnumerable<string> GetAllSearchLinks(HtmlDocument doc, string pid)

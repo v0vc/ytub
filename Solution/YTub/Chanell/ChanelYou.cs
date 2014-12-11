@@ -26,6 +26,9 @@ namespace YTub.Chanell
 
         private readonly BackgroundWorker _bgv = new BackgroundWorker();
 
+        public int MinRes { get; set; }
+        public int MaxResults { get; set; }
+
         public ChanelYou(string chaneltype, string login, string pass, string chanelname, string chanelowner, int ordernum) : base(chaneltype, login, pass, chanelname, chanelowner, ordernum)
         {
             MinRes = 1;
@@ -110,9 +113,6 @@ namespace YTub.Chanell
 
         }
 
-        public int MinRes { get; set; }
-        public int MaxResults { get; set; }
-
         public override CookieContainer GetSession()
         {
             return null;
@@ -134,6 +134,20 @@ namespace YTub.Chanell
         public override void AutorizeChanel()
         {
             return;
+        }
+
+        public override void DownloadItem()
+        {
+            if (string.IsNullOrEmpty(Subscribe.YoudlPath))
+            {
+                MessageBox.Show("Please set path to Youtube-dl in the Settings", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (Subscribe.IsAsyncDl)
+                GetVideosASync();
+            else
+                GetVideosSync();
         }
 
         #region YouTubeExtractor
@@ -197,20 +211,6 @@ namespace YTub.Chanell
             }));
         } 
         #endregion
-
-        public void DownloadVideoExternal()
-        {
-            if (string.IsNullOrEmpty(Subscribe.YoudlPath))
-            {
-                MessageBox.Show("Please set path to Youtube-dl in the Settings", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            if (Subscribe.IsAsyncDl)
-                GetVideosASync();
-            else
-                GetVideosSync();
-        }
 
         private void GetVideosASync()
         {

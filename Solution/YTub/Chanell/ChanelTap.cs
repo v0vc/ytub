@@ -58,5 +58,10 @@ namespace YTub.Chanell
         {
             return;
         }
+
+        public override void DownloadItem()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

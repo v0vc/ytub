@@ -11,6 +11,7 @@ using System.Windows.Media;
 using YoutubeExtractor;
 using YTub.Chanell;
 using YTub.Common;
+using YTub.Video;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 
 namespace YTub.Views
@@ -96,7 +97,7 @@ namespace YTub.Views
                 }
                 else
                 {
-                    c.DownloadVideoExternal();
+                    c.DownloadItem();
                 }
             }
         }
@@ -124,13 +125,20 @@ namespace YTub.Views
         private void PlayLocalButton_OnClick(object sender, RoutedEventArgs e)
         {
             var cchanel = ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel;
-            if (cchanel.CurrentVideoItem.IsHasFile)
-                cchanel.CurrentVideoItem.RunFile("Local");
-            else
+            if (cchanel != null)
             {
-                if (cchanel is ChanelYou)
+                if (cchanel.CurrentVideoItem.IsHasFile)
+                    cchanel.CurrentVideoItem.RunFile("Local");
+                else
                 {
-                    (cchanel as ChanelYou).DownloadVideoExternal();
+                    if (cchanel is ChanelYou)
+                    {
+                        (cchanel as ChanelYou).DownloadItem();
+                    }
+                    if (cchanel is ChanelRt)
+                    {
+                        (cchanel as ChanelRt).DownloadItem();
+                    }
                 }
             }
         }

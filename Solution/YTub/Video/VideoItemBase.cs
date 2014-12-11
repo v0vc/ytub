@@ -47,6 +47,8 @@ namespace YTub.Video
 
         public string VideoOwner { get; set; }
 
+        public string VideoOwnerName { get; set; }
+
         public int ViewCount { get; set; }
 
         public int PrevViewCount
@@ -144,18 +146,13 @@ namespace YTub.Video
         }
         #endregion
 
-        protected VideoItemBase()
-        {
-            MinProgress = 0;
-            MaxProgress = 100;
-        }
-
         protected VideoItemBase(DbDataRecord record)
         {
             Title = record["title"].ToString().Replace("''", "'");
             ClearTitle = MakeValidFileName(Title);
             VideoID = record["v_id"].ToString();
             VideoOwner = record["chanelowner"].ToString();
+            VideoOwnerName = record["chanelname"].ToString();
             VideoLink = record["url"].ToString();
             ServerName = record["servername"].ToString();
             ViewCount = (int) record["viewcount"];
@@ -163,6 +160,12 @@ namespace YTub.Video
             Duration = (int) record["duration"];
             Description = record["description"].ToString();
             Published = (DateTime) record["published"];
+        }
+
+        protected VideoItemBase()
+        {
+            MinProgress = 0;
+            MaxProgress = 100;
         }
 
         public abstract void RunFile(object runtype);

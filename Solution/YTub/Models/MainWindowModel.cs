@@ -12,6 +12,7 @@ using System.Xml.Linq;
 using Microsoft.Win32;
 using YTub.Chanell;
 using YTub.Common;
+using YTub.Video;
 using YTub.Views;
 
 namespace YTub.Models
@@ -45,6 +46,7 @@ namespace YTub.Models
             {
                 new KeyValuePair<string, string>("Russia", "RU"),
                 new KeyValuePair<string, string>("Canada", "CA"),
+                new KeyValuePair<string, string>("United States", "US"),
                 new KeyValuePair<string, string>("Argentina", "AR"),
                 new KeyValuePair<string, string>("Australia", "AU"),
                 new KeyValuePair<string, string>("Austria", "AT"),
@@ -81,8 +83,7 @@ namespace YTub.Models
                 new KeyValuePair<string, string>("Sweden", "SE"),
                 new KeyValuePair<string, string>("Switzerland", "CH"),
                 new KeyValuePair<string, string>("Taiwan", "TW"),
-                new KeyValuePair<string, string>("United Arab Emirates", "AE"),
-                new KeyValuePair<string, string>("United States", "US")
+                new KeyValuePair<string, string>("United Arab Emirates", "AE")
             };
         }
 
@@ -370,10 +371,5 @@ namespace YTub.Models
             }
         }
 
-        //private static bool? ShowOpenDialog(string filter)
-        //{
-        //    var opf = new OpenFileDialog { Filter = filter };
-        //    return opf.ShowDialog();
-        //}
     }
 }
