@@ -51,7 +51,6 @@ namespace YTub.Common
 
         public static bool IsSyncOnStart;
 
-
         private bool _isOnlyFavorites;
 
         private string _result;
@@ -236,7 +235,8 @@ namespace YTub.Common
                 });
             }
 
-            zap = string.Format("https://gdata.youtube.com/feeds/api/standardfeeds/{0}/most_popular?time=all_time&v=2&alt=json", cul);
+            //time=all_time
+            zap = string.Format("https://gdata.youtube.com/feeds/api/standardfeeds/{0}/most_popular?&v=2&alt=json", cul);
             s = wc.DownloadString(zap);
             jsvideo = (JObject)JsonConvert.DeserializeObject(s);
             if (jsvideo == null)

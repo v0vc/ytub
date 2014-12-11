@@ -143,7 +143,7 @@ namespace YTub.Common
             var res = new List<DbDataRecord>();
             Task t = Task.Run(() =>
             {
-                var zap = string.Format("SELECT * FROM {0} WHERE chanelowner='{1}'", TableVideos, chanelowner);
+                var zap = string.Format("SELECT * FROM {0} WHERE chanelowner='{1}' ORDER BY published", TableVideos, chanelowner);
                 using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
                 using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
                 {

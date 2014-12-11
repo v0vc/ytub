@@ -74,7 +74,7 @@ namespace YTub.Common
                 }
                 catch
                 {
-                    Thread.Sleep(10);
+                    Thread.Sleep(1000);
                     i++;
                 }
             }

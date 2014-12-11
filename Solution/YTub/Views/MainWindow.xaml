@@ -243,7 +243,7 @@
                             </Style>
                         </DataGrid.RowStyle>
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="S" Width="28" CanUserResize="False">
+                            <DataGridTemplateColumn Header="S" Width="28" CanUserResize="False" MinWidth="28">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -256,7 +256,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="N" Width="28" MaxWidth="50">
+                            <DataGridTemplateColumn Header="N" Width="28" MinWidth="28">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -320,7 +320,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Views" SortMemberPath="ViewCount" Width="Auto">
+                            <DataGridTemplateColumn Header="Views" SortMemberPath="ViewCount" Width="Auto" MinWidth="50">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -337,7 +337,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Published" SortMemberPath="Published" Width="78" CanUserResize="False">
+                            <DataGridTemplateColumn Header="Published" SortMemberPath="Published" Width="78" CanUserResize="False" MinWidth="65">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -350,7 +350,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Duration" SortMemberPath="Duration" Width="56" CanUserResize="False">
+                            <DataGridTemplateColumn Header="Duration" SortMemberPath="Duration" Width="56" CanUserResize="False" MinWidth="56">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -363,7 +363,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="File" SortMemberPath="IsHasFile" Width="28" CanUserResize="False">
+                            <DataGridTemplateColumn Header="File" SortMemberPath="IsHasFile" Width="28" CanUserResize="False" MinWidth="28">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -391,7 +391,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Download" SortMemberPath="IsHasFile" Width="65" CanUserResize="False">
+                            <DataGridTemplateColumn Header="Download" SortMemberPath="IsHasFile" Width="65" CanUserResize="False" MinWidth="65">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -473,7 +473,7 @@
                             </Style>
                         </DataGrid.RowStyle>
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Width="28" Header="S" CanUserResize="False">
+                            <DataGridTemplateColumn Width="28" Header="S" CanUserResize="False" MinWidth="28">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -486,7 +486,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="N" Width="28" MaxWidth="50">
+                            <DataGridTemplateColumn Header="N" Width="28" MinWidth="28">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -499,7 +499,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Width="80" CanUserResize="False" SortMemberPath="Region">
+                            <DataGridTemplateColumn Width="80" CanUserResize="False" SortMemberPath="Region" MinWidth="80">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -573,7 +573,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Views" SortMemberPath="ViewCount" Width="Auto">
+                            <DataGridTemplateColumn Header="Views" SortMemberPath="ViewCount" Width="Auto" MinWidth="50">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -590,7 +590,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Published" SortMemberPath="Published" Width="78" CanUserResize="False">
+                            <DataGridTemplateColumn Header="Published" SortMemberPath="Published" Width="78" CanUserResize="False" MinWidth="78">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -603,7 +603,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Duration" SortMemberPath="Duration" Width="56" CanUserResize="False">
+                            <DataGridTemplateColumn Header="Duration" SortMemberPath="Duration" Width="56" CanUserResize="False" MinWidth="56">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -616,7 +616,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="File" SortMemberPath="IsHasFile" Width="28" CanUserResize="False">
+                            <DataGridTemplateColumn Header="File" SortMemberPath="IsHasFile" Width="28" CanUserResize="False" MinWidth="28">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -644,7 +644,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Download" SortMemberPath="IsHasFile" Width="65" CanUserResize="False">
+                            <DataGridTemplateColumn Header="Download" SortMemberPath="IsHasFile" Width="65" CanUserResize="False" MinWidth="65">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -685,7 +685,7 @@
             <ResizeGrip Opacity="0.75" DockPanel.Dock="Right" />
             <TextBlock DockPanel.Dock="Right"
                     Text="{Binding Model.MySubscribe.CurrentChanel.ListVideoItems.Count, StringFormat=Total: {0}}"
-                    VerticalAlignment="Stretch"
+                    VerticalAlignment="Center"
                     HorizontalAlignment="Right"
                     Margin="5,0,10,0" />
             <!--<ProgressBar Margin="10,2,10,2"

@@ -226,6 +226,8 @@ namespace YTub.Chanell
 
         public abstract void AutorizeChanel();
 
+        public abstract void DownloadItem();
+
         public void GetItemsFromDb()
         {
             var res = Sqllite.GetChanelVideos(Subscribe.ChanelDb, ChanelOwner);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.Common;
+using System.IO;
 using System.Linq;
 using HtmlAgilityPack;
 using YTub.Common;
@@ -18,6 +19,7 @@ namespace YTub.Video
             foreach (HtmlNode htmlNode in counts)
             {
                 Title = htmlNode.InnerText;
+                ClearTitle = MakeValidFileName(Title);
                 break;
             }
 
@@ -73,8 +75,25 @@ namespace YTub.Video
 
         public override bool IsFileExist()
         {
-            return false;
-            //throw new NotImplementedException();
+            string path;
+            if (!string.IsNullOrEmpty(VideoOwner))
+                path = Path.Combine(Subscribe.DownloadPath, string.Format("rt-{0}({1})", VideoOwnerName, VideoOwner), ClearTitle + ".torrent");
+            else
+            {
+                if (!string.IsNullOrEmpty(ClearTitle))
+                    path = Path.Combine(Subscribe.DownloadPath, string.Format("{0}.mp4", ClearTitle));
+                else
+                {
+                    return false;
+                }
+            }
+
+            var fn = new FileInfo(path);
+            if (fn.Exists)
+            {
+                FilePath = path;
+            }
+            return fn.Exists;
         }
 
         public static string GetDataFromRtTorrent(string input)
