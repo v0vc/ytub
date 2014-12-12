@@ -88,6 +88,8 @@ namespace YTub.Video
                 }
             }
 
+            if (path.Length > 240)
+                path = path.Remove(240);
             var fn = new FileInfo(path);
             if (fn.Exists)
             {
