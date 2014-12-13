@@ -88,7 +88,7 @@ namespace YTub.Video
                 }
             }
 
-            var fn = new FileInfo(path);
+            var fn = new FileInfo(AviodTooLongFileName(path));
             if (fn.Exists)
             {
                 FilePath = path;
