@@ -181,6 +181,11 @@ namespace YTub.Video
             return s;
         }
 
+        public static string AviodTooLongFileName(string path)
+        {
+            return path.Length > 240 ? path.Remove(240) : path;
+        }
+
         public static void Log(string text)
         {
             Application.Current.Dispatcher.BeginInvoke((Action) (() => ViewModelLocator.MvViewModel.Model.LogCollection.Add((text))));
