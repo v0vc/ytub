@@ -43,6 +43,8 @@ namespace YTub.Video
 
         public VideoItemYou(DbDataRecord record) : base(record)
         {
+            MinProgress = 0;
+            MaxProgress = 100;
         }
 
         public override void RunFile(object runtype)

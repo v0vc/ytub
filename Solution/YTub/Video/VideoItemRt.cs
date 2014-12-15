@@ -9,8 +9,11 @@ namespace YTub.Video
 {
     public class VideoItemRt : VideoItemBase
     {
+        public int TotalDl { get; set; }
+
         public VideoItemRt(DbDataRecord record) : base(record)
         {
+            TotalDl = (int) record["previewcount"];
         }
 
         public VideoItemRt(HtmlNode node)
@@ -30,6 +33,8 @@ namespace YTub.Video
                 var sp = VideoLink.Split('=');
                 if (sp.Length == 2)
                     VideoID = sp[1];
+                Duration = GetTorrentSize(htmlNode.InnerText);
+                
                 break;
             }
 
@@ -62,7 +67,7 @@ namespace YTub.Video
             var med = node.Descendants("td").Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Equals("row4 small"));
             foreach (HtmlNode htmlNode in med)
             {
-                Duration = Convert.ToInt32(htmlNode.InnerText);
+                TotalDl = Convert.ToInt32(htmlNode.InnerText);
                 break;
             }
         }
@@ -97,18 +102,40 @@ namespace YTub.Video
             return fn.Exists;
         }
 
-        public static string GetDataFromRtTorrent(string input)
+        //public static string GetDataFromRtTorrent(string input)
+        //{
+        //    var sp = input.Split(':');
+        //    if (sp.Length == 3)
+        //    {
+        //        var sp1 = sp[1].Split(';');
+        //        if (sp1.Length == 4)
+        //        {
+        //            return sp1[1].Replace("&nbsp", string.Empty);
+        //        }
+        //    }
+        //    return string.Empty;
+        //}
+
+        private static int GetTorrentSize(string input)
         {
-            var sp = input.Split(':');
+            double res = 0;
+            var sp = input.Split(';');
             if (sp.Length == 3)
             {
-                var sp1 = sp[1].Split(';');
-                if (sp1.Length == 4)
+                var size = sp[0].Replace("&nbsp", string.Empty).Replace('.', ',');
+                if (double.TryParse(size, out res))
                 {
-                    return sp1[1].Replace("&nbsp", string.Empty);
+                    var sp2 = sp[1].Split(' ');
+                    if (sp2.Length == 2)
+                    {
+                        if (sp2[0] == "GB")
+                            res = res*1000;
+                        else
+                            return (int) res;
+                    }
                 }
             }
-            return string.Empty;
+            return (int) res;
         }
     }
 }

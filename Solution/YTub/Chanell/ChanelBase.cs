@@ -52,6 +52,9 @@ namespace YTub.Chanell
         private readonly List<VideoItemBase> _filterlist = new List<VideoItemBase>();
 
         public readonly BackgroundWorker Bgvdb = new BackgroundWorker();
+        private string _lastColumnHeader;
+        private string _viewSeedColumnHeader;
+        private string _durationColumnHeader;
 
         #region Fields
 
@@ -88,6 +91,36 @@ namespace YTub.Chanell
             {
                 _chanelName = value;
                 OnPropertyChanged("ChanelName");
+            }
+        }
+
+        public string LastColumnHeader
+        {
+            get { return _lastColumnHeader; }
+            set
+            {
+                _lastColumnHeader = value;
+                OnPropertyChanged("LastColumnHeader");
+            }
+        }
+
+        public string ViewSeedColumnHeader
+        {
+            get { return _viewSeedColumnHeader; }
+            set
+            {
+                _viewSeedColumnHeader = value;
+                OnPropertyChanged("ViewSeedColumnHeader");
+            }
+        }
+
+        public string DurationColumnHeader
+        {
+            get { return _durationColumnHeader; }
+            set
+            {
+                _durationColumnHeader = value;
+                OnPropertyChanged("DurationColumnHeader");
             }
         }
 
@@ -188,9 +221,22 @@ namespace YTub.Chanell
             {
                 case 0: //новый канал
 
-                    foreach (var videoItem in ListVideoItems)
+                    foreach (VideoItemBase item in ListVideoItems)
                     {
-                        Sqllite.InsertRecord(Subscribe.ChanelDb, videoItem.VideoID, ChanelOwner, ChanelName, ChanelType, OrderNum, 0, videoItem.VideoLink, videoItem.Title, videoItem.ViewCount, videoItem.ViewCount, videoItem.Duration, videoItem.Published, videoItem.Description);
+                        if (item is VideoItemYou)
+                        {
+                            Sqllite.InsertRecord(Subscribe.ChanelDb, item.VideoID, ChanelOwner, ChanelName, ChanelType,
+                                OrderNum, 0, item.VideoLink, item.Title, item.ViewCount, item.ViewCount, item.Duration,
+                                item.Published, item.Description);
+                            continue;
+                        }
+                        if (item is VideoItemRt)
+                        {
+                            var rt = item as VideoItemRt;
+                            Sqllite.InsertRecord(Subscribe.ChanelDb, item.VideoID, ChanelOwner, ChanelName, ChanelType,
+                                OrderNum, 0, item.VideoLink, item.Title, item.ViewCount, rt.TotalDl, item.Duration,
+                                item.Published, item.Description);
+                        }
                     }
 
                     break;
@@ -199,21 +245,40 @@ namespace YTub.Chanell
 
                     foreach (VideoItemBase item in ListVideoItems)
                     {
-                        //Вычисление дельты - сколько просмотров с предыдущей синхронизации, позволяет находить наиболее часто просматриваемые, но тормозит
+                        if (item is VideoItemYou)
+                        {
+                            #region Delta
 
-                        //VideoItem item1 = item;
-                        //Application.Current.Dispatcher.Invoke(() =>
-                        //{
-                        //    item1.Delta = item1.ViewCount - item1.PrevViewCount;
-                        //    item1.PrevViewCount = Sqllite.GetVideoIntValue(Subscribe.ChanelDb, "viewcount", "v_id", item1.VideoID);
-                        //});
-                        //Sqllite.UpdateValue(Subscribe.ChanelDb, "previewcount", "v_id", item.VideoID, item.PrevViewCount);
+                            //Вычисление дельты - сколько просмотров с предыдущей синхронизации, позволяет находить наиболее часто просматриваемые, но тормозит
 
-                        Sqllite.UpdateValue(Subscribe.ChanelDb, "viewcount", "v_id", item.VideoID, item.ViewCount);
-                        if (item.IsSynced == false)
-                            Sqllite.InsertRecord(Subscribe.ChanelDb, item.VideoID, ChanelOwner, ChanelName, ChanelType, OrderNum, 0,
-                                item.VideoLink, item.Title, item.ViewCount, item.ViewCount, item.Duration,
-                                item.Published, item.Description);
+                            //VideoItem item1 = item;
+                            //Application.Current.Dispatcher.Invoke(() =>
+                            //{
+                            //    item1.Delta = item1.ViewCount - item1.PrevViewCount;
+                            //    item1.PrevViewCount = Sqllite.GetVideoIntValue(Subscribe.ChanelDb, "viewcount", "v_id", item1.VideoID);
+                            //});
+                            //Sqllite.UpdateValue(Subscribe.ChanelDb, "previewcount", "v_id", item.VideoID, item.PrevViewCount);
+
+                            #endregion
+
+                            Sqllite.UpdateValue(Subscribe.ChanelDb, "viewcount", "v_id", item.VideoID, item.ViewCount);
+                            if (item.IsSynced == false)
+                                Sqllite.InsertRecord(Subscribe.ChanelDb, item.VideoID, ChanelOwner, ChanelName,
+                                    ChanelType, OrderNum, 0,
+                                    item.VideoLink, item.Title, item.ViewCount, item.ViewCount, item.Duration,
+                                    item.Published, item.Description);
+                        }
+                        if (item is VideoItemRt)
+                        {
+                            var rt = item as VideoItemRt;
+                            Sqllite.UpdateValue(Subscribe.ChanelDb, "viewcount", "v_id", item.VideoID, item.ViewCount);
+                            Sqllite.UpdateValue(Subscribe.ChanelDb, "previewcount", "v_id", item.VideoID, rt.TotalDl);
+                            if (item.IsSynced == false)
+                                Sqllite.InsertRecord(Subscribe.ChanelDb, item.VideoID, ChanelOwner, ChanelName,
+                                    ChanelType, OrderNum, 0,
+                                    item.VideoLink, item.Title, item.ViewCount, rt.TotalDl, item.Duration,
+                                    item.Published, item.Description);
+                        }
                     }
 
                     break;
