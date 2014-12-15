@@ -33,6 +33,9 @@ namespace YTub.Chanell
         {
             MinRes = 1;
             MaxResults = 25;
+            LastColumnHeader = "Download";
+            ViewSeedColumnHeader = "Views";
+            DurationColumnHeader = "Duration";
             _bgv.DoWork += _bgv_DoWork;
             _bgv.RunWorkerCompleted += _bgv_RunWorkerCompleted;
         }
@@ -166,6 +169,7 @@ namespace YTub.Chanell
                 await DownloadVideoAsync(CurrentVideoItem);
             }
             ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "Download Completed";
+            CurrentVideoItem.IsHasFile = CurrentVideoItem.IsFileExist();
         }
 
         private static Task DownloadVideoAsync(VideoItemBase item)

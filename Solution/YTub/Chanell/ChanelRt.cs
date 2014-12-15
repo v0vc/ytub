@@ -26,6 +26,9 @@ namespace YTub.Chanell
 
         public ChanelRt(string chaneltype, string login, string pass, string chanelname, string chanelowner, int ordernum) : base(chaneltype, login, pass, chanelname, chanelowner, ordernum)
         {
+            LastColumnHeader = "Total DL";
+            ViewSeedColumnHeader = "Seeders";
+            DurationColumnHeader = "Size MB";
             _bgv.DoWork += _bgv_DoWork;
             _bgv.RunWorkerCompleted += _bgv_RunWorkerCompleted;
         }

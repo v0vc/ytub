@@ -236,14 +236,14 @@ namespace YTub.Common
             }
 
             //time=all_time
-            zap = string.Format("https://gdata.youtube.com/feeds/api/standardfeeds/{0}/most_popular?&v=2&alt=json", cul);
+            zap = string.Format("https://gdata.youtube.com/feeds/api/standardfeeds/{0}/most_popular?time=all_time&v=2&alt=json", cul);
             s = wc.DownloadString(zap);
             jsvideo = (JObject)JsonConvert.DeserializeObject(s);
             if (jsvideo == null)
                 return;
             foreach (JToken pair in jsvideo["feed"]["entry"])
             {
-                var v = new VideoItemYou(pair, true, cul + " all") {Num = ListPopularVideoItems.Count + 1};
+                var v = new VideoItemYou(pair, true, cul + " all") { Num = ListPopularVideoItems.Count + 1 };
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     ListPopularVideoItems.Add(v);
@@ -314,6 +314,7 @@ namespace YTub.Common
                         ChanelList.Remove(chanel);
                         FilterChanell();
                     }
+                    Result = "Deleted";
                 }
             }
             else
