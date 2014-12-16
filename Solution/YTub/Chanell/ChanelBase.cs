@@ -29,8 +29,6 @@ namespace YTub.Chanell
         } 
         #endregion
 
-        
-
         private string _password;
 
         private string _login;
@@ -52,8 +50,11 @@ namespace YTub.Chanell
         private readonly List<VideoItemBase> _filterlist = new List<VideoItemBase>();
 
         public readonly BackgroundWorker Bgvdb = new BackgroundWorker();
+
         private string _lastColumnHeader;
+
         private string _viewSeedColumnHeader;
+
         private string _durationColumnHeader;
 
         #region Fields
