@@ -104,7 +104,6 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
@@ -222,6 +221,7 @@
     </Content>
     <Content Include="DLL\Ninject.dll" />
     <Content Include="DLL\System.Data.SQLite.dll" />
+    <Resource Include="Images\Channels\youtube_16.ico" />
     <Resource Include="Images\tick_20.png" />
     <Resource Include="Images\add_24.png" />
     <Resource Include="Images\refresh_24.png" />
@@ -234,6 +234,8 @@
     <Resource Include="Images\redo_24.png" />
     <Resource Include="Images\down_24.png" />
     <Resource Include="Images\up_24.png" />
+    <Resource Include="Images\Channels\rutracker_16.ico" />
+    <Resource Include="Images\Channels\tapochek_16.ico" />
     <Content Include="SQLite.Interop.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

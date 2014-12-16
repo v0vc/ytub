@@ -89,6 +89,29 @@
                             <DataGridTemplateColumn Width="26">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
+                                        <Image Margin="3" ClipToBounds="True" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Image.Style>
+                                                <Style TargetType="{x:Type Image}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding ChanelType}" Value="YouTube">
+                                                            <Setter Property="Source" Value="../Images/Channels/youtube_16.ico" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding ChanelType}" Value="RuTracker">
+                                                            <Setter Property="Source" Value="../Images/Channels/rutracker_16.ico" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding ChanelType}" Value="Tapochek">
+                                                            <Setter Property="Source" Value="../Images/Channels/tapochek_16.ico" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Image.Style>
+                                        </Image>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Width="26">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
                                         <CheckBox IsChecked="{Binding IsReady, Mode=TwoWay}" HorizontalAlignment="Center" IsEnabled="False" Style="{StaticResource CircleCheckbox}" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
