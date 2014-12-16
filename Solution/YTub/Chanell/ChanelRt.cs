@@ -115,38 +115,46 @@ namespace YTub.Chanell
 
         public override CookieContainer GetSession()
         {
-            var cc = new CookieContainer();
-            //cc.Add(new Cookie("tr_simple", "1", "", "rutracker.org"));
-            //cc.Add(new Cookie("bb_t", "a%3A2%3A%7Bi%3A4878398%3Bi%3A1417096232%3Bi%3A4877083%3Bi%3A1417068939%3B%7D", "", "rutracker.org"));
-            var req = (HttpWebRequest)WebRequest.Create("http://login.rutracker.org/forum/login.php");
-            req.CookieContainer = cc;
-            req.Method = WebRequestMethods.Http.Post;
-            req.Host = "login.rutracker.org";
-            req.KeepAlive = true;
-            var postData = string.Format("login_username={0}&login_password={1}&login=%C2%F5%EE%E4", Uri.EscapeDataString(Login), Uri.EscapeDataString(Password));
-            var data = Encoding.ASCII.GetBytes(postData);
-            req.ContentLength = data.Length;
-            req.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
-            req.UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko";
-            req.ContentType = "application/x-www-form-urlencoded";
-            req.Headers.Add("Cache-Control", "max-age=0");
-            req.Headers.Add("Origin", @"http://rutracker.org");
-            req.Headers.Add("Accept-Language", "en-US,en;q=0.8");
-            req.Headers.Add("Accept-Encoding", "gzip,deflate,sdch");
-            req.Headers.Add("DNT", "1");
-            req.Referer = @"http://rutracker.org/forum/index.php";
-
-            using (var stream = req.GetRequestStream())
+            try
             {
-                stream.Write(data, 0, data.Length);
-            }
+                var cc = new CookieContainer();
+                //cc.Add(new Cookie("tr_simple", "1", "", "rutracker.org"));
+                //cc.Add(new Cookie("bb_t", "a%3A2%3A%7Bi%3A4878398%3Bi%3A1417096232%3Bi%3A4877083%3Bi%3A1417068939%3B%7D", "", "rutracker.org"));
+                var req = (HttpWebRequest)WebRequest.Create("http://login.rutracker.org/forum/login.php");
+                req.CookieContainer = cc;
+                req.Method = WebRequestMethods.Http.Post;
+                req.Host = "login.rutracker.org";
+                req.KeepAlive = true;
+                var postData = string.Format("login_username={0}&login_password={1}&login=%C2%F5%EE%E4", Uri.EscapeDataString(Login), Uri.EscapeDataString(Password));
+                var data = Encoding.ASCII.GetBytes(postData);
+                req.ContentLength = data.Length;
+                req.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+                req.UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko";
+                req.ContentType = "application/x-www-form-urlencoded";
+                req.Headers.Add("Cache-Control", "max-age=0");
+                req.Headers.Add("Origin", @"http://rutracker.org");
+                req.Headers.Add("Accept-Language", "en-US,en;q=0.8");
+                req.Headers.Add("Accept-Encoding", "gzip,deflate,sdch");
+                req.Headers.Add("DNT", "1");
+                req.Referer = @"http://rutracker.org/forum/index.php";
 
-            var resp = (HttpWebResponse)req.GetResponse();
-            if (resp.StatusCode == HttpStatusCode.OK)
-            {
-                cc.Add(resp.Cookies);
+                using (var stream = req.GetRequestStream())
+                {
+                    stream.Write(data, 0, data.Length);
+                }
+
+                var resp = (HttpWebResponse)req.GetResponse();
+                if (resp.StatusCode == HttpStatusCode.OK)
+                {
+                    cc.Add(resp.Cookies);
+                }
+                return cc;
             }
-            return cc;
+            catch (Exception ex)
+            {
+                ViewModelLocator.MvViewModel.Model.MySubscribe.Result = ex.Message;
+            }
+            return null;
         }
 
         public override void GetItemsFromNet()
@@ -171,8 +179,7 @@ namespace YTub.Chanell
 
         public override void DownloadItem()
         {
-            _rtcookie = ReadCookiesFromDiskBinary(Cname);
-
+            _rtcookie = ReadCookiesFromDiskBinary(Cname) ?? GetSession();
             // Construct HTTP request to get the file
             var httpRequest = (HttpWebRequest)WebRequest.Create(CurrentVideoItem.VideoLink);
             httpRequest.Method = WebRequestMethods.Http.Post;
@@ -200,14 +207,18 @@ namespace YTub.Chanell
             var ddir = new DirectoryInfo(Path.Combine(Subscribe.DownloadPath, string.Format("rt-{0}({1})", ChanelName, ChanelOwner)));
             if (!ddir.Exists)
                 ddir.Create();
-            var dpath = Path.Combine(ddir.FullName, CurrentVideoItem.ClearTitle + ".torrent");
+            var dpath = string.Format("{0}.torrent", VideoItemBase.AviodTooLongFileName(Path.Combine(ddir.FullName, CurrentVideoItem.ClearTitle)));
             FileStream fileStream = File.Create(dpath);
             while (httpResponseStream != null && (bytesRead = httpResponseStream.Read(buffer, 0, bufferSize)) != 0)
             {
                 fileStream.Write(buffer, 0, bytesRead);
             } // end while
+            var fn = new FileInfo(dpath);
+            if (fn.Exists)
+                CurrentVideoItem.FilePath = fn.FullName;
 
-            CurrentVideoItem.IsHasFile = CurrentVideoItem.IsFileExist();
+            CurrentVideoItem.IsHasFile = fn.Exists;
+            //CurrentVideoItem.IsHasFile = CurrentVideoItem.IsFileExist();
             ViewModelLocator.MvViewModel.Model.MySubscribe.Result = CurrentVideoItem.Title + " downloaded";
         }
 
