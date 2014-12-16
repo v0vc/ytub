@@ -3,9 +3,11 @@ Add chanel as user name, like www.youtube.com/user/zapatou ==> zapatou
 Then sync and enjoy.
 Add RuTracker, you can suscribe to user releases, like http://rutracker.org/forum/tracker.php?pid=2638398 ===> 2638398
 
-![Main Window](https://raw.githubusercontent.com/v0vc/Ytub/7b534e05c54b339c66787af53ecc7e3a3c50a605/Screens/main.png)
+![Main Window](https://raw.githubusercontent.com/v0vc/Ytub/master/Screens/main.png)
 
-![Settings](https://raw.githubusercontent.com/v0vc/Ytub/7b534e05c54b339c66787af53ecc7e3a3c50a605/Screens/settings.png)
+![Settings](https://raw.githubusercontent.com/v0vc/Ytub/master/Screens/settings.png)
+
+![Popular](https://raw.githubusercontent.com/v0vc/Ytub/master/Screens/popular.png)
 
 Приложение позволяет "подписаться" на канал Youtube, не имея регистрации на самом сайте. Данные хранятся в локальной базе данных. 
 При синхронизации зеленым выделяются те видео, которые уже были синхронизованы, красным - новые. 
