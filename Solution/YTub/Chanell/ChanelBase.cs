@@ -357,11 +357,13 @@ namespace YTub.Chanell
             try
             {
                 var fn = new FileInfo(Path.Combine(Sqllite.AppDir, filename));
-
-                using (Stream stream = File.Open(fn.FullName, FileMode.Open))
+                if (fn.Exists)
                 {
-                    var formatter = new BinaryFormatter();
-                    return (CookieContainer)formatter.Deserialize(stream);
+                    using (Stream stream = File.Open(fn.FullName, FileMode.Open))
+                    {
+                        var formatter = new BinaryFormatter();
+                        return (CookieContainer) formatter.Deserialize(stream);
+                    }
                 }
             }
             catch (Exception e)

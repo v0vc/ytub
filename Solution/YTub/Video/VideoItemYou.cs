@@ -33,6 +33,7 @@ namespace YTub.Video
                 {
                     var spraw = pair["id"]["$t"].ToString().Split(':');
                     VideoID = spraw[spraw.Length - 1];
+                    Description = VideoOwner;
                 }
             }
             catch (Exception ex)

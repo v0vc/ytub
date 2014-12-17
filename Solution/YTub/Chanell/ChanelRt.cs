@@ -166,7 +166,7 @@ namespace YTub.Chanell
             var tcb = new TimerCallback(tmr_Tick);
             TimerCommon = new Timer(tcb, null, 0, 1000);
             ListVideoItems.Clear();
-            _rtcookie = ReadCookiesFromDiskBinary(Cname);
+            _rtcookie = ReadCookiesFromDiskBinary(Cname) ?? GetSession();
             _bgv.RunWorkerAsync();
         }
 
