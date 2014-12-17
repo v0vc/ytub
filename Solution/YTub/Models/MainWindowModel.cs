@@ -237,64 +237,6 @@ namespace YTub.Models
             }
         }
 
-        //private static void RestoreAll()
-        //{
-        //    var opf = new OpenFileDialog {Filter = "XML documents (.xml)|*.xml"};
-        //    var res = opf.ShowDialog();
-        //    if (res == true)
-        //    {
-        //        try
-        //        {
-        //            var doc = XDocument.Load(opf.FileName);
-        //            var dicv = doc.Descendants("tblSettings").Elements().ToDictionary(setting => setting.Name.LocalName, setting => setting.Value);
-        //            var dic = new Dictionary<string, string>();
-        //            foreach (XElement element in doc.Descendants("tblSettings").Elements())
-        //            {
-        //                if (element.Name.LocalName == "synconstart" || element.Name.LocalName == "isonlyfavor" || element.Name.LocalName == "ispopular")
-        //                    dic.Add(element.Name.LocalName, "INT");
-        //                else
-        //                    dic.Add(element.Name.LocalName, "TEXT");
-        //            }
-        //            Sqllite.DropTable(Subscribe.ChanelDb, "tblSettings");
-        //            Sqllite.CreateTable(Subscribe.ChanelDb, "tblSettings", dic);
-        //            Sqllite.CreateSettings(Subscribe.ChanelDb, "tblSettings", dicv);
-
-        //            var xElement1 = doc.Element("tables");
-        //            if (xElement1 == null) return;
-        //            var xElement = xElement1.Element("tblVideos");
-        //            if (xElement == null) return;
-        //            foreach (XElement element in xElement.Descendants("Chanell"))
-        //            {
-        //                var owner = element.Elements().FirstOrDefault(z => z.Name == "chanelowner");
-        //                var name = element.Elements().FirstOrDefault(z => z.Name == "chanelname");
-        //                var server = element.Elements().FirstOrDefault(z => z.Name == "servername");
-        //                var ordernum = element.Elements().FirstOrDefault(z => z.Name == "ordernum");
-        //                if (owner != null & name != null & server != null & ordernum != null)
-        //                {
-        //                    ChanelBase chanel = null;
-        //                    if (server.Value == "YouTube")
-        //                        chanel = new ChanelYou(server.Value, "TODO", "TODO", name.Value, owner.Value, Convert.ToInt32(ordernum.Value));
-        //                    if (server.Value == "RuTracker")
-        //                        chanel = new ChanelRt(server.Value, "TODO", "TODO", name.Value, owner.Value, Convert.ToInt32(ordernum.Value));
-        //                    if (server.Value == "Tapochek")
-        //                        chanel = new ChanelTap(server.Value, "TODO", "TODO", name.Value, owner.Value, Convert.ToInt32(ordernum.Value));
-        //                    ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(chanel);
-        //                    ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites = false;
-        //                }
-        //            }
-
-        //            Subscribe.DownloadPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "savepath");
-        //            Subscribe.MpcPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtompc");
-        //            Subscribe.YoudlPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtoyoudl");
-        //            Subscribe.FfmpegPath = Sqllite.GetSettingsValue(Subscribe.ChanelDb, "pathtoffmpeg");
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            ViewModelLocator.MvViewModel.Model.MySubscribe.Result = ex.Message;
-        //        }
-        //    }
-        //}
-
         private static void RestoreChanells()
         {
             var opf = new OpenFileDialog { Filter = "XML documents (.xml)|*.xml" };

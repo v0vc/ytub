@@ -231,8 +231,8 @@ namespace YTub.Common
                         var culture = Sqllite.GetSettingsValue(ChanelDb, "culture");
                         ViewModelLocator.MvViewModel.Model.SelectedCountry = ViewModelLocator.MvViewModel.Model.Countries.First(x => x.Value == culture);
                     }
-
-                    Result = string.Format("Loaded in {0}", Synctime.Duration().ToString(@"mm\:ss"));
+                    if (ChanelList.Any())
+                        Result = string.Format("Chanells loaded in {0}", Synctime.Duration().ToString(@"mm\:ss"));
                     break;
 
                 default:
@@ -401,18 +401,24 @@ namespace YTub.Common
             {
                 case "SyncChanelAll":
 
-                    ChanelSync(ChanelList);
+                    ChanelSync(ChanelList, false);
 
                     break;
 
                 case "SyncChanelSelected":
 
-                    ChanelSync(SelectedListChanels);
+                    ChanelSync(SelectedListChanels, false);
+
+                    break;
+
+                case "SyncAllChanelSelected":
+
+                    ChanelSync(SelectedListChanels, true);
 
                     break;
 
                 case "SyncChanelFavorites":
-                    ChanelSync(ChanelList.Where(x => x.IsFavorite).ToList());
+                    ChanelSync(ChanelList.Where(x => x.IsFavorite).ToList(), false);
                     break;
             }
         }
@@ -440,12 +446,13 @@ namespace YTub.Common
                 _bgv.RunWorkerAsync(culture);
         }
 
-        private static void ChanelSync(ICollection list)
+        private static void ChanelSync(ICollection list, bool isFull)
         {
             if (list == null || list.Count <= 0) return;
 
             foreach (ChanelBase chanel in list)
             {
+                chanel.IsFull = isFull;
                 chanel.GetItemsFromNet();
             }
         }

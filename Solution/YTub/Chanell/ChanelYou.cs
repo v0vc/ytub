@@ -40,7 +40,70 @@ namespace YTub.Chanell
             _bgv.RunWorkerCompleted += _bgv_RunWorkerCompleted;
         }
 
-        void _bgv_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        public override void GetItemsFromNet()
+        {
+            if (_bgv.IsBusy)
+                return;
+            Synctime = new TimeSpan();
+            ViewModelLocator.MvViewModel.Model.MySubscribe.Synctime = Synctime;
+            var tcb = new TimerCallback(tmr_Tick);
+            TimerCommon = new Timer(tcb, null, 0, 1000);
+            if (IsFull)
+                ListVideoItems.Clear();
+            _bgv.RunWorkerAsync();
+        }
+
+        private void _bgv_DoWork(object sender, DoWorkEventArgs e)
+        {
+            while (true)
+            {
+                var wc = new WebClient { Encoding = Encoding.UTF8 };
+                var zap = string.Format("https://gdata.youtube.com/feeds/api/users/{0}/uploads?alt=json&start-index={1}&max-results={2}",
+                    ChanelOwner, MinRes, MaxResults);
+                string s = wc.DownloadString(zap);
+                var jsvideo = (JObject)JsonConvert.DeserializeObject(s);
+                if (jsvideo == null)
+                    return;
+                int total;
+                if (int.TryParse(jsvideo["feed"]["openSearch$totalResults"]["$t"].ToString(), out total))
+                {
+                    foreach (JToken pair in jsvideo["feed"]["entry"])
+                    {
+                        var v = new VideoItemYou(pair, false, "RU")
+                        {
+                            Num = ListVideoItems.Count + 1,
+                            VideoOwner = ChanelOwner
+                        };
+
+                        if (IsFull)
+                        {
+                            if (ListVideoItems.Contains(v) || string.IsNullOrEmpty(v.Title))
+                                continue;
+                            Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
+                        }
+                        else
+                        {
+                            if (ListVideoItems.Select(x => x.VideoID).Contains(v.VideoID) || string.IsNullOrEmpty(v.Title))
+                                continue;
+                            Application.Current.Dispatcher.Invoke(() => ListVideoItems.Insert(0, v));
+                        }
+
+                        //Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
+                    }
+                    if (!IsFull)
+                        return;
+
+                    if (total > ListVideoItems.Count)
+                    {
+                        MinRes = MinRes + MaxResults;
+                        continue;
+                    }
+                }
+                break;
+            }
+        }
+
+        private void _bgv_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (e.Error != null)
             {
@@ -81,62 +144,13 @@ namespace YTub.Chanell
             }
         }
 
-        void _bgv_DoWork(object sender, DoWorkEventArgs e)
-        {
-            while (true)
-            {
-                var wc = new WebClient { Encoding = Encoding.UTF8 };
-                var zap = string.Format("https://gdata.youtube.com/feeds/api/users/{0}/uploads?alt=json&start-index={1}&max-results={2}",
-                    ChanelOwner, MinRes, MaxResults);
-                string s = wc.DownloadString(zap);
-                var jsvideo = (JObject)JsonConvert.DeserializeObject(s);
-                if (jsvideo == null)
-                    return;
-                int total;
-                if (int.TryParse(jsvideo["feed"]["openSearch$totalResults"]["$t"].ToString(), out total))
-                {
-                    foreach (JToken pair in jsvideo["feed"]["entry"])
-                    {
-                        var v = new VideoItemYou(pair, false, "RU")
-                        {
-                            Num = ListVideoItems.Count + 1,
-                            VideoOwner = ChanelOwner
-                        };
-
-                        Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
-                    }
-                    if (total > ListVideoItems.Count)
-                    {
-                        MinRes = MinRes + MaxResults;
-                        continue;
-                    }
-                }
-                break;
-            }
-
-        }
-
         public override CookieContainer GetSession()
         {
             return null;
         }
 
-        public override void GetItemsFromNet()
-        {
-            if (_bgv.IsBusy)
-                return;
-            Synctime = new TimeSpan();
-            ViewModelLocator.MvViewModel.Model.MySubscribe.Synctime = Synctime;
-            var tcb = new TimerCallback(tmr_Tick);
-            TimerCommon = new Timer(tcb, null, 0, 1000);
-            ListVideoItems.Clear();
-            _bgv.RunWorkerAsync();
-
-        }
-
         public override void AutorizeChanel()
         {
-            return;
         }
 
         public override void DownloadItem()
@@ -259,7 +273,7 @@ namespace YTub.Chanell
                 GetVideos();
         }
 
-        void tmr_Tick(object o)
+        private void tmr_Tick(object o)
         {
             Synctime = Synctime.Add(TimeSpan.FromSeconds(1));
         }

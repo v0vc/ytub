@@ -20,6 +20,8 @@ namespace YTub.Chanell
     {
         private const string Cname = "rtcookie.ck";
 
+        private const string UrlBase = "http://rutracker.org/forum/tracker.php?rid";
+
         private CookieContainer _rtcookie;
 
         private readonly BackgroundWorker _bgv = new BackgroundWorker();
@@ -31,86 +33,6 @@ namespace YTub.Chanell
             DurationColumnHeader = "Size MB";
             _bgv.DoWork += _bgv_DoWork;
             _bgv.RunWorkerCompleted += _bgv_RunWorkerCompleted;
-        }
-
-        void _bgv_DoWork(object sender, DoWorkEventArgs e)
-        {
-            var wc = new WebClientEx(_rtcookie);
-            var zap = string.Format("http://rutracker.org/forum/tracker.php?rid={0}", ChanelOwner);
-            string s = wc.DownloadString(zap);
-            var doc = new HtmlDocument();
-            doc.LoadHtml(s);
-
-            var results = doc.DocumentNode.Descendants("tr").Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Equals("tCenter hl-tr"));
-            foreach (HtmlNode node in results)
-            {
-                var v = new VideoItemRt(node) {VideoOwner = ChanelOwner, VideoOwnerName = ChanelName};
-                if (!ListVideoItems.Contains(v) && !string.IsNullOrEmpty(v.Title))
-                {
-                    v.Num = ListVideoItems.Count + 1;
-                    Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
-                }
-            }
-
-            var serchlinks = GetAllSearchLinks(doc, ChanelOwner);
-            Thread.Sleep(500);
-            foreach (string link in serchlinks)
-            {
-                s = wc.DownloadString(link);
-                doc = new HtmlDocument();
-                doc.LoadHtml(s);
-                results = doc.DocumentNode.Descendants("tr").Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Equals("tCenter hl-tr"));
-                foreach (HtmlNode node in results)
-                {
-                    var v = new VideoItemRt(node) {VideoOwner = ChanelOwner, VideoOwnerName = ChanelName};
-                    if (!ListVideoItems.Contains(v) && !string.IsNullOrEmpty(v.Title))
-                    {
-                        v.Num = ListVideoItems.Count + 1;
-                        Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
-                    }
-                }
-                Thread.Sleep(500);
-            }
-        }
-
-        void _bgv_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            if (e.Error != null)
-            {
-                if (e.Error is SQLiteException)
-                {
-                    MessageBox.Show(e.Error.Message, "Database exception", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                else
-                {
-                    MessageBox.Show(e.Error.Message, "Common error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-            else
-            {
-                var dir = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
-                if (dir == null) return;
-                int totalrow;
-                Sqllite.CreateOrConnectDb(Subscribe.ChanelDb, ChanelOwner, out totalrow);
-                if (totalrow == 0)
-                {
-                    foreach (VideoItemBase item in ListVideoItems)
-                    {
-                        item.IsHasFile = item.IsFileExist();
-                    }
-                }
-                else
-                {
-                    foreach (VideoItemBase item in ListVideoItems)
-                    {
-                        item.IsHasFile = item.IsFileExist();
-                        item.IsSynced = Sqllite.IsTableHasRecord(Subscribe.ChanelDb, item.VideoID);
-                    }
-                    IsReady = !ListVideoItems.Select(x => x.IsSynced).Contains(false);
-                }
-                if (!Bgvdb.IsBusy)
-                    Bgvdb.RunWorkerAsync(totalrow); //отдельный воркер для записи в базу
-            }
         }
 
         public override CookieContainer GetSession()
@@ -155,19 +77,6 @@ namespace YTub.Chanell
                 ViewModelLocator.MvViewModel.Model.MySubscribe.Result = ex.Message;
             }
             return null;
-        }
-
-        public override void GetItemsFromNet()
-        {
-            if (_bgv.IsBusy)
-                return;
-            Synctime = new TimeSpan();
-            ViewModelLocator.MvViewModel.Model.MySubscribe.Synctime = Synctime;
-            var tcb = new TimerCallback(tmr_Tick);
-            TimerCommon = new Timer(tcb, null, 0, 1000);
-            ListVideoItems.Clear();
-            _rtcookie = ReadCookiesFromDiskBinary(Cname) ?? GetSession();
-            _bgv.RunWorkerAsync();
         }
 
         public override void AutorizeChanel()
@@ -222,6 +131,123 @@ namespace YTub.Chanell
             ViewModelLocator.MvViewModel.Model.MySubscribe.Result = CurrentVideoItem.Title + " downloaded";
         }
 
+        public override void GetItemsFromNet()
+        {
+            if (_bgv.IsBusy)
+                return;
+            if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(Password))
+            {
+                ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "Please, set Login and Password";
+                return;
+            }
+            Synctime = new TimeSpan();
+            ViewModelLocator.MvViewModel.Model.MySubscribe.Synctime = Synctime;
+            var tcb = new TimerCallback(tmr_Tick);
+            TimerCommon = new Timer(tcb, null, 0, 1000);
+            if (IsFull)
+                ListVideoItems.Clear();
+            _rtcookie = ReadCookiesFromDiskBinary(Cname);
+            if (_rtcookie == null)
+                AutorizeChanel();
+            _bgv.RunWorkerAsync();
+        }
+
+        private void _bgv_DoWork(object sender, DoWorkEventArgs e)
+        {
+            var wc = new WebClientEx(_rtcookie);
+            var zap = string.Format("{0}={1}", UrlBase, ChanelOwner);
+            string s = wc.DownloadString(zap);
+            var doc = new HtmlDocument();
+            doc.LoadHtml(s);
+
+            var results = doc.DocumentNode.Descendants("tr").Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Equals("tCenter hl-tr"));
+            foreach (HtmlNode node in results)
+            {
+                var v = new VideoItemRt(node) {VideoOwner = ChanelOwner, VideoOwnerName = ChanelName, Num = ListVideoItems.Count + 1};
+                if (IsFull)
+                {
+                    if (ListVideoItems.Contains(v) || string.IsNullOrEmpty(v.Title)) 
+                        continue;
+                    Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
+                }
+                else
+                {
+                    if (ListVideoItems.Select(x=>x.VideoID).Contains(v.VideoID) || string.IsNullOrEmpty(v.Title)) 
+                        continue;
+                    Application.Current.Dispatcher.Invoke(() => ListVideoItems.Insert(0, v));
+                }
+            }
+
+            //чтоб не перекачивать каждый раз весь канал, считаем что все новые уместятся в первом чанке
+            if (!IsFull) 
+                return;
+
+            var serchlinks = GetAllSearchLinks(doc, ChanelOwner);
+            Thread.Sleep(500);
+            foreach (string link in serchlinks)
+            {
+                s = wc.DownloadString(link);
+                doc = new HtmlDocument();
+                doc.LoadHtml(s);
+                results =
+                    doc.DocumentNode.Descendants("tr")
+                        .Where(
+                            d =>
+                                d.Attributes.Contains("class") &&
+                                d.Attributes["class"].Value.Equals("tCenter hl-tr"));
+                foreach (HtmlNode node in results)
+                {
+                    var v = new VideoItemRt(node) {VideoOwner = ChanelOwner, VideoOwnerName = ChanelName};
+                    if (!ListVideoItems.Contains(v) && !string.IsNullOrEmpty(v.Title))
+                    {
+                        v.Num = ListVideoItems.Count + 1;
+                        Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
+                    }
+                }
+                Thread.Sleep(500);
+            }
+        }
+
+        private void _bgv_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Error != null)
+            {
+                if (e.Error is SQLiteException)
+                {
+                    MessageBox.Show(e.Error.Message, "Database exception", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show(e.Error.Message, "Common error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                var dir = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+                if (dir == null) return;
+                int totalrow;
+                Sqllite.CreateOrConnectDb(Subscribe.ChanelDb, ChanelOwner, out totalrow);
+                if (totalrow == 0)
+                {
+                    foreach (VideoItemBase item in ListVideoItems)
+                    {
+                        item.IsHasFile = item.IsFileExist();
+                    }
+                }
+                else
+                {
+                    foreach (VideoItemBase item in ListVideoItems)
+                    {
+                        item.IsHasFile = item.IsFileExist();
+                        item.IsSynced = Sqllite.IsTableHasRecord(Subscribe.ChanelDb, item.VideoID);
+                    }
+                    IsReady = !ListVideoItems.Select(x => x.IsSynced).Contains(false);
+                }
+                if (!Bgvdb.IsBusy)
+                    Bgvdb.RunWorkerAsync(totalrow); //отдельный воркер для записи в базу
+            }
+        }
+
         private static IEnumerable<string> GetAllSearchLinks(HtmlDocument doc, string pid)
         {
             var hrefTags = new List<string>();
@@ -252,7 +278,7 @@ namespace YTub.Chanell
             return res;
         }
 
-        void tmr_Tick(object o)
+        private void tmr_Tick(object o)
         {
             Synctime = Synctime.Add(TimeSpan.FromSeconds(1));
         }
