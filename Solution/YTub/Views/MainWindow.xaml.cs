@@ -22,6 +22,7 @@ namespace YTub.Views
     public partial class MainWindow : Window
     {
         public static readonly DependencyProperty DraggedItemProperty = DependencyProperty.Register("DraggedItem", typeof(ChanelBase), typeof(Window));
+
         public bool IsDragging { get; set; }
 
         public bool IsEditing { get; set; }
@@ -35,7 +36,20 @@ namespace YTub.Views
         public MainWindow()
         {
             InitializeComponent();
+            //Shutter.SetParent(GridShutterParent);
+            //this.Subscribe(911, OnShutterShow);
+            //this.Subscribe(910, OnShutterHide);
         }
+
+        //private void OnShutterShow(EventMessage p)
+        //{
+        //    Shutter.ShowDialogHandler();
+        //}
+
+        //private void OnShutterHide(EventMessage p)
+        //{
+        //    Shutter.HideDialogHandler();
+        //}
 
         private void Exit_OnClick(object sender, RoutedEventArgs e)
         {

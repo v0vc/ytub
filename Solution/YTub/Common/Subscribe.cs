@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Newtonsoft.Json;
@@ -27,6 +28,25 @@ namespace YTub.Common
 {
     public class Subscribe : INotifyPropertyChanged
     {
+        private bool _isOnlyFavorites;
+
+        private string _result;
+
+        private const string Dbfile = "ytub.db";
+
+        private ChanelBase _currentChanel;
+
+        private IList _selectedListChanels = new ArrayList();
+
+        private readonly BackgroundWorker _bgv = new BackgroundWorker();
+
+        private readonly List<VideoItemBase> _filterlist = new List<VideoItemBase>();
+
+        private Timer _timer;
+
+        private string _titleFilter;
+
+
         public static string ChanelDb;
 
         public static string DownloadPath;
@@ -50,22 +70,6 @@ namespace YTub.Common
         public static bool IsPopular;
 
         public static bool IsSyncOnStart;
-
-        private bool _isOnlyFavorites;
-
-        private string _result;
-
-        private ChanelBase _currentChanel;
-
-        private IList _selectedListChanels = new ArrayList();
-
-        private readonly BackgroundWorker _bgv = new BackgroundWorker();
-
-        private readonly List<VideoItemBase> _filterlist = new List<VideoItemBase>();
-
-        private Timer _timer;
-
-        private string _titleFilter;
 
         #region Fields
 
@@ -114,7 +118,8 @@ namespace YTub.Common
             {
                 _isOnlyFavorites = value;
                 OnPropertyChanged("IsOnlyFavorites");
-                FilterChanell();
+                if (ChanelList.Any())
+                    FilterChanell();
             }
         }
 
@@ -139,7 +144,7 @@ namespace YTub.Common
             var dir = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
             if (dir == null) return;
             Sqllite.AppDir = dir;
-            ChanelDb = Path.Combine(dir, "ytub.db");
+            ChanelDb = Path.Combine(dir, Dbfile);
             ChanelList = new ObservableCollection<ChanelBase>();
             ChanelListToBind = new ObservableCollection<ChanelBase>();
             ListPopularVideoItems = new TrulyObservableCollection<VideoItemBase>();
@@ -151,7 +156,6 @@ namespace YTub.Common
                 RtPass = Sqllite.GetSettingsValue(fn.FullName, "rtpassword");
                 TapLogin = Sqllite.GetSettingsValue(fn.FullName, "taplogin");
                 TapPass = Sqllite.GetSettingsValue(fn.FullName, "tappassword");
-
                 DownloadPath = Sqllite.GetSettingsValue(ChanelDb, "savepath");
                 MpcPath = Sqllite.GetSettingsValue(ChanelDb, "pathtompc");
                 IsSyncOnStart = Sqllite.GetSettingsIntValue(ChanelDb, "synconstart") != 0;
@@ -175,6 +179,7 @@ namespace YTub.Common
                     new ChanelRt("RuTracker", string.Empty, string.Empty, "RuTracker", string.Empty, 0),
                     new ChanelTap("Tapochek", string.Empty, string.Empty, "Tapochek", string.Empty, 0)
                 };
+                DownloadPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             }
             _bgv.DoWork += _bgv_DoWork;
             _bgv.RunWorkerCompleted += _bgv_RunWorkerCompleted;
@@ -207,10 +212,35 @@ namespace YTub.Common
             }
         }
 
-        void _bgv_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void _bgv_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             _timer.Dispose();
-            Result = string.Format("{0} synced in {1}", ViewModelLocator.MvViewModel.Model.SelectedCountry.Key, Synctime.Duration().ToString(@"mm\:ss"));
+            if (e.Result == null)
+                return;
+
+            switch (e.Result.ToString())
+            {
+                case "GetDB":
+                    IsOnlyFavorites = Sqllite.GetSettingsIntValue(ChanelDb, "isonlyfavor") == 1;
+
+                    if (IsSyncOnStart)
+                        SyncChanel(IsOnlyFavorites ? "SyncChanelFavorites" : "SyncChanelAll");
+
+                    if (IsPopular)
+                    {
+                        var culture = Sqllite.GetSettingsValue(ChanelDb, "culture");
+                        ViewModelLocator.MvViewModel.Model.SelectedCountry = ViewModelLocator.MvViewModel.Model.Countries.First(x => x.Value == culture);
+                    }
+
+                    Result = string.Format("Loaded in {0}", Synctime.Duration().ToString(@"mm\:ss"));
+                    break;
+
+                default:
+                    Result = string.Format("{0} synced in {1}", ViewModelLocator.MvViewModel.Model.SelectedCountry.Key,
+                        Synctime.Duration().ToString(@"mm\:ss"));
+                    break;
+            }
+
         }
 
         void _bgv_DoWork(object sender, DoWorkEventArgs e)
@@ -218,22 +248,57 @@ namespace YTub.Common
             var cul = e.Argument.ToString();
             if (string.IsNullOrEmpty(cul))
                 cul = "RU";
-            var wc = new WebClient { Encoding = Encoding.UTF8 };
-            var zap = string.Format("https://gdata.youtube.com/feeds/api/standardfeeds/{0}/most_popular?time=today&v=2&alt=json", cul);
-            string s = wc.DownloadString(zap);
-            var jsvideo = (JObject)JsonConvert.DeserializeObject(s);
-            if (jsvideo == null)
-                return;
-            foreach (JToken pair in jsvideo["feed"]["entry"])
+            e.Result = cul;
+            switch (cul)
             {
-                var v = new VideoItemYou(pair, true, cul + " now") { Num = ListPopularVideoItems.Count + 1 };
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    ListPopularVideoItems.Add(v);
-                    v.IsHasFile = v.IsFileExist();
-                    v.IsSynced = true;
-                });
+                case "GetDB":
+
+                    foreach (KeyValuePair<string, string> pair in Sqllite.GetDistinctValues(ChanelDb, "chanelowner", "chanelname"))
+                    {
+                        var sp = pair.Value.Split(':');
+
+                        ChanelBase chanel = null;
+                        if (sp[1] == "YouTube")
+                            chanel = new ChanelYou(sp[1], "TODO", "TODO", sp[0], pair.Key, Convert.ToInt32(sp[2]));
+                        if (sp[1] == "RuTracker")
+                            chanel = new ChanelRt(sp[1], RtLogin, RtPass, sp[0], pair.Key, Convert.ToInt32(sp[2]));
+                        if (sp[1] == "Tapochek")
+                            chanel = new ChanelTap(sp[1], TapLogin, TapPass, sp[0], pair.Key, Convert.ToInt32(sp[2]));
+
+                        ChanelList.Add(chanel);
+                    }
+
+                    foreach (ChanelBase chanel in ChanelList)
+                    {
+                        chanel.GetItemsFromDb();
+                    }
+
+                    if (ChanelList.Any())
+                        CurrentChanel = ChanelList[0];
+
+                    break;
+
+                default:
+                    var wc = new WebClient {Encoding = Encoding.UTF8};
+                    var zap = string.Format("https://gdata.youtube.com/feeds/api/standardfeeds/{0}/most_popular?time=today&v=2&alt=json", cul);
+                    string s = wc.DownloadString(zap);
+                    var jsvideo = (JObject) JsonConvert.DeserializeObject(s);
+                    if (jsvideo == null)
+                        return;
+                    foreach (JToken pair in jsvideo["feed"]["entry"])
+                    {
+                        var v = new VideoItemYou(pair, true, cul + " now") {Num = ListPopularVideoItems.Count + 1};
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            ListPopularVideoItems.Add(v);
+                            v.IsHasFile = v.IsFileExist();
+                            v.IsSynced = true;
+                        });
+                    }
+                    break;
             }
+
+            #region all_time
 
             //time=all_time
             //zap = string.Format("https://gdata.youtube.com/feeds/api/standardfeeds/{0}/most_popular?time=all_time&v=2&alt=json", cul);
@@ -251,6 +316,8 @@ namespace YTub.Common
             //        v.IsSynced = true;
             //    });
             //}
+
+            #endregion
         }
 
         public void AddChanel(object o)
@@ -352,6 +419,8 @@ namespace YTub.Common
 
         public void GetChanelsFromDb()
         {   
+            InitializeTimer();
+
             var fn = new FileInfo(ChanelDb);
             if (!fn.Exists)
             {
@@ -359,57 +428,17 @@ namespace YTub.Common
                 return;
             }
 
-            foreach (KeyValuePair<string, string> pair in Sqllite.GetDistinctValues(ChanelDb, "chanelowner", "chanelname"))
-            {
-                var sp = pair.Value.Split(':');
-                
-                ChanelBase chanel = null;
-                if (sp[1] == "YouTube")
-                    chanel = new ChanelYou(sp[1], "TODO", "TODO", sp[0], pair.Key, Convert.ToInt32(sp[2]));
-                if (sp[1] == "RuTracker")
-                    chanel = new ChanelRt(sp[1], RtLogin, RtPass, sp[0], pair.Key, Convert.ToInt32(sp[2]));
-                if (sp[1] == "Tapochek")
-                    chanel = new ChanelTap(sp[1], TapLogin, TapPass, sp[0], pair.Key, Convert.ToInt32(sp[2]));
-
-                ChanelList.Add(chanel);
-            }
-
-            foreach (ChanelBase chanel in ChanelList)
-            {
-                chanel.GetItemsFromDb();
-            }
-
-            if (ChanelList.Any())
-                CurrentChanel = ChanelList[0];
-
-            IsOnlyFavorites = Sqllite.GetSettingsIntValue(ChanelDb, "isonlyfavor") == 1;
-
-            if (IsSyncOnStart)
-            {
-                if (IsOnlyFavorites)
-                    SyncChanel("SyncChanelFavorites");
-                else
-                    SyncChanel("SyncChanelAll");
-            }
-
-            if (IsPopular)
-            {
-                var culture = Sqllite.GetSettingsValue(ChanelDb, "culture");
-                ViewModelLocator.MvViewModel.Model.SelectedCountry = ViewModelLocator.MvViewModel.Model.Countries.First(x => x.Value == culture);
-            }
+            if (!_bgv.IsBusy)
+                _bgv.RunWorkerAsync("GetDB");
         }
 
         public void GetPopularVideos(string culture)
         {
-            Synctime =new TimeSpan();
-            var tcb = new TimerCallback(tmr_Tick);
-            _timer = new Timer(tcb, null, 0, 1000);
+            InitializeTimer();
             ListPopularVideoItems.Clear();
             if (!_bgv.IsBusy)
                 _bgv.RunWorkerAsync(culture);
         }
-
-
 
         private static void ChanelSync(ICollection list)
         {
@@ -423,28 +452,38 @@ namespace YTub.Common
 
         private void FilterChanell()
         {
-            ChanelListToBind.Clear();
-            if (IsOnlyFavorites)
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                foreach (ChanelBase chanel in ChanelList.Where(x => x.IsFavorite))
+                ChanelListToBind.Clear();
+                if (IsOnlyFavorites)
                 {
-                    ChanelListToBind.Add(chanel);
+                    foreach (ChanelBase chanel in ChanelList.Where(x => x.IsFavorite))
+                    {
+                        ChanelListToBind.Add(chanel);
+                    }
                 }
-            }
-            else
-            {
-                foreach (ChanelBase chanel in ChanelList)
+                else
                 {
-                    ChanelListToBind.Add(chanel);
+                    foreach (ChanelBase chanel in ChanelList)
+                    {
+                        ChanelListToBind.Add(chanel);
+                    }
                 }
-            }
-            if (ChanelListToBind.Any())
-                CurrentChanel = ChanelListToBind[0];
+                if (ChanelListToBind.Any())
+                    CurrentChanel = ChanelListToBind[0];
+            });
         }
 
         void tmr_Tick(object o)
         {
             Synctime = Synctime.Add(TimeSpan.FromSeconds(1));
+        }
+
+        private void InitializeTimer()
+        {
+            Synctime = new TimeSpan();
+            var tcb = new TimerCallback(tmr_Tick);
+            _timer = new Timer(tcb, null, 0, 1000);
         }
 
         //public static void CheckFfmpegPath()
@@ -465,6 +504,13 @@ namespace YTub.Common
         //        else
         //            IsPathContainFfmpeg = false;
         //    }
+        //}
+
+        //public void ShowShutter(bool isShow)
+        //{
+        //    //this.Send(911); //show shutter
+        //    //this.Send(910); //hide shutter
+        //    this.Send(isShow ? 911 : 910);
         //}
 
         #region INotifyPropertyChanged
