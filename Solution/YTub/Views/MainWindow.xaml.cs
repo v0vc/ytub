@@ -36,39 +36,6 @@ namespace YTub.Views
         public MainWindow()
         {
             InitializeComponent();
-            //Shutter.SetParent(GridShutterParent);
-            //this.Subscribe(911, OnShutterShow);
-            //this.Subscribe(910, OnShutterHide);
-        }
-
-        //private void OnShutterShow(EventMessage p)
-        //{
-        //    Shutter.ShowDialogHandler();
-        //}
-
-        //private void OnShutterHide(EventMessage p)
-        //{
-        //    Shutter.HideDialogHandler();
-        //}
-
-        private void Exit_OnClick(object sender, RoutedEventArgs e)
-        {
-            Close();
-        }
-
-        private void RemoveChanelOnClick(object sender, RoutedEventArgs e)
-        {
-            ViewModelLocator.MvViewModel.Model.MySubscribe.RemoveChanel(null);
-        }
-
-        private void SyncChanelOnClick(object sender, RoutedEventArgs e)
-        {
-            ViewModelLocator.MvViewModel.Model.MySubscribe.SyncChanel("SyncChanelSelected");
-        }
-
-        private void AutorizeChanelOnClick(object sender, RoutedEventArgs e)
-        {
-            ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.AutorizeChanel();
         }
 
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
@@ -82,6 +49,31 @@ namespace YTub.Views
                 MessageBox.Show(ex.GetBaseException().Message);
             }
             //DataGridChanels.UnselectAll();
+        }
+
+        private void Exit_OnClick(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        private void SyncChanelOnClick(object sender, RoutedEventArgs e)
+        {
+            ViewModelLocator.MvViewModel.Model.MySubscribe.SyncChanel("SyncChanelSelected");
+        }
+
+        private void SyncAllChanelOnClick(object sender, RoutedEventArgs e)
+        {
+            ViewModelLocator.MvViewModel.Model.MySubscribe.SyncChanel("SyncAllChanelSelected");
+        }
+
+        private void AutorizeChanelOnClick(object sender, RoutedEventArgs e)
+        {
+            ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel.AutorizeChanel();
+        }
+
+        private void RemoveChanelOnClick(object sender, RoutedEventArgs e)
+        {
+            ViewModelLocator.MvViewModel.Model.MySubscribe.RemoveChanel(null);
         }
 
         private void EditChanelOnClick(object sender, RoutedEventArgs e)

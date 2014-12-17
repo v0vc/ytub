@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using YTub.Chanell;
 using YTub.Common;
+using YTub.Video;
 using YTub.Views;
 
 namespace YTub.Models
@@ -66,14 +67,21 @@ namespace YTub.Models
                         chanel = new ChanelRt(SelectedForumItem.ChanelType, SelectedForumItem.Login, SelectedForumItem.Password, ChanelName, ChanelOwner, ordernum);
                     if (SelectedForumItem.ChanelType == "Tapochek")
                         chanel = new ChanelTap(SelectedForumItem.ChanelType, SelectedForumItem.Login, SelectedForumItem.Password, ChanelName, ChanelOwner, ordernum);
-                    if (!ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Select(z => z.ChanelOwner).Contains(ChanelOwner))
+                    if (chanel != null)
                     {
-                        ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(chanel);
-                        ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelListToBind.Add(chanel);
-                    }
-                    else
-                    {
-                        MessageBox.Show("Subscribe has already " + ChanelOwner, "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                        if (!ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Select(z => z.ChanelOwner).Contains(ChanelOwner))
+                        {
+                            ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(chanel);
+                            ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelListToBind.Add(chanel);
+                            chanel.IsFull = true;
+                            chanel.GetItemsFromNet();
+                            ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel = chanel;
+                        }
+                        else
+                        {
+                            MessageBox.Show("Subscribe has already " + ChanelOwner, "Information", MessageBoxButton.OK,
+                                MessageBoxImage.Information);
+                        }
                     }
                     //ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites = false;
                 }
