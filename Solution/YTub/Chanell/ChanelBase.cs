@@ -298,9 +298,9 @@ namespace YTub.Chanell
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "ReadCookiesFromDiskBinary: " + e.Message;
+                Subscribe.SetResult("ReadCookiesFromDiskBinary: " + ex.Message);
             }
             return null;
         }
@@ -335,7 +335,7 @@ namespace YTub.Chanell
                             try
                             {
                                 fn.Delete();
-                                ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "Deleted";
+                                Subscribe.SetResult("Deleted");
                             }
                             catch (Exception ex)
                             {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.IO;
 using System.Linq;
@@ -74,47 +75,36 @@ namespace YTub.Video
 
         public override void RunFile(object runtype)
         {
-            return;
-            throw new NotImplementedException();
         }
 
         public override bool IsFileExist()
         {
-            string path;
-            if (!string.IsNullOrEmpty(VideoOwner))
-                path = Path.Combine(Subscribe.DownloadPath, string.Format("rt-{0}({1})", VideoOwnerName, VideoOwner), ClearTitle + ".torrent");
-            else
+            var lstnames = new List<string>
             {
-                if (!string.IsNullOrEmpty(ClearTitle))
-                    path = Path.Combine(Subscribe.DownloadPath, string.Format("{0}.mp4", ClearTitle));
-                else
+                Path.Combine(Subscribe.DownloadPath, string.Format("rt-{0}({1})", VideoOwnerName, VideoOwner),
+                    MakeTorrentFileName(false)),
+                Path.Combine(Subscribe.DownloadPath, string.Format("rt-{0}({1})", VideoOwnerName, VideoOwner),
+                    MakeTorrentFileName(true))
+            };
+
+            foreach (string torname in lstnames)
+            {
+                var fn = new FileInfo(AviodTooLongFileName(torname));
+                if (fn.Exists)
                 {
-                    return false;
+                    FilePath = fn.FullName;
+                    return fn.Exists;
                 }
             }
-
-            var fn = new FileInfo(AviodTooLongFileName(path));
-
-            if (fn.Exists)
-            {
-                FilePath = path;
-            }
-            return fn.Exists;
+            return false;
         }
 
-        //public static string GetDataFromRtTorrent(string input)
-        //{
-        //    var sp = input.Split(':');
-        //    if (sp.Length == 3)
-        //    {
-        //        var sp1 = sp[1].Split(';');
-        //        if (sp1.Length == 4)
-        //        {
-        //            return sp1[1].Replace("&nbsp", string.Empty);
-        //        }
-        //    }
-        //    return string.Empty;
-        //}
+        public string MakeTorrentFileName(bool isFullName)
+        {
+            if (isFullName)
+                return string.Format("{0}.torrent", ClearTitle);
+            return string.Format("[rutracker.org].t{0}.torrent", VideoID);
+        }
 
         private static int GetTorrentSize(string input)
         {

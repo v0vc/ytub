@@ -28,6 +28,8 @@ namespace YTub.ViewModels
 
         public RelayCommand BackupRestoreCommand { get; set; }
 
+        public RelayCommand SearchCommand { get; set; }
+
         public MainWindowViewModel(MainWindowModel model)
         {
             Model = model;
@@ -37,6 +39,7 @@ namespace YTub.ViewModels
             RemoveChanelCommand = new RelayCommand(Model.MySubscribe.RemoveChanel);
             OpenSettingsCommand = new RelayCommand(Model.OpenSettings);
             BackupRestoreCommand = new RelayCommand(Model.BackupRestore);
+            SearchCommand = new RelayCommand(Model.MySubscribe.Search);
         }
     }
 }

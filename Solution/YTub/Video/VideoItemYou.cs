@@ -48,6 +48,37 @@ namespace YTub.Video
             MaxProgress = 100;
         }
 
+        public VideoItemYou(JToken pair, bool isPopular)
+        {
+            try
+            {
+                Title = pair["title"]["$t"].ToString();
+                ClearTitle = MakeValidFileName(Title);
+                ViewCount = (int)pair["yt$statistics"]["viewCount"];
+                Duration = (int)pair["media$group"]["yt$duration"]["seconds"];
+                VideoLink = pair["link"][0]["href"].ToString().Split('&')[0];
+                Published = (DateTime)pair["published"]["$t"];
+                var owner = pair["author"][0]["uri"]["$t"].ToString().Split('/');
+                VideoOwner = owner[owner.Length - 1];
+                if (!isPopular)
+                {
+                    var spraw = pair["id"]["$t"].ToString().Split('/');
+                    VideoID = spraw[spraw.Length - 1];
+                    Description = pair["content"]["$t"].ToString();
+                }
+                else
+                {
+                    var spraw = pair["id"]["$t"].ToString().Split(':');
+                    VideoID = spraw[spraw.Length - 1];
+                    Description = VideoOwner;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log(ex.Message);
+            }
+        }
+
         public override void RunFile(object runtype)
         {
             switch (runtype.ToString())

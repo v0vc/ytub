@@ -74,7 +74,7 @@ namespace YTub.Chanell
             }
             catch (Exception ex)
             {
-                ViewModelLocator.MvViewModel.Model.MySubscribe.Result = ex.Message;
+                Subscribe.SetResult(ex.Message);
             }
             return null;
         }
@@ -110,25 +110,29 @@ namespace YTub.Chanell
 
             const int bufferSize = 1024;
             var buffer = new byte[bufferSize];
-            int bytesRead;
 
             // Read from response and write to file
             var ddir = new DirectoryInfo(Path.Combine(Subscribe.DownloadPath, string.Format("rt-{0}({1})", ChanelName, ChanelOwner)));
             if (!ddir.Exists)
                 ddir.Create();
-            var dpath = string.Format("{0}.torrent", VideoItemBase.AviodTooLongFileName(Path.Combine(ddir.FullName, CurrentVideoItem.ClearTitle)));
-            FileStream fileStream = File.Create(dpath);
-            while (httpResponseStream != null && (bytesRead = httpResponseStream.Read(buffer, 0, bufferSize)) != 0)
-            {
-                fileStream.Write(buffer, 0, bytesRead);
-            } // end while
-            var fn = new FileInfo(dpath);
-            if (fn.Exists)
-                CurrentVideoItem.FilePath = fn.FullName;
 
-            CurrentVideoItem.IsHasFile = fn.Exists;
-            //CurrentVideoItem.IsHasFile = CurrentVideoItem.IsFileExist();
-            ViewModelLocator.MvViewModel.Model.MySubscribe.Result = CurrentVideoItem.Title + " downloaded";
+            var rt = CurrentVideoItem as VideoItemRt;
+            if (rt != null)
+            {
+                var dpath = VideoItemBase.AviodTooLongFileName(Path.Combine(ddir.FullName, rt.MakeTorrentFileName(false)));
+                FileStream fileStream = File.Create(dpath);
+                int bytesRead;
+                while (httpResponseStream != null && (bytesRead = httpResponseStream.Read(buffer, 0, bufferSize)) != 0)
+                {
+                    fileStream.Write(buffer, 0, bytesRead);
+                } // end while
+                var fn = new FileInfo(dpath);
+                if (fn.Exists)
+                    rt.FilePath = fn.FullName;
+
+                rt.IsHasFile = fn.Exists;
+            }
+            Subscribe.SetResult(CurrentVideoItem.Title + " downloaded");
         }
 
         public override void GetItemsFromNet()
@@ -137,7 +141,7 @@ namespace YTub.Chanell
                 return;
             if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(Password))
             {
-                ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "Please, set Login and Password";
+                Subscribe.SetResult("Please, set Login and Password");
                 return;
             }
             Synctime = new TimeSpan();

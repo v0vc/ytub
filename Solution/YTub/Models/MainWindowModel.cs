@@ -39,7 +39,7 @@ namespace YTub.Models
 
         public MainWindowModel()
         {
-            MySubscribe = new Subscribe();
+            MySubscribe = new Subscribe(this);
             LogCollection = new ObservableCollection<string>();
 
             Countries = new List<KeyValuePair<string, string>>
@@ -170,19 +170,14 @@ namespace YTub.Models
                     Backup();
                     break;
 
-                //case "restoreall":
-                //    RestoreAll();
-                //    ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "Restore completed";
-                //    break;
-
                 case "restorechanells":
                     RestoreChanells();
-                    ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "Restore completed";
+                    Subscribe.SetResult("Restore channels completed");
                     break;
 
                 case "restoresettings":
                     RestoreSettings();
-                    ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "Restore completed";
+                    Subscribe.SetResult("Restore settings comleted");
                     break;
             }
         }
@@ -233,7 +228,7 @@ namespace YTub.Models
                     }
                 }
                 doc.Save(dlg.FileName);
-                ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "Backup " + dlg.FileName + " completed";
+                Subscribe.SetResult(string.Format("Backup {0} completed", dlg.FileName));
             }
         }
 
@@ -272,7 +267,7 @@ namespace YTub.Models
                 }
                 catch (Exception ex)
                 {
-                    ViewModelLocator.MvViewModel.Model.MySubscribe.Result = ex.Message;
+                    Subscribe.SetResult(ex.Message);
                 }
             }
         }
@@ -308,7 +303,7 @@ namespace YTub.Models
                 }
                 catch (Exception ex)
                 {
-                    ViewModelLocator.MvViewModel.Model.MySubscribe.Result = ex.Message;
+                    Subscribe.SetResult(ex.Message);
                 }
             }
         }

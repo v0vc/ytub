@@ -306,5 +306,11 @@ namespace YTub.Views
             IsDragging = false;
             DataGridChanels.IsReadOnly = false;
         }
+
+        private void Search_OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+                ViewModelLocator.MvViewModel.Model.MySubscribe.Search(null);
+        }
     }
 }
