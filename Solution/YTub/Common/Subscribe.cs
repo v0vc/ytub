@@ -195,7 +195,6 @@ namespace YTub.Common
             var dir = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
             if (dir == null) return;
             Sqllite.AppDir = dir;
-            Result = "Working...";
             ChanelDb = Path.Combine(dir, Dbfile);
             ChanelList = new ObservableCollection<ChanelBase>();
             ChanelListToBind = new ObservableCollection<ChanelBase>();
@@ -205,6 +204,7 @@ namespace YTub.Common
             var fn = new FileInfo(ChanelDb);
             if (fn.Exists)
             {
+                Result = "Working...";
                 RtLogin = Sqllite.GetSettingsValue(fn.FullName, "rtlogin");
                 RtPass = Sqllite.GetSettingsValue(fn.FullName, "rtpassword");
                 TapLogin = Sqllite.GetSettingsValue(fn.FullName, "taplogin");
@@ -226,6 +226,7 @@ namespace YTub.Common
             }
             else
             {
+                Result = "Ready";
                 ServerList = new ObservableCollection<ChanelBase>
                 {
                     new ChanelYou("YouTube", string.Empty, string.Empty, "YouTube", string.Empty, 0),
