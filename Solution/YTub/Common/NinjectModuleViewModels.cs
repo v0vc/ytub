@@ -12,7 +12,6 @@ namespace YTub.Common
         public override void Load()
         {
             Bind<ViewModels.MainWindowViewModel>().ToSelf().InSingletonScope();
-            //Bind<Views.AddChanelView>().ToSelf().InSingletonScope();
         }
     }
 }

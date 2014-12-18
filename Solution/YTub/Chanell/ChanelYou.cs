@@ -88,7 +88,6 @@ namespace YTub.Chanell
                             Application.Current.Dispatcher.Invoke(() => ListVideoItems.Insert(0, v));
                         }
 
-                        //Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
                     }
                     if (!IsFull)
                     {
@@ -189,7 +188,7 @@ namespace YTub.Chanell
                 CurrentVideoItem.IsHasFile = false;
                 await DownloadVideoAsync(CurrentVideoItem);
             }
-            ViewModelLocator.MvViewModel.Model.MySubscribe.Result = "Download Completed";
+            Subscribe.SetResult("Download Completed");
             CurrentVideoItem.IsHasFile = CurrentVideoItem.IsFileExist();
         }
 
