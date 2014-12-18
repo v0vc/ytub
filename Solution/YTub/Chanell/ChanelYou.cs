@@ -91,7 +91,14 @@ namespace YTub.Chanell
                         //Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
                     }
                     if (!IsFull)
+                    {
+                        for (int i = 0; i < ListVideoItems.Count; i++)
+                        {
+                            var k = i;
+                            ListVideoItems[i].Num = k + 1;
+                        }
                         return;
+                    }
 
                     if (total > ListVideoItems.Count)
                     {

@@ -13,10 +13,5 @@ namespace YTub
         {
             get { return Common.NinjectContainer.VmKernel.Get<ViewModels.MainWindowViewModel>(); }
         }
-
-        //public static Views.AddChanelView AddChanelView
-        //{
-        //    get { return Common.NinjectContainer.VmKernel.Get<Views.AddChanelView>(); }
-        //}
     }
 }

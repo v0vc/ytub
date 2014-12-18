@@ -179,8 +179,15 @@ namespace YTub.Chanell
             }
 
             //чтоб не перекачивать каждый раз весь канал, считаем что все новые уместятся в первом чанке
-            if (!IsFull) 
+            if (!IsFull)
+            {
+                for (int i = 0; i < ListVideoItems.Count; i++)
+                {
+                    var k = i;
+                    ListVideoItems[i].Num = k + 1;
+                }
                 return;
+            }
 
             var serchlinks = GetAllSearchLinks(doc, ChanelOwner);
             Thread.Sleep(500);
