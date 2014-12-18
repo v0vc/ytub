@@ -144,6 +144,7 @@ namespace YTub.Common
             var dir = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
             if (dir == null) return;
             Sqllite.AppDir = dir;
+            Result = "Working...";
             ChanelDb = Path.Combine(dir, Dbfile);
             ChanelList = new ObservableCollection<ChanelBase>();
             ChanelListToBind = new ObservableCollection<ChanelBase>();

@@ -249,7 +249,8 @@
     <Error Condition="!Exists('..\packages\System.Data.SQLite.Core.1.0.94.0\build\net451\System.Data.SQLite.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.Data.SQLite.Core.1.0.94.0\build\net451\System.Data.SQLite.Core.targets'))" />
   </Target>
   <PropertyGroup>
-    <PostBuildEvent>copy "$(ProjectDir)Lib\7z.dll" "$(TargetDir)"</PostBuildEvent>
+    <PostBuildEvent>if $(PlatformName)==x86 (copy "$(ProjectDir)Lib\x86\7z.dll" "$(TargetDir)")
+if $(PlatformName)==x64 (copy "$(ProjectDir)Lib\x64\7z.dll" "$(TargetDir)")</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
