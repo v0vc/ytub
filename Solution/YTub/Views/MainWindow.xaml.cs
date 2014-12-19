@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -40,6 +41,7 @@ namespace YTub.Views
 
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
+            TextBoxChannelFilter.Focus();
             try
             {
                 ViewModelLocator.MvViewModel.Model.MySubscribe.GetChanelsFromDb();
@@ -310,7 +312,24 @@ namespace YTub.Views
         private void Search_OnKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
-                ViewModelLocator.MvViewModel.Model.MySubscribe.Search(null);
+                ViewModelLocator.MvViewModel.Model.MySubscribe.SearchItems(null);
+        }
+
+        private void DataGridChanels_OnGotFocus(object sender, RoutedEventArgs e)
+        {
+            ViewModelLocator.MvViewModel.Model.MySubscribe.SelectedTabIndex = 0;
+        }
+
+        private void AddChanellOnClick(object sender, RoutedEventArgs e)
+        {
+            ViewModelLocator.MvViewModel.Model.MySubscribe.AddChanell();
+        }
+
+        private void DataGrid_OnSorting(object sender, DataGridSortingEventArgs e)
+        {
+            var myGrid = sender as DataGrid;
+            if (myGrid != null)
+                e.Column.SortDirection = ListSortDirection.Ascending;
         }
     }
 }

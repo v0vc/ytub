@@ -128,7 +128,8 @@ namespace YTub.Common
                     {
                         foreach (DbDataRecord record in sdr)
                         {
-                            res.Add(record[chanelowner].ToString(), record[chanelname] + ":" + record["servername"] + ":" + record["ordernum"]);
+                            if (!res.ContainsKey(record[chanelowner].ToString()))
+                                res.Add(record[chanelowner].ToString(), record[chanelname] + ":" + record["servername"] + ":" + record["ordernum"]);
                         }
                     }
                     sqlcon.Close();

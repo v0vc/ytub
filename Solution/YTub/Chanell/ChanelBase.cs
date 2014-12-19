@@ -9,6 +9,7 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -58,6 +59,8 @@ namespace YTub.Chanell
         private string _viewSeedColumnHeader;
 
         private string _durationColumnHeader;
+
+        private readonly Regex _regname = new Regex(@"(.+?)(\(\d+\))$");
 
         #endregion
 
@@ -210,6 +213,13 @@ namespace YTub.Chanell
             }
         }
 
+        protected ChanelBase()
+        {
+            ChanelName = "All";
+            ChanelOwner = "All";
+            ChanelType = "All";
+        }
+
         #endregion
 
         #region Abstract Methods
@@ -221,6 +231,10 @@ namespace YTub.Chanell
         public abstract void AutorizeChanel();
 
         public abstract void DownloadItem();
+
+        public abstract void SearchItems(string key, TrulyObservableCollection<VideoItemBase> listSearchVideoItems);
+
+        public abstract void GetPopularItems(string key, TrulyObservableCollection<VideoItemBase> listPopularVideoItems);
 
         #endregion
 
@@ -436,6 +450,7 @@ namespace YTub.Chanell
 
         private void InsertItemToDb(IEnumerable<VideoItemBase> lstItems)
         {
+            var clearname = ChannelClearName();
             foreach (VideoItemBase item in lstItems)
             {
                 if (item is VideoItemYou)
@@ -454,19 +469,30 @@ namespace YTub.Chanell
 
                     #endregion
 
-                    Sqllite.InsertRecord(Subscribe.ChanelDb, item.VideoID, ChanelOwner, ChanelName, ChanelType,
+                    Sqllite.InsertRecord(Subscribe.ChanelDb, item.VideoID, ChanelOwner, clearname, ChanelType,
                         OrderNum, 0, item.VideoLink, item.Title, item.ViewCount, item.ViewCount, item.Duration,
                         item.Published, item.Description);
+
                     continue;
                 }
                 if (item is VideoItemRt)
                 {
                     var rt = item as VideoItemRt;
-                    Sqllite.InsertRecord(Subscribe.ChanelDb, item.VideoID, ChanelOwner, ChanelName, ChanelType,
+                    Sqllite.InsertRecord(Subscribe.ChanelDb, item.VideoID, ChanelOwner, clearname, ChanelType,
                         OrderNum, 0, item.VideoLink, item.Title, item.ViewCount, rt.TotalDl, item.Duration,
                         item.Published, item.Description);
                 }
             }
+        }
+
+        private string ChannelClearName()
+        {
+            var match = _regname.Match(ChanelName);
+            if (match.Success)
+            {
+                return _regname.Replace(ChanelName, "$1").TrimEnd(' ');
+            }
+            return ChanelName;
         }
 
         #endregion

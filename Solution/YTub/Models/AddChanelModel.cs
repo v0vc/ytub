@@ -14,6 +14,8 @@ namespace YTub.Models
 {
     public class AddChanelModel
     {
+        private readonly MainWindowModel _model;
+
         private readonly bool _isedit;
 
         public ObservableCollection<ChanelBase> ServerList { get; set; }
@@ -28,18 +30,20 @@ namespace YTub.Models
 
         public ChanelBase SelectedForumItem { get; set; }
 
-        public AddChanelModel(AddChanelView view, bool isedit, ObservableCollection<ChanelBase> serverList)
+        public AddChanelModel(MainWindowModel model, AddChanelView view, bool isedit, ObservableCollection<ChanelBase> serverList)
         {
+            _model = model;
             _isedit = isedit;
             View = view;
             AddChanelCommand = new RelayCommand(AddChanel);
             ServerList = serverList;
             if (ServerList.Any())
                 SelectedForumItem = ServerList[0];
-            //Name = "Best of the Web";
-            //User = "zapatou";
-            //Name = "Den";
-            //User = "fit4liferu";
+
+            var text = Clipboard.GetData(DataFormats.Text) as string;
+            if (string.IsNullOrWhiteSpace(text) || text.Contains(Environment.NewLine))
+                return;
+            ChanelOwner = text;
         }
 
         private void AddChanel(object o)
@@ -48,7 +52,7 @@ namespace YTub.Models
             {
                 if (_isedit)
                 {
-                    var chanel = ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.FirstOrDefault(x => x.ChanelOwner == ChanelOwner);
+                    var chanel = _model.MySubscribe.ChanelList.FirstOrDefault(x => x.ChanelOwner == ChanelOwner);
                     if (chanel != null)
                     {
                         chanel.ChanelName = ChanelName;
@@ -57,7 +61,7 @@ namespace YTub.Models
                 }
                 else
                 {
-                    var ordernum = ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Count;
+                    var ordernum = _model.MySubscribe.ChanelList.Count;
                     ChanelBase chanel = null;
                     if (string.IsNullOrEmpty(ChanelName))
                         ChanelName = ChanelOwner;
@@ -69,13 +73,15 @@ namespace YTub.Models
                         chanel = new ChanelTap(SelectedForumItem.ChanelType, SelectedForumItem.Login, SelectedForumItem.Password, ChanelName, ChanelOwner, ordernum);
                     if (chanel != null)
                     {
-                        if (!ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Select(z => z.ChanelOwner).Contains(ChanelOwner))
+                        if (!_model.MySubscribe.ChanelList.Select(z => z.ChanelOwner).Contains(ChanelOwner))
                         {
-                            ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(chanel);
-                            ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelListToBind.Add(chanel);
+                            _model.MySubscribe.ChanelList.Add(chanel);
+                            _model.MySubscribe.ChanelListToBind.Add(chanel);
                             chanel.IsFull = true;
                             chanel.GetItemsFromNet();
-                            ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel = chanel;
+                            _model.MySubscribe.CurrentChanel = chanel;
+                            _model.MySubscribe.SelectedTabIndex = 0;
+
                         }
                         else
                         {
@@ -83,7 +89,6 @@ namespace YTub.Models
                                 MessageBoxImage.Information);
                         }
                     }
-                    //ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites = false;
                 }
                 View.Close();    
             }

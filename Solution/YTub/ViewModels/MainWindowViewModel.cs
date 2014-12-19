@@ -39,7 +39,7 @@ namespace YTub.ViewModels
             RemoveChanelCommand = new RelayCommand(Model.MySubscribe.RemoveChanel);
             OpenSettingsCommand = new RelayCommand(Model.OpenSettings);
             BackupRestoreCommand = new RelayCommand(Model.BackupRestore);
-            SearchCommand = new RelayCommand(Model.MySubscribe.Search);
+            SearchCommand = new RelayCommand(Model.MySubscribe.SearchItems);
         }
     }
 }

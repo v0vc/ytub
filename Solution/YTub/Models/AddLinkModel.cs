@@ -67,9 +67,8 @@ namespace YTub.Models
             {
                 View.Close();
 
-                //Subscribe.CheckFfmpegPath();
+                var youdl = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Subscribe.DownloadPath, Link, null);
 
-                var youdl = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Subscribe.DownloadPath, Link, null);//, Subscribe.IsPathContainFfmpeg);
                 //var sync = new ManualResetEvent(false); 
                 youdl.DownloadFile(IsAudio);
             }

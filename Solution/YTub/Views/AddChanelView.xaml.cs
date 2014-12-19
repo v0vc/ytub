@@ -45,7 +45,7 @@ namespace YTub.Views
 
         private void AddChanelView_OnLoaded(object sender, RoutedEventArgs e)
         {
-            TextBoxName.SelectAll();
+            TextBoxLink.SelectAll();
         }
     }
 }

@@ -24,6 +24,14 @@ namespace YTub.Chanell
 
         private readonly List<VideoItemBase> _selectedListVideoItemsList = new List<VideoItemBase>();
 
+        private TrulyObservableCollection<VideoItemBase> _listSearchVideoItems;
+
+        private TrulyObservableCollection<VideoItemBase> _listPopularVideoItems;
+
+        private string _searchkey;
+
+        private string _cul;
+
         private readonly BackgroundWorker _bgv = new BackgroundWorker();
 
         public int MinRes { get; set; }
@@ -40,72 +48,136 @@ namespace YTub.Chanell
             _bgv.RunWorkerCompleted += _bgv_RunWorkerCompleted;
         }
 
-        public override void GetItemsFromNet()
-        {
-            if (_bgv.IsBusy)
-                return;
-            Synctime = new TimeSpan();
-            ViewModelLocator.MvViewModel.Model.MySubscribe.Synctime = Synctime;
-            var tcb = new TimerCallback(tmr_Tick);
-            TimerCommon = new Timer(tcb, null, 0, 1000);
-            if (IsFull)
-                ListVideoItems.Clear();
-            _bgv.RunWorkerAsync();
-        }
-
         private void _bgv_DoWork(object sender, DoWorkEventArgs e)
         {
-            while (true)
+            var type = e.Argument.ToString();
+            e.Result = type;
+
+            WebClient wc;
+            string zap;
+            string res;
+            JObject jsvideo;
+
+            switch (type)
             {
-                var wc = new WebClient { Encoding = Encoding.UTF8 };
-                var zap = string.Format("https://gdata.youtube.com/feeds/api/users/{0}/uploads?alt=json&start-index={1}&max-results={2}",
-                    ChanelOwner, MinRes, MaxResults);
-                string s = wc.DownloadString(zap);
-                var jsvideo = (JObject)JsonConvert.DeserializeObject(s);
-                if (jsvideo == null)
-                    return;
-                int total;
-                if (int.TryParse(jsvideo["feed"]["openSearch$totalResults"]["$t"].ToString(), out total))
-                {
+                case "Get":
+
+                    #region Get
+
+                    while (true)
+                    {
+                        wc = new WebClient { Encoding = Encoding.UTF8 };
+                        zap =
+                            string.Format(
+                                "https://gdata.youtube.com/feeds/api/users/{0}/uploads?alt=json&start-index={1}&max-results={2}",
+                                ChanelOwner, MinRes, MaxResults);
+                        res = wc.DownloadString(zap);
+                        jsvideo = (JObject)JsonConvert.DeserializeObject(res);
+                        if (jsvideo == null)
+                            return;
+                        int total;
+                        if (int.TryParse(jsvideo["feed"]["openSearch$totalResults"]["$t"].ToString(), out total))
+                        {
+                            foreach (JToken pair in jsvideo["feed"]["entry"])
+                            {
+                                var v = new VideoItemYou(pair, false, "RU")
+                                {
+                                    Num = ListVideoItems.Count + 1,
+                                    VideoOwner = ChanelOwner
+                                };
+
+                                if (IsFull)
+                                {
+                                    if (ListVideoItems.Contains(v) || string.IsNullOrEmpty(v.Title))
+                                        continue;
+                                    if (Application.Current.Dispatcher.CheckAccess())
+                                        ListVideoItems.Add(v);
+                                    else
+                                        Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
+                                }
+                                else
+                                {
+                                    if (ListVideoItems.Select(x => x.VideoID).Contains(v.VideoID) ||
+                                        string.IsNullOrEmpty(v.Title))
+                                        continue;
+                                    if (Application.Current.Dispatcher.CheckAccess())
+                                        ListVideoItems.Insert(0, v);
+                                    else
+                                        Application.Current.Dispatcher.Invoke(() => ListVideoItems.Insert(0, v));
+                                }
+
+                            }
+                            if (!IsFull)
+                            {
+                                for (int i = 0; i < ListVideoItems.Count; i++)
+                                {
+                                    var k = i;
+                                    ListVideoItems[i].Num = k + 1;
+                                }
+                                return;
+                            }
+
+                            if (total > ListVideoItems.Count)
+                            {
+                                MinRes = MinRes + MaxResults;
+                                continue;
+                            }
+                        }
+                        break;
+                    }
+
+                    #endregion
+
+                    break;
+
+                case "Popular":
+
+                    wc = new WebClient { Encoding = Encoding.UTF8 };
+                    zap =
+                        string.Format(
+                            "https://gdata.youtube.com/feeds/api/standardfeeds/{0}/most_popular?time=today&v=2&alt=json",
+                            _cul);
+                    res = wc.DownloadString(zap);
+                    jsvideo = (JObject)JsonConvert.DeserializeObject(res);
+                    if (jsvideo == null)
+                        return;
+
                     foreach (JToken pair in jsvideo["feed"]["entry"])
                     {
-                        var v = new VideoItemYou(pair, false, "RU")
+                        var v = new VideoItemYou(pair, true, _cul + " now") { Num = _listPopularVideoItems.Count + 1 };
+
+                        if (Application.Current.Dispatcher.CheckAccess())
+                            AddItems(v, _listPopularVideoItems);
+                        else
+                            Application.Current.Dispatcher.Invoke(() => AddItems(v, _listPopularVideoItems));
+                    }
+
+                    break;
+
+                case "Search":
+
+                    wc = new WebClient { Encoding = Encoding.UTF8 };
+                    zap = string.Format("https://gdata.youtube.com/feeds/api/videos?q={0}&max-results=50&v=2&alt=json",
+                        _searchkey);
+                    res = wc.DownloadString(zap);
+                    jsvideo = (JObject)JsonConvert.DeserializeObject(res);
+                    if (jsvideo == null)
+                        return;
+
+                    foreach (JToken pair in jsvideo["feed"]["entry"])
+                    {
+                        var v = new VideoItemYou(pair, true)
                         {
-                            Num = ListVideoItems.Count + 1,
-                            VideoOwner = ChanelOwner
+                            Num = _listSearchVideoItems.Count + 1
                         };
 
-                        if (IsFull)
-                        {
-                            if (ListVideoItems.Contains(v) || string.IsNullOrEmpty(v.Title))
-                                continue;
-                            Application.Current.Dispatcher.Invoke(() => ListVideoItems.Add(v));
-                        }
+                        if (Application.Current.Dispatcher.CheckAccess())
+                            AddItems(v, _listSearchVideoItems);
                         else
-                        {
-                            if (ListVideoItems.Select(x => x.VideoID).Contains(v.VideoID) || string.IsNullOrEmpty(v.Title))
-                                continue;
-                            Application.Current.Dispatcher.Invoke(() => ListVideoItems.Insert(0, v));
-                        }
-
-                    }
-                    if (!IsFull)
-                    {
-                        for (int i = 0; i < ListVideoItems.Count; i++)
-                        {
-                            var k = i;
-                            ListVideoItems[i].Num = k + 1;
-                        }
-                        return;
+                            Application.Current.Dispatcher.Invoke(() => AddItems(v, _listSearchVideoItems));
                     }
 
-                    if (total > ListVideoItems.Count)
-                    {
-                        MinRes = MinRes + MaxResults;
-                        continue;
-                    }
-                }
-                break;
+                    break;
             }
         }
 
@@ -124,30 +196,110 @@ namespace YTub.Chanell
             }
             else
             {
-                MinRes = 1;
-                var dir = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
-                if (dir == null) return;
-                int totalrow;
-                Sqllite.CreateOrConnectDb(Subscribe.ChanelDb, ChanelOwner, out totalrow);
-                if (totalrow == 0)
+                if (e.Result == null)
+                    return;
+
+                switch (e.Result.ToString())
                 {
-                    foreach (VideoItemBase item in ListVideoItems)
-                    {
-                        item.IsHasFile = item.IsFileExist();
-                    }
+                    case "Get":
+
+                        MinRes = 1;
+                        var dir = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+                        if (dir == null) return;
+                        int totalrow;
+                        Sqllite.CreateOrConnectDb(Subscribe.ChanelDb, ChanelOwner, out totalrow);
+                        if (totalrow == 0)
+                        {
+                            foreach (VideoItemBase item in ListVideoItems)
+                            {
+                                item.IsHasFile = item.IsFileExist();
+                            }
+                        }
+                        else
+                        {
+                            foreach (VideoItemBase item in ListVideoItems)
+                            {
+                                item.IsHasFile = item.IsFileExist();
+                                item.IsSynced = Sqllite.IsTableHasRecord(Subscribe.ChanelDb, item.VideoID);
+                            }
+                            IsReady = !ListVideoItems.Select(x => x.IsSynced).Contains(false);
+                            if (!IsReady)
+                            {
+                                var countnew = ListVideoItems.Count(x => x.IsSynced == false);
+                                ChanelName = string.Format("{0} ({1})", ChanelName, countnew);
+                            }
+                        }
+                        if (!Bgvdb.IsBusy)
+                            Bgvdb.RunWorkerAsync(totalrow); //отдельный воркер для записи в базу
+
+                        break;
+
+                    case "Popular":
+
+                        Subscribe.SetResult(string.Format("{0} synced in {1}", ViewModelLocator.MvViewModel.Model.SelectedCountry.Key, Synctime.Duration().ToString(@"mm\:ss")));
+
+                        break;
+
+                    case "Search":
+
+                        Subscribe.SetResult(string.Format("{0} searched in {1}", _searchkey, Synctime.Duration().ToString(@"mm\:ss")));
+
+                        break;
                 }
-                else
-                {
-                    foreach (VideoItemBase item in ListVideoItems)
-                    {
-                        item.IsHasFile = item.IsFileExist();
-                        item.IsSynced = Sqllite.IsTableHasRecord(Subscribe.ChanelDb, item.VideoID);
-                    }
-                    IsReady = !ListVideoItems.Select(x => x.IsSynced).Contains(false);
-                }
-                if (!Bgvdb.IsBusy)
-                    Bgvdb.RunWorkerAsync(totalrow); //отдельный воркер для записи в базу
             }
+        }
+
+        public override void GetItemsFromNet()
+        {
+            if (_bgv.IsBusy)
+                return;
+            //ViewModelLocator.MvViewModel.Model.MySubscribe.Synctime = Synctime;
+            Subscribe.SetResult("Working...");
+
+            InitializeTimer();
+
+            if (IsFull)
+                ListVideoItems.Clear();
+            _bgv.RunWorkerAsync("Get");
+        }
+
+        public override void SearchItems(string key, TrulyObservableCollection<VideoItemBase> listSearchVideoItems)
+        {
+            InitializeTimer();
+            _listSearchVideoItems = listSearchVideoItems;
+            _searchkey = key;
+            if (!_bgv.IsBusy)
+                _bgv.RunWorkerAsync("Search");
+        }
+
+        public override void GetPopularItems(string key, TrulyObservableCollection<VideoItemBase> listPopularVideoItems)
+        {
+            InitializeTimer();
+            _cul = key;
+            _listPopularVideoItems = listPopularVideoItems;
+            if (!_bgv.IsBusy)
+                _bgv.RunWorkerAsync("Popular");
+
+            #region all_time
+
+            //time=all_time
+            //zap = string.Format("https://gdata.youtube.com/feeds/api/standardfeeds/{0}/most_popular?time=all_time&v=2&alt=json", cul);
+            //s = wc.DownloadString(zap);
+            //jsvideo = (JObject)JsonConvert.DeserializeObject(s);
+            //if (jsvideo == null)
+            //    return;
+            //foreach (JToken pair in jsvideo["feed"]["entry"])
+            //{
+            //    var v = new VideoItemYou(pair, true, cul + " all") { Num = ListPopularVideoItems.Count + 1 };
+            //    Application.Current.Dispatcher.Invoke(() =>
+            //    {
+            //        ListPopularVideoItems.Add(v);
+            //        v.IsHasFile = v.IsFileExist();
+            //        v.IsSynced = true;
+            //    });
+            //}
+
+            #endregion
         }
 
         public override CookieContainer GetSession()
@@ -236,6 +388,13 @@ namespace YTub.Chanell
         } 
         #endregion
 
+        private static void AddItems(VideoItemYou v, ICollection<VideoItemBase> listPopularVideoItems)
+        {
+            listPopularVideoItems.Add(v);
+            v.IsHasFile = v.IsFileExist();
+            v.IsSynced = true;
+        }
+
         private void GetVideosASync()
         {
             foreach (VideoItemBase item in SelectedListVideoItems)
@@ -277,6 +436,13 @@ namespace YTub.Chanell
         {
             if (_step < _selectedListVideoItemsList.Count)
                 GetVideos();
+        }
+
+        private void InitializeTimer()
+        {
+            Synctime = new TimeSpan();
+            var tcb = new TimerCallback(tmr_Tick);
+            TimerCommon = new Timer(tcb, null, 0, 1000);
         }
 
         private void tmr_Tick(object o)
