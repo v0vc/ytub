@@ -51,6 +51,7 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition></RowDefinition>
+                        <RowDefinition Height="27"></RowDefinition>
                         <RowDefinition Height="38"></RowDefinition>
                     </Grid.RowDefinitions>
                     <common:CustomDataGrid ItemsSource="{Binding Model.MySubscribe.ChanelListToBind}"
@@ -65,7 +66,8 @@
                                            MouseMove="OnMouseMoveChanells"
                                            PreviewMouseLeftButtonDown="OnMouseLeftButtonDownChanells"
                                            CellEditEnding="OnEndEditChanells"
-                                           BeginningEdit="OnBeginEditChanells">
+                                           BeginningEdit="OnBeginEditChanells"
+                                           GotFocus="DataGridChanels_OnGotFocus">
                         <DataGrid.CellStyle>
                             <Style TargetType="{x:Type DataGridCell}">
                                 <Setter Property="Foreground" Value="Black" />
@@ -159,11 +161,47 @@
                             <Style TargetType="{x:Type DataGridRow}">
                                 <Setter Property="ContextMenu" Value="{StaticResource DataRowContextMenu}" />
                                 <Setter Property="BorderThickness" Value="0" />
-                                <EventSetter Event="MouseDoubleClick" Handler="Row_doubleClick"/>
+                                <EventSetter Event="MouseDoubleClick" Handler="Row_doubleClick" />
                             </Style>
                         </DataGrid.RowStyle>
                     </common:CustomDataGrid>
                     <Border BorderBrush="Gainsboro" BorderThickness="1" Grid.Row="1" Margin="0,3,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox Name="TextBoxChannelFilter" 
+                                     Width="149" 
+                                     VerticalContentAlignment="Center"
+                                     Text="{Binding Path = DataContext.Model.MySubscribe.ChanelFilter, 
+                                     UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}">
+                                <TextBox.Resources>
+                                    <VisualBrush x:Key="HelpBrush" TileMode="None" Opacity="0.4" Stretch="None" AlignmentX="Left" AlignmentY="Center">
+                                        <VisualBrush.Visual>
+                                            <TextBlock FontStyle="Italic" Text="Filter" FontSize="13" />
+                                        </VisualBrush.Visual>
+                                        <VisualBrush.Transform>
+                                            <ScaleTransform CenterX="150" ScaleX="0.99" />
+                                        </VisualBrush.Transform>
+                                    </VisualBrush>
+                                </TextBox.Resources>
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox">
+                                        <Style.Triggers>
+                                            <Trigger Property="Text" Value="{x:Null}">
+                                                <Setter Property="Background" Value="{StaticResource HelpBrush}" />
+                                            </Trigger>
+                                            <Trigger Property="Text" Value="">
+                                                <Setter Property="Background" Value="{StaticResource HelpBrush}" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+                            <ComboBox Width="80" HorizontalAlignment="Left" HorizontalContentAlignment="Stretch" VerticalAlignment="Center" Height="22" Margin="2,0,0,0"
+                                                            ItemsSource="{Binding Path = DataContext.Model.MySubscribe.ServerList, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
+                                                            SelectedItem="{Binding Path=DataContext.Model.MySubscribe.FilterForumItem, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
+                                                            DisplayMemberPath="ChanelType" />
+                        </StackPanel>
+                    </Border>
+                    <Border BorderBrush="Gainsboro" BorderThickness="1" Grid.Row="2" Margin="0,3,0,0">
                         <StackPanel Orientation="Horizontal">
                             <Button Width="43" Height="26" Margin="2,0,0,0" ToolTip="Sync All"
                                     Background="#CCDAFF"
@@ -228,7 +266,8 @@
                             RowHeaderWidth="0"
                             RowHeight="27"
                             ColumnHeaderHeight="34"
-                            VerticalScrollBarVisibility="Visible">
+                            VerticalScrollBarVisibility="Visible"
+                            Sorting="DataGrid_OnSorting">
                         <DataGrid.Resources>
                             <ContextMenu x:Key="DataRowContextMenu">
                                 <MenuItem Header="Play Online" Click="PlayOnClick" CommandParameter="Online" />
@@ -303,12 +342,12 @@
                                             <Setter.Value>
                                                 <DataTemplate>
                                                     <StackPanel Orientation="Horizontal">
-                                                        <TextBox Width="150" Margin="10,0,0,0" Height="22" VerticalContentAlignment="Center"
+                                                        <TextBox Width="150" Margin="5,0,0,0" Height="22" VerticalContentAlignment="Center"
                                                                  Text="{Binding Path = DataContext.Model.MySubscribe.CurrentChanel.TitleFilter, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}">
                                                             <TextBox.Resources>
-                                                                <VisualBrush x:Key="HelpBrush" TileMode="None" Opacity="0.4" Stretch="None" AlignmentX="Left" AlignmentY="Center">
+                                                                <VisualBrush x:Key="HelpBrush" TileMode="None" Opacity="0.4" Stretch="None" AlignmentX="Left" AlignmentY="Bottom">
                                                                     <VisualBrush.Visual>
-                                                                        <TextBlock FontStyle="Italic" Text="filter" FontSize="13" />
+                                                                        <TextBlock FontStyle="Italic" Text="Key" FontSize="13" />
                                                                     </VisualBrush.Visual>
                                                                     <VisualBrush.Transform>
                                                                         <ScaleTransform CenterX="150" ScaleX="0.99" />
@@ -487,9 +526,11 @@
                             RowHeaderWidth="0"
                             RowHeight="27"
                             ColumnHeaderHeight="34"
-                            VerticalScrollBarVisibility="Visible">
+                            VerticalScrollBarVisibility="Visible"
+                            Sorting="DataGrid_OnSorting">
                         <DataGrid.Resources>
                             <ContextMenu x:Key="DataRowContextMenu">
+                                <MenuItem Header="Add Chanell" Click="AddChanellOnClick" />
                                 <MenuItem Header="Play Online" Click="PlayOnClick" CommandParameter="Online" />
                                 <MenuItem Header="Play Local" Click="PlayOnClick" CommandParameter="Local" />
                                 <MenuItem Header="Download" Click="DownloadVideoOnClick" />
@@ -579,19 +620,18 @@
                             <DataGridTemplateColumn Width="*" SortMemberPath="Title">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
-                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Left" />
                                         <Setter Property="FontSize" Value="12"></Setter>
                                         <Setter Property="ContentTemplate">
                                             <Setter.Value>
                                                 <DataTemplate>
                                                     <StackPanel Orientation="Horizontal">
-                                                        <Label Content="Title"></Label>
-                                                        <TextBox Width="150" Margin="10,0,0,0" Height="20"
+                                                        <TextBox Width="150" Margin="5,0,0,0" Height="22"
                                                                  Text="{Binding Path = DataContext.Model.MySubscribe.TitleFilter, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}">
                                                             <TextBox.Resources>
-                                                                <VisualBrush x:Key="HelpBrush" TileMode="None" Opacity="0.4" Stretch="None" AlignmentX="Left" AlignmentY="Center">
+                                                                <VisualBrush x:Key="HelpBrush" TileMode="None" Opacity="0.4" Stretch="None" AlignmentX="Left" AlignmentY="Bottom">
                                                                     <VisualBrush.Visual>
-                                                                        <TextBlock FontStyle="Italic" Text="filter" FontSize="13" />
+                                                                        <TextBlock FontStyle="Italic" Text="Key" FontSize="13" />
                                                                     </VisualBrush.Visual>
                                                                     <VisualBrush.Transform>
                                                                         <ScaleTransform CenterX="150" ScaleX="0.99" />
@@ -611,6 +651,7 @@
                                                                 </Style>
                                                             </TextBox.Style>
                                                         </TextBox>
+                                                        <Label Content="Title"></Label>
                                                     </StackPanel>
                                                 </DataTemplate>
                                             </Setter.Value>
@@ -741,9 +782,11 @@
                             RowHeaderWidth="0"
                             RowHeight="27"
                             ColumnHeaderHeight="34"
-                            VerticalScrollBarVisibility="Visible">
+                            VerticalScrollBarVisibility="Visible"
+                            Sorting="DataGrid_OnSorting">
                         <DataGrid.Resources>
                             <ContextMenu x:Key="DataRowContextMenu">
+                                <MenuItem Header="Add Chanell" Click="AddChanellOnClick" />
                                 <MenuItem Header="Play Online" Click="PlayOnClick" CommandParameter="Online" />
                                 <MenuItem Header="Play Local" Click="PlayOnClick" CommandParameter="Local" />
                                 <MenuItem Header="Download" Click="DownloadVideoOnClick" />
@@ -816,10 +859,9 @@
                                             <Setter.Value>
                                                 <DataTemplate>
                                                     <StackPanel Orientation="Horizontal">
-                                                        <TextBox Width="230" Margin="10,0,0,0" Height="22" VerticalContentAlignment="Center"
+                                                        <TextBox Width="230" Margin="5,0,0,0" Height="22" VerticalContentAlignment="Center"
                                                                  Text="{Binding Path = DataContext.Model.MySubscribe.SearchKey, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
-                                                                 KeyDown="Search_OnKeyDown"
-                                                                 >
+                                                                 KeyDown="Search_OnKeyDown">
                                                             <TextBox.Resources>
                                                                 <VisualBrush x:Key="HelpBrush" TileMode="None" Opacity="0.4" Stretch="None" AlignmentX="Left" AlignmentY="Center">
                                                                     <VisualBrush.Visual>
@@ -846,8 +888,7 @@
                                                         <ComboBox Width="80" HorizontalAlignment="Left" HorizontalContentAlignment="Stretch" VerticalAlignment="Center" Height="22" Margin="2,0,0,0"
                                                             ItemsSource="{Binding Path = DataContext.Model.MySubscribe.ServerList, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
                                                             SelectedItem="{Binding Path=DataContext.Model.MySubscribe.SelectedForumItem, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
-                                                            DisplayMemberPath="ChanelType" 
-                                                            />
+                                                            DisplayMemberPath="ChanelType" />
                                                         <Button Width="40" Margin="2,0,0,0" Content="OK" Command="{Binding Path=DataContext.SearchCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"></Button>
                                                     </StackPanel>
                                                 </DataTemplate>

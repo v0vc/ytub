@@ -123,6 +123,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Chanell\ChanelBase.cs" />
+    <Compile Include="Chanell\ChanelEmpty.cs" />
     <Compile Include="Chanell\ChanelRt.cs" />
     <Compile Include="Chanell\ChanelTap.cs" />
     <Compile Include="Chanell\ChanelYou.cs" />

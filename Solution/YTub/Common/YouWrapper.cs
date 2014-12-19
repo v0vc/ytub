@@ -256,6 +256,7 @@ namespace YTub.Common
                 try
                 {
                     FileHelper.RenameFile(fnres, fnn);
+                    Thread.Sleep(2000);
                     fnvid.Delete();
                     fnaud.Delete();
                     if (Item != null)
@@ -266,7 +267,7 @@ namespace YTub.Common
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception(ex.Message);
+                    Subscribe.SetResult(ex.Message);
                 }
             }
         }

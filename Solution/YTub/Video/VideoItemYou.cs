@@ -14,6 +14,7 @@ namespace YTub.Video
         {
             try
             {
+                ServerName = "YouTube";
                 Title = pair["title"]["$t"].ToString();
                 ClearTitle = MakeValidFileName(Title);
                 ViewCount = (int) pair["yt$statistics"]["viewCount"];
@@ -44,6 +45,7 @@ namespace YTub.Video
 
         public VideoItemYou(DbDataRecord record) : base(record)
         {
+            ServerName = "YouTube";
             MinProgress = 0;
             MaxProgress = 100;
         }
@@ -52,6 +54,7 @@ namespace YTub.Video
         {
             try
             {
+                ServerName = "YouTube";
                 Title = pair["title"]["$t"].ToString();
                 ClearTitle = MakeValidFileName(Title);
                 ViewCount = (int)pair["yt$statistics"]["viewCount"];
