@@ -401,7 +401,11 @@ namespace YTub.Chanell
             {
                 YouWrapper youwr;
                 if (!string.IsNullOrEmpty(item.VideoOwner))
-                    youwr = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Path.Combine(Subscribe.DownloadPath, item.VideoOwner), item);
+                {
+
+                    youwr = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath,
+                        Path.Combine(Subscribe.DownloadPath, item.VideoOwner), item);
+                }
                 else
                     youwr = new YouWrapper(Subscribe.YoudlPath, Subscribe.FfmpegPath, Subscribe.DownloadPath, item);
 
