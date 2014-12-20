@@ -320,7 +320,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="N" Width="28" MinWidth="28">
+                            <DataGridTemplateColumn Header="N" Width="28" MinWidth="28" SortMemberPath="Num">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -581,7 +581,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="N" Width="28" MinWidth="28">
+                            <DataGridTemplateColumn Header="N" Width="28" MinWidth="28" SortMemberPath="Num">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -837,7 +837,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="N" Width="28" MinWidth="28">
+                            <DataGridTemplateColumn Header="N" Width="28" MinWidth="28" SortMemberPath="Num">
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />

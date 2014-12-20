@@ -327,9 +327,7 @@ namespace YTub.Views
 
         private void DataGrid_OnSorting(object sender, DataGridSortingEventArgs e)
         {
-            var myGrid = sender as DataGrid;
-            if (myGrid != null)
-                e.Column.SortDirection = ListSortDirection.Ascending;
+            e.Column.SortDirection = e.Column.SortDirection ?? ListSortDirection.Ascending;
         }
     }
 }
