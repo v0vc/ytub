@@ -60,7 +60,7 @@ namespace YTub.Chanell
 
         private string _durationColumnHeader;
 
-        private readonly Regex _regname = new Regex(@"(.+?)(\(\d+\))$");
+        /*private readonly Regex _regname = new Regex(@"(.+?)(\(\d+\))$");*/
 
         #endregion
 
@@ -450,7 +450,7 @@ namespace YTub.Chanell
 
         private void InsertItemToDb(IEnumerable<VideoItemBase> lstItems)
         {
-            var clearname = ChannelClearName();
+            var clearname = ChanellClearName(ChanelName);
             foreach (VideoItemBase item in lstItems)
             {
                 if (item is VideoItemYou)
@@ -485,7 +485,7 @@ namespace YTub.Chanell
             }
         }
 
-        private string ChannelClearName()
+/*        private string ChannelClearName()
         {
             var match = _regname.Match(ChanelName);
             if (match.Success)
@@ -493,6 +493,13 @@ namespace YTub.Chanell
                 return _regname.Replace(ChanelName, "$1").TrimEnd(' ');
             }
             return ChanelName;
+        }*/
+
+        public static string ChanellClearName(string input)
+        {
+            var rq = new Regex(@"(.+?)(\(\d+\))$");
+            var match = rq.Match(input);
+            return match.Success ? rq.Replace(input, "$1").TrimEnd(' ') : input;
         }
 
         #endregion

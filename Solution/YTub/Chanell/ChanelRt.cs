@@ -141,7 +141,7 @@ namespace YTub.Chanell
             var buffer = new byte[bufferSize];
 
             // Read from response and write to file
-            var ddir = new DirectoryInfo(Path.Combine(Subscribe.DownloadPath, string.Format("rt-{0}({1})", ChanelName, ChanelOwner)));
+            var ddir = new DirectoryInfo(Path.Combine(Subscribe.DownloadPath, string.Format("rt-{0}({1})", ChanellClearName(ChanelName), ChanelOwner)));
             if (!ddir.Exists)
                 ddir.Create();
 
