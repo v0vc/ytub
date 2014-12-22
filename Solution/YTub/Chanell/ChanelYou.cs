@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data.SQLite;
 using System.Diagnostics;
@@ -14,6 +16,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using YoutubeExtractor;
 using YTub.Common;
+using YTub.Models;
 using YTub.Video;
 
 namespace YTub.Chanell
@@ -32,15 +35,29 @@ namespace YTub.Chanell
 
         private string _cul;
 
+        private readonly MainWindowModel _model;
+
         private readonly BackgroundWorker _bgv = new BackgroundWorker();
 
         public int MinRes { get; set; }
         public int MaxResults { get; set; }
 
-        public ChanelYou(string chaneltype, string login, string pass, string chanelname, string chanelowner, int ordernum) : base(chaneltype, login, pass, chanelname, chanelowner, ordernum)
+        public ChanelYou(string chaneltype, string login, string pass, string chanelname, string chanelowner, int ordernum, MainWindowModel model)
+            : base(chaneltype, login, pass, chanelname, chanelowner, ordernum, model)
         {
+            _model = model;
             MinRes = 1;
             MaxResults = 25;
+            LastColumnHeader = "Download";
+            ViewSeedColumnHeader = "Views";
+            DurationColumnHeader = "Duration";
+            _bgv.DoWork += _bgv_DoWork;
+            _bgv.RunWorkerCompleted += _bgv_RunWorkerCompleted;
+        }
+
+        public ChanelYou(MainWindowModel model)
+        {
+            _model = model;
             LastColumnHeader = "Download";
             ViewSeedColumnHeader = "Views";
             DurationColumnHeader = "Duration";
@@ -53,10 +70,7 @@ namespace YTub.Chanell
             var type = e.Argument.ToString();
             e.Result = type;
 
-            WebClient wc;
             string zap;
-            string res;
-            JObject jsvideo;
 
             switch (type)
             {
@@ -66,13 +80,13 @@ namespace YTub.Chanell
 
                     while (true)
                     {
-                        wc = new WebClient { Encoding = Encoding.UTF8 };
+                        var wc = new WebClient { Encoding = Encoding.UTF8 };
                         zap =
                             string.Format(
                                 "https://gdata.youtube.com/feeds/api/users/{0}/uploads?alt=json&start-index={1}&max-results={2}",
                                 ChanelOwner, MinRes, MaxResults);
-                        res = wc.DownloadString(zap);
-                        jsvideo = (JObject)JsonConvert.DeserializeObject(res);
+                        var res = wc.DownloadString(zap);
+                        var jsvideo = (JObject)JsonConvert.DeserializeObject(res);
                         if (jsvideo == null)
                             return;
                         int total;
@@ -132,50 +146,15 @@ namespace YTub.Chanell
 
                 case "Popular":
 
-                    wc = new WebClient { Encoding = Encoding.UTF8 };
-                    zap =
-                        string.Format(
-                            "https://gdata.youtube.com/feeds/api/standardfeeds/{0}/most_popular?time=today&v=2&alt=json",
-                            _cul);
-                    res = wc.DownloadString(zap);
-                    jsvideo = (JObject)JsonConvert.DeserializeObject(res);
-                    if (jsvideo == null)
-                        return;
-
-                    foreach (JToken pair in jsvideo["feed"]["entry"])
-                    {
-                        var v = new VideoItemYou(pair, true, _cul + " now") { Num = _listPopularVideoItems.Count + 1 };
-
-                        if (Application.Current.Dispatcher.CheckAccess())
-                            AddItems(v, _listPopularVideoItems);
-                        else
-                            Application.Current.Dispatcher.Invoke(() => AddItems(v, _listPopularVideoItems));
-                    }
+                    zap = string.Format("https://gdata.youtube.com/feeds/api/standardfeeds/{0}/most_popular?time=today&v=2&alt=json",_cul);
+                    MakeYouResponse(zap, _listPopularVideoItems);
 
                     break;
 
                 case "Search":
 
-                    wc = new WebClient { Encoding = Encoding.UTF8 };
-                    zap = string.Format("https://gdata.youtube.com/feeds/api/videos?q={0}&max-results=50&v=2&alt=json",
-                        _searchkey);
-                    res = wc.DownloadString(zap);
-                    jsvideo = (JObject)JsonConvert.DeserializeObject(res);
-                    if (jsvideo == null)
-                        return;
-
-                    foreach (JToken pair in jsvideo["feed"]["entry"])
-                    {
-                        var v = new VideoItemYou(pair, true)
-                        {
-                            Num = _listSearchVideoItems.Count + 1
-                        };
-
-                        if (Application.Current.Dispatcher.CheckAccess())
-                            AddItems(v, _listSearchVideoItems);
-                        else
-                            Application.Current.Dispatcher.Invoke(() => AddItems(v, _listSearchVideoItems));
-                    }
+                    zap = string.Format("https://gdata.youtube.com/feeds/api/videos?q={0}&max-results=50&v=2&alt=json", _searchkey);
+                    MakeYouResponse(zap, _listSearchVideoItems);
 
                     break;
             }
@@ -236,24 +215,52 @@ namespace YTub.Chanell
 
                     case "Popular":
 
-                        Subscribe.SetResult(string.Format("{0} synced in {1}", ViewModelLocator.MvViewModel.Model.SelectedCountry.Key, Synctime.Duration().ToString(@"mm\:ss")));
+                        _model.MySubscribe.Result = string.Format("{0} synced in {1}", _model.SelectedCountry.Key, Synctime.Duration().ToString(@"mm\:ss"));
 
                         break;
 
                     case "Search":
 
-                        Subscribe.SetResult(string.Format("{0} searched in {1}", _searchkey, Synctime.Duration().ToString(@"mm\:ss")));
+                        _model.MySubscribe.Result = string.Format("{0} searched in {1}", _searchkey, Synctime.Duration().ToString(@"mm\:ss"));
 
                         break;
                 }
             }
         }
 
+        private void MakeYouResponse(string zap, ObservableCollection<VideoItemBase> listVideoItems)
+        {
+            listVideoItems.CollectionChanged += listVideoItems_CollectionChanged;
+            var wc = new WebClient { Encoding = Encoding.UTF8 };
+            
+            var res = wc.DownloadString(zap);
+            var jsvideo = (JObject)JsonConvert.DeserializeObject(res);
+            if (jsvideo == null)
+                return;
+
+            foreach (JToken pair in jsvideo["feed"]["entry"])
+            {
+                var v = new VideoItemYou(pair, true, _cul + " now") { Num = listVideoItems.Count + 1 };
+
+                if (Application.Current.Dispatcher.CheckAccess())
+                    AddItems(v, listVideoItems);
+                else
+                    Application.Current.Dispatcher.Invoke(() => AddItems(v, listVideoItems));
+            }
+            listVideoItems.CollectionChanged -= listVideoItems_CollectionChanged;
+        }
+
+        private void listVideoItems_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            var collection = sender as TrulyObservableCollection<VideoItemBase>;
+            if (collection != null)
+                _model.MySubscribe.ResCount = collection.Count;
+        }
+
         public override void GetItemsFromNet()
         {
             if (_bgv.IsBusy)
                 return;
-            //ViewModelLocator.MvViewModel.Model.MySubscribe.Synctime = Synctime;
             Subscribe.SetResult("Working...");
 
             InitializeTimer();
@@ -263,10 +270,25 @@ namespace YTub.Chanell
             _bgv.RunWorkerAsync("Get");
         }
 
+        public override void DownloadItem(IList list)
+        {
+            if (string.IsNullOrEmpty(Subscribe.YoudlPath))
+            {
+                MessageBox.Show("Please set path to Youtube-dl in the Settings", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (Subscribe.IsAsyncDl)
+                GetVideosASync(list);
+            else
+                GetVideosSync();
+        }
+
         public override void SearchItems(string key, TrulyObservableCollection<VideoItemBase> listSearchVideoItems)
         {
             InitializeTimer();
             _listSearchVideoItems = listSearchVideoItems;
+            _model.MySubscribe.ResCount = _listSearchVideoItems.Count;
             _searchkey = key;
             if (!_bgv.IsBusy)
                 _bgv.RunWorkerAsync("Search");
@@ -277,6 +299,7 @@ namespace YTub.Chanell
             InitializeTimer();
             _cul = key;
             _listPopularVideoItems = listPopularVideoItems;
+            _model.MySubscribe.ResCount = _listPopularVideoItems.Count;
             if (!_bgv.IsBusy)
                 _bgv.RunWorkerAsync("Popular");
 
@@ -311,26 +334,11 @@ namespace YTub.Chanell
         {
         }
 
-        public override void DownloadItem()
-        {
-            if (string.IsNullOrEmpty(Subscribe.YoudlPath))
-            {
-                MessageBox.Show("Please set path to Youtube-dl in the Settings", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            if (Subscribe.IsAsyncDl)
-                GetVideosASync();
-            else
-                GetVideosSync();
-        }
-
         #region YouTubeExtractor
-        public async void DownloadVideoInternal()
+
+        public override async void DownloadVideoInternal(IList list)
         {
-            var lst = new List<VideoItemBase>(SelectedListVideoItems.Count);
-            lst.AddRange(SelectedListVideoItems.Cast<VideoItemBase>());
-            foreach (VideoItemBase item in lst)
+            foreach (VideoItemBase item in list)
             {
                 CurrentVideoItem = item;
                 var dir = new DirectoryInfo(Path.Combine(Subscribe.DownloadPath, CurrentVideoItem.VideoOwner));
@@ -340,7 +348,7 @@ namespace YTub.Chanell
                 CurrentVideoItem.IsHasFile = false;
                 await DownloadVideoAsync(CurrentVideoItem);
             }
-            Subscribe.SetResult("Download Completed");
+            _model.MySubscribe.Result = "Download Completed";
             CurrentVideoItem.IsHasFile = CurrentVideoItem.IsFileExist();
         }
 
@@ -395,9 +403,9 @@ namespace YTub.Chanell
             v.IsSynced = true;
         }
 
-        private void GetVideosASync()
+        private static void GetVideosASync(IList list)
         {
-            foreach (VideoItemBase item in SelectedListVideoItems)
+            foreach (VideoItemBase item in list)
             {
                 YouWrapper youwr;
                 if (!string.IsNullOrEmpty(item.VideoOwner))

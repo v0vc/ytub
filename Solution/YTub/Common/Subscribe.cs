@@ -90,9 +90,25 @@ namespace YTub.Common
 
         private ChanelBase _filterForumItem;
 
+        private int _resCount;
+
+        private VideoItemBase _currentVideoItem;
+
+        private IList _selectedListVideoItems = new ArrayList();
+
         #endregion
 
         #region Properties
+
+        public int ResCount
+        {
+            get { return _resCount; }
+            set
+            {
+                _resCount = value;
+                OnPropertyChanged("ResCount");
+            }
+        }
 
         public int SelectedTabIndex
         {
@@ -103,6 +119,27 @@ namespace YTub.Common
                 OnPropertyChanged("SelectedTabIndex");
             }
         }
+
+        public VideoItemBase CurrentVideoItem
+        {
+            get { return _currentVideoItem; }
+            set
+            {
+                _currentVideoItem = value;
+                OnPropertyChanged("CurrentVideoItem");
+            }
+        }
+
+        public IList SelectedListVideoItems
+        {
+            get { return _selectedListVideoItems; }
+            set
+            {
+                _selectedListVideoItems = value;
+                OnPropertyChanged("SelectedListVideoItems");
+            }
+        }
+
         public ChanelBase CurrentChanel
         {
             get { return _currentChanel; }
@@ -110,6 +147,10 @@ namespace YTub.Common
             {
                 _currentChanel = value;
                 OnPropertyChanged("CurrentChanel");
+                if (_currentChanel != null)
+                {
+                    _model.MySubscribe.ResCount = _currentChanel.ListVideoItems.Count;
+                }
             }
         }
 
@@ -236,9 +277,9 @@ namespace YTub.Common
                 FfmpegPath = Sqllite.GetSettingsValue(ChanelDb, "pathtoffmpeg");
                 ServerList = new ObservableCollection<ChanelBase>
                 {
-                    new ChanelYou("YouTube", string.Empty, string.Empty, "YouTube", string.Empty, 0),
-                    new ChanelRt("RuTracker", RtLogin, RtPass, "RuTracker", string.Empty, 0),
-                    new ChanelTap("Tapochek", TapLogin, TapPass, "Tapochek", string.Empty, 0),
+                    new ChanelYou("YouTube", string.Empty, string.Empty, "YouTube", string.Empty, 0, _model),
+                    new ChanelRt("RuTracker", RtLogin, RtPass, "RuTracker", string.Empty, 0, _model),
+                    new ChanelTap("Tapochek", TapLogin, TapPass, "Tapochek", string.Empty, 0, _model),
                     new ChanelEmpty()
                 };
             }
@@ -247,9 +288,9 @@ namespace YTub.Common
                 Result = "Ready";
                 ServerList = new ObservableCollection<ChanelBase>
                 {
-                    new ChanelYou("YouTube", string.Empty, string.Empty, "YouTube", string.Empty, 0),
-                    new ChanelRt("RuTracker", string.Empty, string.Empty, "RuTracker", string.Empty, 0),
-                    new ChanelTap("Tapochek", string.Empty, string.Empty, "Tapochek", string.Empty, 0),
+                    new ChanelYou("YouTube", string.Empty, string.Empty, "YouTube", string.Empty, 0, _model),
+                    new ChanelRt("RuTracker", string.Empty, string.Empty, "RuTracker", string.Empty, 0, _model),
+                    new ChanelTap("Tapochek", string.Empty, string.Empty, "Tapochek", string.Empty, 0, _model),
                     new ChanelEmpty()
                 };
                 DownloadPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
@@ -264,12 +305,109 @@ namespace YTub.Common
 
         #region Public Methods
 
+        public void PlayDownload(object obj)
+        {
+            if (obj == null)
+                return;
+
+            IList lsyou;
+            IList lsrt;
+            IList lstap;
+            switch (obj.ToString())
+            {
+                case "Search":
+
+                    ChanelBase cnanel;
+                    lsyou = SelectedListVideoItems.OfType<VideoItemYou>().Select(item => item).ToList();
+                    if (lsyou.Count > 0)
+                    {
+                        cnanel = new ChanelYou(_model);
+                        cnanel.DownloadItem(lsyou);
+                    }
+                        
+                    lsrt = SelectedListVideoItems.OfType<VideoItemRt>().Select(item => item).ToList();
+                    if (lsrt.Count > 0)
+                    {
+                        cnanel = new ChanelRt(_model);
+                        cnanel.DownloadItem(lsrt);
+                    }
+
+                    lstap = SelectedListVideoItems.OfType<VideoItemTap>().Select(item => item).ToList();
+                    if (lstap.Count > 0)
+                    {
+                        cnanel = new ChanelTap(_model);
+                        cnanel.DownloadItem(lstap);
+                    }
+
+                    break;
+
+                case "Popular":
+
+                    var chanelpop = new ChanelYou(_model);
+
+                    chanelpop.DownloadItem(SelectedListVideoItems);
+
+                    break;
+
+                case "Get":
+
+                    CurrentChanel.DownloadItem(CurrentChanel.SelectedListVideoItems);
+
+                    break;
+
+                case "SearchPlay":
+                case "PopularPlay":
+
+                    if (CurrentVideoItem is VideoItemYou)
+                    {
+                        var item = CurrentVideoItem as VideoItemYou;
+                        item.RunFile(item.IsHasFile ? "Local" : "Online");
+
+                    }
+                    break;
+
+                case "GetPlay":
+
+                    if (CurrentChanel.CurrentVideoItem is VideoItemYou)
+                    {
+                        var item = CurrentChanel.CurrentVideoItem as VideoItemYou;
+                        item.RunFile(item.IsHasFile ? "Local" : "Online");
+                    }
+
+                    break;
+
+                case "GetInternal":
+
+                    lsyou = CurrentChanel.SelectedListVideoItems.OfType<VideoItemYou>().Select(item => item).ToList();
+                    if (lsyou.Count > 0)
+                    {
+                        cnanel = new ChanelYou(_model);
+                        cnanel.DownloadVideoInternal(lsyou);
+                    }
+
+                    break;
+
+                case "PopularInternal":
+                case "SearchInternal":
+
+                    lsyou = SelectedListVideoItems.OfType<VideoItemYou>().Select(item => item).ToList();
+                    if (lsyou.Count > 0)
+                    {
+                        cnanel = new ChanelYou(_model);
+                        cnanel.DownloadVideoInternal(lsyou);
+                    }
+
+                    break;
+            }
+        }
+
         public void AddChanel(object o)
         {
             var isEdit = o != null && o.ToString() == "edit";
             try
             {
-                var addChanelModel = new AddChanelModel(_model, null, isEdit, ServerList);
+                var servlist = new ObservableCollection<ChanelBase>(ServerList.Where(x => x.ChanelType != "All"));
+                var addChanelModel = new AddChanelModel(_model, null, isEdit, servlist);
                 if (isEdit)
                 {
                     addChanelModel.ChanelOwner = CurrentChanel.ChanelOwner;
@@ -308,17 +446,28 @@ namespace YTub.Common
         public void AddChanell()
         {
             var ordernum = _model.MySubscribe.ChanelList.Count;
-            var item = _model.MySubscribe.CurrentChanel.CurrentVideoItem;
-            var chanel = new ChanelYou(item.ServerName, _model.MySubscribe.CurrentChanel.Login,
-                _model.MySubscribe.CurrentChanel.Password, item.VideoOwner, item.VideoOwner, ordernum);
+            var item = _model.MySubscribe.CurrentVideoItem;
             if (!_model.MySubscribe.ChanelList.Select(z => z.ChanelOwner).Contains(item.VideoOwner))
             {
-                _model.MySubscribe.ChanelList.Add(chanel);
-                _model.MySubscribe.ChanelListToBind.Add(chanel);
-                chanel.IsFull = true;
-                chanel.GetItemsFromNet();
-                _model.MySubscribe.CurrentChanel = chanel;
-                _model.MySubscribe.SelectedTabIndex = 0;
+                ChanelBase chanel = null;
+                if (item is VideoItemYou)
+                    chanel = new ChanelYou(item.ServerName, RtLogin, RtPass, item.VideoOwner, item.VideoOwner, ordernum, _model);
+
+                if (item is VideoItemRt)
+                    chanel = new ChanelRt(item.ServerName, RtLogin, RtPass, item.VideoOwner, item.VideoOwner, ordernum, _model);
+
+                if (item is VideoItemTap)
+                    chanel = new ChanelTap(item.ServerName, TapLogin, TapPass, item.VideoOwner, item.VideoOwner, ordernum, _model);
+
+                if (chanel != null)
+                {
+                    _model.MySubscribe.ChanelList.Add(chanel);
+                    _model.MySubscribe.ChanelListToBind.Add(chanel);
+                    chanel.IsFull = true;
+                    chanel.GetItemsFromNet();
+                    _model.MySubscribe.CurrentChanel = chanel;
+                    _model.MySubscribe.SelectedTabIndex = 0;
+                }
             }
             else
             {
@@ -378,9 +527,8 @@ namespace YTub.Common
         public void GetPopularVideos(string culture)
         {
             ListPopularVideoItems.Clear();
-            var chanell = SelectedForumItem as ChanelYou;
-            if (chanell != null)
-                chanell.GetPopularItems(culture, ListPopularVideoItems);
+            var chanell = new ChanelYou(_model);
+            chanell.GetPopularItems(culture, ListPopularVideoItems);
         }
 
         public void SearchItems(object obj)
@@ -402,7 +550,10 @@ namespace YTub.Common
 
                     var chanelRt = SelectedForumItem as ChanelRt;
                     if (chanelRt != null)
+                    {
+                        chanelRt.IsFull = true;
                         chanelRt.SearchItems(SearchKey, ListSearchVideoItems);
+                    }
 
                     break;
 
@@ -461,11 +612,11 @@ namespace YTub.Common
 
                 ChanelBase chanel = null;
                 if (sp[1] == "YouTube")
-                    chanel = new ChanelYou(sp[1], "TODO", "TODO", sp[0], pair.Key, Convert.ToInt32(sp[2]));
+                    chanel = new ChanelYou(sp[1], "TODO", "TODO", sp[0], pair.Key, Convert.ToInt32(sp[2]), _model);
                 if (sp[1] == "RuTracker")
-                    chanel = new ChanelRt(sp[1], RtLogin, RtPass, sp[0], pair.Key, Convert.ToInt32(sp[2]));
+                    chanel = new ChanelRt(sp[1], RtLogin, RtPass, sp[0], pair.Key, Convert.ToInt32(sp[2]), _model);
                 if (sp[1] == "Tapochek")
-                    chanel = new ChanelTap(sp[1], TapLogin, TapPass, sp[0], pair.Key, Convert.ToInt32(sp[2]));
+                    chanel = new ChanelTap(sp[1], TapLogin, TapPass, sp[0], pair.Key, Convert.ToInt32(sp[2]), _model);
 
                 ChanelList.Add(chanel);
             }

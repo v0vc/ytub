@@ -1,18 +1,26 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using YTub.Common;
+using YTub.Models;
 using YTub.Video;
 
 namespace YTub.Chanell
 {
     public class ChanelTap : ChanelBase
     {
-        public ChanelTap(string chaneltype, string login, string pass, string chanelname, string chanelowner, int ordernum) : base(chaneltype, login, pass, chanelname, chanelowner, ordernum)
+        private readonly MainWindowModel _model;
+        public ChanelTap(string chaneltype, string login, string pass, string chanelname, string chanelowner, int ordernum, MainWindowModel model) : base(chaneltype, login, pass, chanelname, chanelowner, ordernum, model)
         {
+        }
+
+        public ChanelTap(MainWindowModel model)
+        {
+            _model = model;
         }
 
         public override CookieContainer GetSession()
@@ -61,7 +69,7 @@ namespace YTub.Chanell
             return;
         }
 
-        public override void DownloadItem()
+        public override void DownloadItem(IList list)
         {
             throw new NotImplementedException();
         }
@@ -72,6 +80,11 @@ namespace YTub.Chanell
         }
 
         public override void GetPopularItems(string key, TrulyObservableCollection<VideoItemBase> listPopularVideoItems)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void DownloadVideoInternal(IList list)
         {
             throw new NotImplementedException();
         }

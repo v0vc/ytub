@@ -66,11 +66,11 @@ namespace YTub.Models
                     if (string.IsNullOrEmpty(ChanelName))
                         ChanelName = ChanelOwner;
                     if (SelectedForumItem.ChanelType == "YouTube")
-                        chanel = new ChanelYou(SelectedForumItem.ChanelType, SelectedForumItem.Login, SelectedForumItem.Password,ChanelName, ChanelOwner, ordernum);
+                        chanel = new ChanelYou(SelectedForumItem.ChanelType, SelectedForumItem.Login, SelectedForumItem.Password, ChanelName, ChanelOwner, ordernum, _model);
                     if (SelectedForumItem.ChanelType == "RuTracker")
-                        chanel = new ChanelRt(SelectedForumItem.ChanelType, SelectedForumItem.Login, SelectedForumItem.Password, ChanelName, ChanelOwner, ordernum);
+                        chanel = new ChanelRt(SelectedForumItem.ChanelType, SelectedForumItem.Login, SelectedForumItem.Password, ChanelName, ChanelOwner, ordernum, _model);
                     if (SelectedForumItem.ChanelType == "Tapochek")
-                        chanel = new ChanelTap(SelectedForumItem.ChanelType, SelectedForumItem.Login, SelectedForumItem.Password, ChanelName, ChanelOwner, ordernum);
+                        chanel = new ChanelTap(SelectedForumItem.ChanelType, SelectedForumItem.Login, SelectedForumItem.Password, ChanelName, ChanelOwner, ordernum, _model);
                     if (chanel != null)
                     {
                         if (!_model.MySubscribe.ChanelList.Select(z => z.ChanelOwner).Contains(ChanelOwner))

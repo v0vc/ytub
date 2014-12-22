@@ -234,7 +234,6 @@ namespace YTub.Models
             var favor = IsOnlyFavorites ? 1 : 0;
             Sqllite.UpdateSetting(Subscribe.ChanelDb, "isonlyfavor", favor);
 
-
             var popular = IsPopular ? 1 : 0;
             Sqllite.UpdateSetting(Subscribe.ChanelDb, "ispopular", popular);
             Subscribe.IsPopular = IsPopular;
@@ -517,10 +516,18 @@ namespace YTub.Models
                     CreateNoWindow = true
                 }
             };
-            pProcess.Start();
-            var res = pProcess.StandardOutput.ReadToEnd();
-            pProcess.Close();
-            return VideoItemBase.MakeValidFileName(res);
+            try
+            {
+                pProcess.Start();
+                var res = pProcess.StandardOutput.ReadToEnd();
+                pProcess.Close();
+                return VideoItemBase.MakeValidFileName(res);
+            }
+            catch
+            {
+                return "Please, check";
+            }
+            
         }
 
         private static string Makeffversion(string ver)

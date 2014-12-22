@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -30,7 +31,7 @@ namespace YTub.Chanell
             throw new NotImplementedException();
         }
 
-        public override void DownloadItem()
+        public override void DownloadItem(IList list)
         {
             throw new NotImplementedException();
         }
@@ -41,6 +42,11 @@ namespace YTub.Chanell
         }
 
         public override void GetPopularItems(string key, TrulyObservableCollection<VideoItemBase> listPopularVideoItems)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void DownloadVideoInternal(IList list)
         {
             throw new NotImplementedException();
         }
