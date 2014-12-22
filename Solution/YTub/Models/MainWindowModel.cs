@@ -119,7 +119,8 @@ namespace YTub.Models
 
             try
             {
-                var settingsModel = new SettingsModel(savepath, mpcpath, synconstart, youpath, ffpath, isonlyfavor, ispopular, isasync, culture, Countries, ViewModelLocator.MvViewModel.Model.MySubscribe.ServerList);
+                var servlist = MySubscribe.ServerList.Where(x => x.ChanelType != "All");
+                var settingsModel = new SettingsModel(savepath, mpcpath, synconstart, youpath, ffpath, isonlyfavor, ispopular, isasync, culture, Countries, servlist);
                 var settingslView = new SettingsView
                 {
                     Owner = Application.Current.MainWindow,
@@ -232,7 +233,7 @@ namespace YTub.Models
             }
         }
 
-        private static void RestoreChanells()
+        private void RestoreChanells()
         {
             var opf = new OpenFileDialog { Filter = "XML documents (.xml)|*.xml" };
             var res = opf.ShowDialog();
@@ -255,11 +256,11 @@ namespace YTub.Models
                         {
                             ChanelBase chanel = null;
                             if (server.Value == "YouTube")
-                                chanel = new ChanelYou(server.Value, "TODO", "TODO", name.Value, owner.Value, Convert.ToInt32(ordernum.Value));
+                                chanel = new ChanelYou(server.Value, "TODO", "TODO", name.Value, owner.Value, Convert.ToInt32(ordernum.Value), this);
                             if (server.Value == "RuTracker")
-                                chanel = new ChanelRt(server.Value, "TODO", "TODO", name.Value, owner.Value, Convert.ToInt32(ordernum.Value));
+                                chanel = new ChanelRt(server.Value, "TODO", "TODO", name.Value, owner.Value, Convert.ToInt32(ordernum.Value), this);
                             if (server.Value == "Tapochek")
-                                chanel = new ChanelTap(server.Value, "TODO", "TODO", name.Value, owner.Value, Convert.ToInt32(ordernum.Value));
+                                chanel = new ChanelTap(server.Value, "TODO", "TODO", name.Value, owner.Value, Convert.ToInt32(ordernum.Value), this);
                             ViewModelLocator.MvViewModel.Model.MySubscribe.ChanelList.Add(chanel);
                             ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites = false;
                         }

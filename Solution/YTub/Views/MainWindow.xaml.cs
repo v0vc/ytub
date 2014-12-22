@@ -87,67 +87,7 @@ namespace YTub.Views
         {
             if (e.Key == Key.Insert)
             {
-                //ViewModelLocator.MvViewModel.Model.MySubscribe.AddChanel(null);
                 ViewModelLocator.MvViewModel.Model.AddLink(null);
-            }
-        }
-
-        private void DownloadVideoOnClick(object sender, RoutedEventArgs e)
-        {
-            var sndr = sender as MenuItem;
-            var cchanel = ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel;
-            if (cchanel is ChanelYou)
-            {
-                var c = cchanel as ChanelYou;
-                if (sndr == null)
-                {
-                    c.DownloadVideoInternal();
-                }
-                else
-                {
-                    c.DownloadItem();
-                }
-            }
-        }
-
-        private void PlayOnClick(object sender, RoutedEventArgs e)
-        {
-            var sndr = sender as MenuItem;
-            var cchanel = ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel;
-            if (cchanel != null)
-            {
-                if (sndr == null)
-                {
-                    if (cchanel.CurrentVideoItem.IsHasFile)
-                        cchanel.CurrentVideoItem.RunFile("Local");
-                    else
-                        cchanel.CurrentVideoItem.RunFile("Online");
-                }
-                else
-                {
-                    cchanel.CurrentVideoItem.RunFile(sndr.CommandParameter.ToString());
-                }
-            }
-        }
-
-        private void PlayLocalButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            var cchanel = ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel;
-            if (cchanel != null)
-            {
-                if (cchanel.CurrentVideoItem.IsHasFile)
-                    cchanel.CurrentVideoItem.RunFile("Local");
-                else
-                {
-                    if (cchanel is ChanelYou)
-                    {
-                        (cchanel as ChanelYou).DownloadItem();
-                    }
-                    if (cchanel is ChanelRt)
-                    {
-                        (cchanel as ChanelRt).DownloadItem();
-                    }
-                }
             }
         }
 

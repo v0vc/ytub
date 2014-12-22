@@ -190,7 +190,7 @@ namespace YTub.Common
             
             //var fnvid = fndl.First(x => x.Length == fndl.Max(z => z.Length));
             //var fnaud = fndl.First(x => x.Length == fndl.Min(z => z.Length));
-            var fnvid = fndl.First(x => Path.GetExtension(x.Name) == ".mp4");
+            var fnvid = fndl.First(x => Path.GetExtension(x.Name) == ".mp4" || Path.GetExtension(x.Name) == ".webm");
             var fnaud = fndl.First(x => Path.GetExtension(x.Name) == ".m4a"
                                         || Path.GetExtension(x.Name) == ".webm"
                                         || Path.GetExtension(x.Name) == ".aac"

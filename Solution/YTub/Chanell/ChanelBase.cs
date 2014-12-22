@@ -14,6 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using YTub.Common;
+using YTub.Models;
 using YTub.Video;
 
 namespace YTub.Chanell
@@ -65,7 +66,7 @@ namespace YTub.Chanell
         #endregion
 
         #region Properties
-
+        public MainWindowModel Model { get; set; }
         public TimeSpan Synctime { get; set; }
 
         public string Login
@@ -193,9 +194,9 @@ namespace YTub.Chanell
 
         #region Construction
 
-        protected ChanelBase(string chaneltype, string login, string pass, string chanelname, string chanelowner,
-            int ordernum)
+        protected ChanelBase(string chaneltype, string login, string pass, string chanelname, string chanelowner, int ordernum, MainWindowModel model)
         {
+            Model = model;
             ChanelType = chaneltype;
             Login = login;
             Password = pass;
@@ -211,6 +212,14 @@ namespace YTub.Chanell
                 var res = Sqllite.GetVideoIntValue(Subscribe.ChanelDb, "isfavorite", "chanelowner", ChanelOwner);
                 IsFavorite = res != 0;
             }
+            ListVideoItems.CollectionChanged += ListVideoItems_CollectionChanged;
+        }
+
+        private void ListVideoItems_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            var collection = sender as TrulyObservableCollection<VideoItemBase>;
+            if (collection != null)
+                Model.MySubscribe.ResCount = collection.Count;
         }
 
         protected ChanelBase()
@@ -230,7 +239,7 @@ namespace YTub.Chanell
 
         public abstract void AutorizeChanel();
 
-        public abstract void DownloadItem();
+        public abstract void DownloadItem(IList list);
 
         public abstract void SearchItems(string key, TrulyObservableCollection<VideoItemBase> listSearchVideoItems);
 
@@ -269,9 +278,9 @@ namespace YTub.Chanell
             }
         }
 
-        public static void WriteCookiesToDiskBinary(CookieContainer cookieJar, string filename)
+        public void WriteCookiesToDiskBinary(CookieContainer cookieJar, string filename)
         {
-            var subs = ViewModelLocator.MvViewModel.Model.MySubscribe;
+            //var subs = ViewModelLocator.MvViewModel.Model.MySubscribe;
             var fn = new FileInfo(Path.Combine(Sqllite.AppDir, filename));
             if (fn.Exists)
             {
@@ -281,7 +290,7 @@ namespace YTub.Chanell
                 }
                 catch (Exception e)
                 {
-                    subs.Result = "WriteCookiesToDiskBinary: " + e.Message;
+                    Model.MySubscribe.Result = "WriteCookiesToDiskBinary: " + e.Message;
                 }
             }
             using (Stream stream = File.Create(fn.FullName))
@@ -293,7 +302,7 @@ namespace YTub.Chanell
                 }
                 catch (Exception e)
                 {
-                    subs.Result = "WriteCookiesToDiskBinary: " + e.Message;
+                    Model.MySubscribe.Result = "WriteCookiesToDiskBinary: " + e.Message;
                 }
             }
         }
@@ -503,5 +512,7 @@ namespace YTub.Chanell
         }
 
         #endregion
+
+        public abstract void DownloadVideoInternal(IList list);
     }
 }

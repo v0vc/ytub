@@ -102,6 +102,7 @@
     </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -141,6 +142,9 @@
     <Compile Include="Common\YouWrapper.cs" />
     <Compile Include="Models\AddLinkModel.cs" />
     <Compile Include="Models\SettingsModel.cs" />
+    <Compile Include="ViewModelLocator.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Views\AddLinkView.xaml.cs">
       <DependentUpon>AddLinkView.xaml</DependentUpon>
     </Compile>
@@ -175,7 +179,6 @@
     <Compile Include="Common\TrulyObservableCollection.cs" />
     <Compile Include="Models\AddChanelModel.cs" />
     <Compile Include="Models\MainWindowModel.cs" />
-    <Compile Include="ViewModelLocator.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="Views\AddChanelView.xaml.cs">
       <DependentUpon>AddChanelView.xaml</DependentUpon>
