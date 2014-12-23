@@ -43,8 +43,6 @@ namespace YTub.Chanell
 
         private string _chanelName;
 
-        public Timer TimerCommon;
-
         private IList _selectedListVideoItems = new ArrayList();
 
         private VideoItemBase _currentVideoItem;
@@ -61,13 +59,13 @@ namespace YTub.Chanell
 
         private string _durationColumnHeader;
 
-        /*private readonly Regex _regname = new Regex(@"(.+?)(\(\d+\))$");*/
-
         #endregion
 
         #region Properties
         public MainWindowModel Model { get; set; }
         public TimeSpan Synctime { get; set; }
+
+        public Timer TimerCommon;
 
         public string Login
         {
@@ -240,6 +238,8 @@ namespace YTub.Chanell
         public abstract void AutorizeChanel();
 
         public abstract void DownloadItem(IList list);
+
+        public abstract void DownloadVideoInternal(IList list);
 
         public abstract void SearchItems(string key, TrulyObservableCollection<VideoItemBase> listSearchVideoItems);
 
@@ -415,18 +415,16 @@ namespace YTub.Chanell
 
         private void _bgvdb_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            var subs = ViewModelLocator.MvViewModel.Model.MySubscribe;
             if (e.Error == null)
             {
                 TimerCommon.Dispose();
-                var glSync = subs.Synctime;
-                glSync = glSync.Add(Synctime.Duration());
-                subs.Result = string.Format("Total: {0}. {1} synced in {2}", glSync.ToString(@"mm\:ss"), ChanelName,
+                Model.MySubscribe.Result = string.Format("Total: {0}. {1} sync in {2}",
+                    Model.MySubscribe.Synctime.ToString(@"mm\:ss"), ChanellClearName(ChanelName),
                     Synctime.Duration().ToString(@"mm\:ss"));
             }
             else
             {
-                subs.Result = e.Error.Message;
+                Model.MySubscribe.Result = e.Error.Message;
             }
         }
 
@@ -494,16 +492,6 @@ namespace YTub.Chanell
             }
         }
 
-/*        private string ChannelClearName()
-        {
-            var match = _regname.Match(ChanelName);
-            if (match.Success)
-            {
-                return _regname.Replace(ChanelName, "$1").TrimEnd(' ');
-            }
-            return ChanelName;
-        }*/
-
         public static string ChanellClearName(string input)
         {
             var rq = new Regex(@"(.+?)(\(\d+\))$");
@@ -512,7 +500,6 @@ namespace YTub.Chanell
         }
 
         #endregion
-
-        public abstract void DownloadVideoInternal(IList list);
+        
     }
 }

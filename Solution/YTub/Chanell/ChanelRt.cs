@@ -177,6 +177,7 @@ namespace YTub.Chanell
                     rt.IsHasFile = fn.Exists;
                 }
                 _model.MySubscribe.Result = item.Title + " downloaded";
+                break; //TODO mass torr dl
             }
         }
 
@@ -280,8 +281,22 @@ namespace YTub.Chanell
                         {
                             foreach (VideoItemBase item in ListVideoItems)
                             {
-                                item.IsHasFile = item.IsFileExist();
-                                item.IsSynced = Sqllite.IsTableHasRecord(Subscribe.ChanelDb, item.VideoID);
+                                if (Application.Current.Dispatcher.CheckAccess())
+                                {
+                                    item.IsHasFile = item.IsFileExist();
+                                    item.IsSynced = Sqllite.IsTableHasRecord(Subscribe.ChanelDb, item.VideoID,
+                                        ChanelOwner);
+                                }
+                                else
+                                {
+                                    VideoItemBase item1 = item;
+                                    Application.Current.Dispatcher.Invoke(() =>
+                                    {
+                                        item1.IsHasFile = item1.IsFileExist();
+                                        item1.IsSynced = Sqllite.IsTableHasRecord(Subscribe.ChanelDb, item1.VideoID,
+                                            ChanelOwner);
+                                    });
+                                }
                             }
                             IsReady = !ListVideoItems.Select(x => x.IsSynced).Contains(false);
                             if (!IsReady)
@@ -290,6 +305,12 @@ namespace YTub.Chanell
                                 ChanelName = string.Format("{0} ({1})", ChanelName, countnew);
                             }
                         }
+
+                        TimerCommon.Dispose();
+                        _model.MySubscribe.Synctime = _model.MySubscribe.Synctime.Add(Synctime.Duration());
+
+                        //Thread.Sleep(1000); //avoid too many connections
+
                         if (!Bgvdb.IsBusy)
                             Bgvdb.RunWorkerAsync(totalrow); //отдельный воркер для записи в базу
 
@@ -446,6 +467,7 @@ namespace YTub.Chanell
 
         private void tmr_Tick(object o)
         {
+            _model.MySubscribe.Result = "Working...";
             Synctime = Synctime.Add(TimeSpan.FromSeconds(1));
         }
     }
