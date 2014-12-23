@@ -206,13 +206,13 @@
                         <StackPanel Orientation="Horizontal">
                             <Button Width="43" Height="26" Margin="2,0,0,0" ToolTip="Sync All"
                                     Background="#CCDAFF"
-                                    Command="{Binding SelectChanelCommand}"
+                                    Command="{Binding SyncChanelCommand}"
                                     CommandParameter="SyncChanelAll">
                                 <Image Source="../Images/refresh_24.png" Margin="0,1,0,0" />
                             </Button>
                             <Button Width="43" Height="26" Margin="3,0,0,0" ToolTip="Sync Favorites"
                                     Background="#CCDAFF"
-                                    Command="{Binding SelectChanelCommand}"
+                                    Command="{Binding SyncChanelCommand}"
                                     CommandParameter="SyncChanelFavorites">
                                 <Image Source="../Images/redo_24.png" Margin="0,3,0,0" />
                             </Button>

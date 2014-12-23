@@ -9,6 +9,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using SevenZip;
 using YTub.Chanell;
@@ -568,31 +569,35 @@ namespace YTub.Common
         public void SyncChanel(object obj)
         {
             Result = string.Empty;
+            Synctime = new TimeSpan();
 
-            switch (obj.ToString())
+            Task.Run(() =>
             {
-                case "SyncChanelAll":
+                switch (obj.ToString())
+                {
+                    case "SyncChanelAll":
 
-                    ChanelSync(ChanelList, false);
+                        ChanelSync(ChanelList, false);
 
-                    break;
+                        break;
 
-                case "SyncChanelSelected":
+                    case "SyncChanelSelected":
 
-                    ChanelSync(SelectedListChanels, false);
+                        ChanelSync(SelectedListChanels, false);
 
-                    break;
+                        break;
 
-                case "SyncAllChanelSelected":
+                    case "SyncAllChanelSelected":
 
-                    ChanelSync(SelectedListChanels, true);
+                        ChanelSync(SelectedListChanels, true);
 
-                    break;
+                        break;
 
-                case "SyncChanelFavorites":
-                    ChanelSync(ChanelList.Where(x => x.IsFavorite).ToList(), false);
-                    break;
-            }
+                    case "SyncChanelFavorites":
+                        ChanelSync(ChanelList.Where(x => x.IsFavorite).ToList(), false);
+                        break;
+                }
+            });
         }
 
         public static void SetResult(string result)

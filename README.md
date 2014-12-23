@@ -1,7 +1,8 @@
-﻿My Watching Manager.
-Add chanel as user name, like www.youtube.com/user/zapatou ==> zapatou
-Then sync and enjoy.
-Add RuTracker, you can suscribe to user releases, like http://rutracker.org/forum/tracker.php?pid=2638398 ===> 2638398
+﻿My Watching Manager.   
+Add chanel as user name, like www.youtube.com/user/zapatou ==> zapatou.   
+Then sync and enjoy.   
+Add RuTracker, you can suscribe to user releases, like http://rutracker.org/forum/tracker.php?pid=2638398 ===> 2638398.   
+Use Releases to get compiled version.   
 
 ![Main Window](https://raw.githubusercontent.com/v0vc/Ytub/master/Screens/main.png)
 

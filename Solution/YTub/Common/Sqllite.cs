@@ -91,12 +91,12 @@ namespace YTub.Common
             t.Wait();
         }
 
-        public static bool IsTableHasRecord(string dbfile, string id)
+        public static bool IsTableHasRecord(string dbfile, string id, string chanelowner)
         {
             var res = false;
             Task t = Task.Run(() =>
             {
-                var zap = string.Format("SELECT * FROM {0} WHERE v_id='{1}'", TableVideos, id);
+                var zap = string.Format("SELECT * FROM {0} WHERE v_id='{1}' AND chanelowner='{2}'", TableVideos, id, chanelowner);
                 using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
                 using (var sqlcommand = new SQLiteCommand(zap, sqlcon))
                 {
