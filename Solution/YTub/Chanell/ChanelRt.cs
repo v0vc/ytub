@@ -133,10 +133,11 @@ namespace YTub.Chanell
         {
             _rtcookie = ReadCookiesFromDiskBinary(Cname) ?? GetSession();
             // Construct HTTP request to get the file
-            var httpRequest = (HttpWebRequest)WebRequest.Create(CurrentVideoItem.VideoLink);
-            httpRequest.Method = WebRequestMethods.Http.Post;
             foreach (VideoItemBase item in list)
             {
+                var httpRequest = (HttpWebRequest)WebRequest.Create(item.VideoLink);
+                httpRequest.Method = WebRequestMethods.Http.Post;
+            
                 httpRequest.Referer = string.Format("http://rutracker.org/forum/viewtopic.php?t={0}", item.VideoID);
                 httpRequest.CookieContainer = _rtcookie;
 
@@ -178,7 +179,7 @@ namespace YTub.Chanell
                     rt.IsHasFile = fn.Exists;
                 }
                 _model.MySubscribe.Result = item.Title + " downloaded";
-                break; //TODO mass torr dl
+                //break; //TODO mass torr dl
             }
         }
 
@@ -342,8 +343,8 @@ namespace YTub.Chanell
             {
                 var v = new VideoItemRt(node)
                 {
-                    VideoOwner = ChanelOwner,
-                    VideoOwnerName = ChanelName,
+                    //VideoOwner = ChanelOwner,
+                    //VideoOwnerName = ChanelName,
                     Num = listVideoItems.Count + 1
                 };
 
@@ -386,7 +387,7 @@ namespace YTub.Chanell
                 foreach (HtmlNode nodes in results)
                 {
                     var v = new VideoItemRt(nodes) {VideoOwner = ChanelOwner, VideoOwnerName = ChanelName};
-                    if (!listVideoItems.Contains(v) && !string.IsNullOrEmpty(v.Title))
+                    if (!listVideoItems.Contains(v) &&!listVideoItems.Select(x=>x.Title).Contains(v.Title) && !string.IsNullOrEmpty(v.Title))
                     {
                         v.Num = listVideoItems.Count + 1;
                         Application.Current.Dispatcher.Invoke(() => listVideoItems.Add(v));
@@ -418,14 +419,15 @@ namespace YTub.Chanell
                 if (sp.Length == 2)
                 {
                     var raw2 = string.Format("{0}{1}&pid={2}", sp[0].Remove(sp[0].Length - 3), sp[1], pid);
-                    res.Add(raw2);
+                    if (!res.Contains(raw2))
+                        res.Add(raw2);
                 }
             }
 
             return res;
         }
 
-        private static IEnumerable<string> GetAllSearchLinks(HtmlDocument doc)
+        private IEnumerable<string> GetAllSearchLinks(HtmlDocument doc)
         {
             var hrefTags = new List<string>();
 
@@ -435,7 +437,15 @@ namespace YTub.Chanell
             {
                 HtmlAttribute att = link.Attributes["href"];
                 if (att.Value != null && !hrefTags.Contains(att.Value))
-                    hrefTags.Add(att.Value);
+                {
+                    var sp = att.Value.Split(';');
+                    if (sp.Length == 2)
+                    {
+                        var res = string.Format("{0}{1}&nm={2}", sp[0].Remove(sp[0].Length - 3), sp[1], _searchkey);
+                        if (!hrefTags.Contains(res))
+                            hrefTags.Add(res);
+                    }
+                }
             }
 
             return hrefTags.Select(link => string.Format("http://rutracker.org/forum/{0}", link)).ToList();

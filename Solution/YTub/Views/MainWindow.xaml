@@ -276,9 +276,9 @@
                         </i:Interaction.Triggers>
                         <DataGrid.Resources>
                             <ContextMenu x:Key="DataRowContextMenu">
-                                <MenuItem Header="Copy Link" Click="CopyLinkOnClick"></MenuItem>
-                                <MenuItem Header="Copy Author" Click="CopyAuthorOnClick"></MenuItem>
-                                <MenuItem Header="Delete File" Click="DeleteOnClick"></MenuItem>
+                                <MenuItem Header="Copy Link" Click="CopyLinkOnClick" CommandParameter="Get"></MenuItem>
+                                <MenuItem Header="Copy Author" Click="CopyAuthorOnClick" CommandParameter="Get"></MenuItem>
+                                <MenuItem Header="Delete" Click="DeleteOnClick" CommandParameter="Get"></MenuItem>
                             </ContextMenu>
                         </DataGrid.Resources>
                         <DataGrid.CellStyle>
@@ -542,10 +542,10 @@
                         </i:Interaction.Triggers>
                         <DataGrid.Resources>
                             <ContextMenu x:Key="DataRowContextMenu">
-                                <MenuItem Header="Add Chanell" Click="AddChanellOnClick" />
-                                <MenuItem Header="Copy Link" Click="CopyLinkOnClick"></MenuItem>
-                                <MenuItem Header="Copy Author" Click="CopyAuthorOnClick"></MenuItem>
-                                <MenuItem Header="Delete File" Click="DeleteOnClick"></MenuItem>
+                                <MenuItem Header="Subscribe" Click="AddChanellOnClick" CommandParameter="Popular"/>
+                                <MenuItem Header="Copy Link" Click="CopyLinkOnClick" CommandParameter="Popular"></MenuItem>
+                                <MenuItem Header="Copy Author" Click="CopyAuthorOnClick" CommandParameter="Popular"></MenuItem>
+                                <MenuItem Header="Delete" Click="DeleteOnClick" CommandParameter="Popular"></MenuItem>
                             </ContextMenu>
                         </DataGrid.Resources>
                         <DataGrid.CellStyle>
@@ -804,10 +804,10 @@
                         </i:Interaction.Triggers>
                         <DataGrid.Resources>
                             <ContextMenu x:Key="DataRowContextMenu">
-                                <MenuItem Header="Add Chanell" Click="AddChanellOnClick" />
-                                <MenuItem Header="Copy Link" Click="CopyLinkOnClick"></MenuItem>
-                                <MenuItem Header="Copy Author" Click="CopyAuthorOnClick"></MenuItem>
-                                <MenuItem Header="Delete File" Click="DeleteOnClick"></MenuItem>
+                                <MenuItem Header="Subscribe" Click="AddChanellOnClick" CommandParameter="Search"/>
+                                <MenuItem Header="Copy Link" Click="CopyLinkOnClick" CommandParameter="Search"></MenuItem>
+                                <MenuItem Header="Copy Author" Click="CopyAuthorOnClick" CommandParameter="Search"></MenuItem>
+                                <MenuItem Header="Delete" Click="DeleteOnClick" CommandParameter="Search"></MenuItem>
                             </ContextMenu>
                         </DataGrid.Resources>
                         <DataGrid.CellStyle>
@@ -915,9 +915,9 @@
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Title}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="2,0,0,0" ToolTipService.ShowDuration="120000">
                                             <TextBlock.ToolTip>
-                                                <TextBlock Text="{Binding Description}"></TextBlock>
+                                                <TextBlock Text="{Binding VideoOwnerName}" />
                                             </TextBlock.ToolTip>
-                                            </TextBlock>
+                                        </TextBlock>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -985,7 +985,7 @@
                                     <DataTemplate>
                                         <Button x:Name="Button" BorderThickness="0" 
                                                 Background="Transparent" 
-                                                Command="{Binding Path = DataContext.PlayDownloadCommand,  RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
+                                                Command="{Binding Path=DataContext.PlayDownloadCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
                                                 CommandParameter="Search"
                                                 >
                                             <Image x:Name="Image"></Image>

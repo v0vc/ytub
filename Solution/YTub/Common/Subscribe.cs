@@ -389,7 +389,7 @@ namespace YTub.Common
                 if (isEdit)
                 {
                     addChanelModel.ChanelOwner = CurrentChanel.ChanelOwner;
-                    addChanelModel.ChanelName = CurrentChanel.ChanelName;
+                    addChanelModel.ChanelName = ChanelBase.ChanellClearName(CurrentChanel.ChanelName);
                     addChanelModel.SelectedForumItem = ServerList.First(z => z.ChanelType == CurrentChanel.ChanelType);
                 }
 
@@ -432,10 +432,10 @@ namespace YTub.Common
                     chanel = new ChanelYou(item.ServerName, RtLogin, RtPass, item.VideoOwner, item.VideoOwner, ordernum, _model);
 
                 if (item is VideoItemRt)
-                    chanel = new ChanelRt(item.ServerName, RtLogin, RtPass, item.VideoOwner, item.VideoOwner, ordernum, _model);
+                    chanel = new ChanelRt(item.ServerName, RtLogin, RtPass, item.VideoOwnerName, item.VideoOwner, ordernum, _model);
 
                 if (item is VideoItemTap)
-                    chanel = new ChanelTap(item.ServerName, TapLogin, TapPass, item.VideoOwner, item.VideoOwner, ordernum, _model);
+                    chanel = new ChanelTap(item.ServerName, TapLogin, TapPass, item.VideoOwnerName, item.VideoOwner, ordernum, _model);
 
                 if (chanel != null)
                 {

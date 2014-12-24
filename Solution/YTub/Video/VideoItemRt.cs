@@ -19,6 +19,7 @@ namespace YTub.Video
 
         public VideoItemRt(HtmlNode node)
         {
+            ServerName = "RuTracker";
             var counts = node.Descendants("a").Where(d =>d.Attributes.Contains("class") && d.Attributes["class"].Value.Equals("med tLink hl-tags bold"));
             foreach (HtmlNode htmlNode in counts)
             {
@@ -69,6 +70,17 @@ namespace YTub.Video
             foreach (HtmlNode htmlNode in med)
             {
                 TotalDl = Convert.ToInt32(htmlNode.InnerText);
+                break;
+            }
+
+            var user = node.Descendants("a").Where(d => d.Attributes.Contains("class") && d.Attributes["class"].Value.Equals("med"));
+            foreach (HtmlNode htmlNode in user)
+            {
+                var uid = htmlNode.Attributes["href"].Value;
+                var sp = uid.Split('=');
+                if (sp.Length == 2)
+                    VideoOwner = sp[1];
+                VideoOwnerName = htmlNode.InnerText;
                 break;
             }
         }

@@ -260,7 +260,8 @@
   </Target>
   <PropertyGroup>
     <PostBuildEvent>if $(PlatformName)==x86 (copy "$(ProjectDir)Lib\x86\7z.dll" "$(TargetDir)")
-if $(PlatformName)==x64 (copy "$(ProjectDir)Lib\x64\7z.dll" "$(TargetDir)")</PostBuildEvent>
+if $(PlatformName)==x64 (copy "$(ProjectDir)Lib\x64\7z.dll" "$(TargetDir)")
+if $(PlatformName)==AnyCPU (copy "$(ProjectDir)Lib\x86\7z.dll" "$(TargetDir)")</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
