@@ -394,6 +394,8 @@ namespace YTub.Models
         {
             if (obj == null) return;
 
+            Result = "Dowloading...";
+
             switch (obj.ToString())
             {
                 case "youtube-dl":

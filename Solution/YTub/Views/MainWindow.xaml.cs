@@ -93,23 +93,101 @@ namespace YTub.Views
 
         private void CopyLinkOnClick(object sender, RoutedEventArgs e)
         {
-            var cchanel = ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel;
-            if (cchanel != null && cchanel.CurrentVideoItem != null)
+            var mitem = sender as MenuItem;
+            if (mitem == null) return;
+            switch (mitem.CommandParameter.ToString())
             {
-                try
-                {
-                    Clipboard.SetText(cchanel.CurrentVideoItem.VideoLink);
-                }
-                catch{}
+                case "Popular":
+                case "Search":
+                    var chanel = ViewModelLocator.MvViewModel.Model.MySubscribe.SelectedForumItem;
+                    if (chanel != null && chanel.CurrentVideoItem != null)
+                    {
+                        try
+                        {
+                            Clipboard.SetText(chanel.CurrentVideoItem.VideoLink);
+                        }
+                        catch
+                        {
+                        }
+                    }
+                    break;
+
+                case "Get":
+                    var cchanel = ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel;
+                    if (cchanel != null && cchanel.CurrentVideoItem != null)
+                    {
+                        try
+                        {
+                            Clipboard.SetText(cchanel.CurrentVideoItem.VideoLink);
+                        }
+                        catch
+                        {
+                        }
+                    }
+                    break;
             }
+        }
+
+        private void CopyAuthorOnClick(object sender, RoutedEventArgs e)
+        {
+            var mitem = sender as MenuItem;
+            if (mitem == null) return;
+            switch (mitem.CommandParameter.ToString())
+            {
+                case "Popular":
+                case "Search":
+                    var chanel = ViewModelLocator.MvViewModel.Model.MySubscribe.SelectedForumItem;
+                    if (chanel != null && chanel.CurrentVideoItem != null)
+                    {
+                        try
+                        {
+                            Clipboard.SetText(chanel.CurrentVideoItem.VideoOwner);
+                        }
+                        catch
+                        {
+                        }
+                    }
+                    break;
+
+                case "Get":
+                    var cchanel = ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel;
+                    if (cchanel != null && cchanel.CurrentVideoItem != null)
+                    {
+                        try
+                        {
+                            Clipboard.SetText(cchanel.CurrentVideoItem.VideoOwner);
+                        }
+                        catch
+                        {
+                        }
+                    }
+                    break;
+            }
+
         }
 
         private void DeleteOnClick(object sender, RoutedEventArgs e)
         {
-            var cchanel = ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel;
-            if (cchanel != null && cchanel.CurrentVideoItem != null)
+            var mitem = sender as MenuItem;
+            if (mitem == null) return;
+            switch (mitem.CommandParameter.ToString())
             {
-                cchanel.DeleteFiles();
+                case "Popular":
+                case "Search":
+                    var chanel = ViewModelLocator.MvViewModel.Model.MySubscribe.SelectedForumItem;
+                    if (chanel != null && chanel.CurrentVideoItem != null)
+                    {
+                        chanel.DeleteFiles();
+                    }
+                    break;
+
+                case "Get":
+                    var cchanel = ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel;
+                    if (cchanel != null && cchanel.CurrentVideoItem != null)
+                    {
+                        cchanel.DeleteFiles();
+                    }
+                    break;
             }
         }
 
@@ -130,19 +208,6 @@ namespace YTub.Views
         private void ButtonShowHideFavor_OnClick(object sender, RoutedEventArgs e)
         {
             ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites = !ViewModelLocator.MvViewModel.Model.MySubscribe.IsOnlyFavorites;
-        }
-
-        private void CopyAuthorOnClick(object sender, RoutedEventArgs e)
-        {
-            var cchanel = ViewModelLocator.MvViewModel.Model.MySubscribe.CurrentChanel;
-            if (cchanel != null && cchanel.CurrentVideoItem != null)
-            {
-                try
-                {
-                    Clipboard.SetText(cchanel.CurrentVideoItem.VideoOwner);
-                }
-                catch{}
-            }
         }
 
         private void OnMouseLeftButtonUpChanells(object sender, MouseButtonEventArgs e)

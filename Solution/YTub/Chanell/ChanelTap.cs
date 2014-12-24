@@ -38,8 +38,7 @@ namespace YTub.Chanell
             req.Method = "POST";
             req.Host = "login.rutracker.org";
             req.KeepAlive = true;
-            var postData = string.Format("login_username={0}&login_password={1}&login=%C2%F5%EE%E4",
-                Uri.EscapeDataString(Login), Uri.EscapeDataString(Password));
+            var postData = string.Format("login_username={0}&login_password={1}&login=%C2%F5%EE%E4", Uri.EscapeDataString(Login), Uri.EscapeDataString(Password));
             var data = Encoding.ASCII.GetBytes(postData);
             req.ContentLength = data.Length;
             req.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";

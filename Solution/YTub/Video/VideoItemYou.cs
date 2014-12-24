@@ -24,6 +24,7 @@ namespace YTub.Video
                 Region = region;
                 var owner = pair["author"][0]["uri"]["$t"].ToString().Split('/');
                 VideoOwner = owner[owner.Length - 1];
+                VideoOwnerName = VideoOwner;
                 if (!isPopular)
                 {
                     var spraw = pair["id"]["$t"].ToString().Split('/');
