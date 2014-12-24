@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using YTub.Common;
+using YTub.Controls;
 using YTub.Video;
 
 namespace YTub.Chanell
@@ -14,6 +15,9 @@ namespace YTub.Chanell
     {
         public ChanelEmpty()
         {
+            LastColumnHeader = "Download";
+            ViewSeedColumnHeader = "Views";
+            DurationColumnHeader = "Duration";
         }
 
         public override CookieContainer GetSession()
@@ -36,12 +40,12 @@ namespace YTub.Chanell
             throw new NotImplementedException();
         }
 
-        public override void SearchItems(string key, TrulyObservableCollection<VideoItemBase> listSearchVideoItems)
+        public override void SearchItems(string key, ObservableCollectionEx<VideoItemBase> listSearchVideoItems)
         {
             throw new NotImplementedException();
         }
 
-        public override void GetPopularItems(string key, TrulyObservableCollection<VideoItemBase> listPopularVideoItems)
+        public override void GetPopularItems(string key, ObservableCollectionEx<VideoItemBase> listPopularVideoItems)
         {
             throw new NotImplementedException();
         }

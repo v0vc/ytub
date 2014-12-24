@@ -33,7 +33,7 @@ namespace YTub.Models
             set
             {
                 _selectedCountry = value;
-                ViewModelLocator.MvViewModel.Model.MySubscribe.GetPopularVideos(SelectedCountry.Value);
+                MySubscribe.GetPopularVideos(SelectedCountry.Value);
             }
         }
 

@@ -1,15 +1,15 @@
 ﻿<Window x:Class="YTub.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:common="clr-namespace:YTub.Common"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:controls="clr-namespace:YTub.Controls"
         Title="YTub" Height="400" Width="1005" MinWidth="500" MinHeight="300"
         DataContext="{Binding MvViewModel, Source={StaticResource ViewModelLocator}}"
         Loaded="MainWindow_OnLoaded"
         KeyUp="MainWindow_OnKeyUp"
         Icon="../Images/ok.ico"
         Name="Window">
-    <Grid Name="GridShutterParent">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"></RowDefinition>
             <RowDefinition></RowDefinition>
@@ -55,7 +55,7 @@
                         <RowDefinition Height="27"></RowDefinition>
                         <RowDefinition Height="38"></RowDefinition>
                     </Grid.RowDefinitions>
-                    <common:CustomDataGrid ItemsSource="{Binding Model.MySubscribe.ChanelListToBind}"
+                    <controls:DataGridEx ItemsSource="{Binding Model.MySubscribe.ChanelListToBind}"
                                            SelectedItemsList="{Binding Model.MySubscribe.SelectedListChanels, Mode=TwoWay}"
                                            AutoGenerateColumns="False"
                                            HeadersVisibility="None"
@@ -165,7 +165,7 @@
                                 <EventSetter Event="MouseDoubleClick" Handler="Row_doubleClick" />
                             </Style>
                         </DataGrid.RowStyle>
-                    </common:CustomDataGrid>
+                    </controls:DataGridEx>
                     <Border BorderBrush="Gainsboro" BorderThickness="1" Grid.Row="1" Margin="0,3,0,0">
                         <StackPanel Orientation="Horizontal">
                             <TextBox Name="TextBoxChannelFilter" 
@@ -250,10 +250,10 @@
                     </Border>
                 </Grid>
             </GroupBox>
-            <GridSplitter Grid.Column="1" Width="4" VerticalAlignment="Stretch" HorizontalAlignment="Center" Margin="0,0,0,1"></GridSplitter>
+            <GridSplitter Grid.Column="1" Width="4" VerticalAlignment="Stretch" HorizontalAlignment="Center" Margin="0,0,0,1" />
             <TabControl Grid.Column="2" SelectedIndex="{Binding Model.MySubscribe.SelectedTabIndex, Mode=TwoWay}">
                 <TabItem Header="Videos:" Width="60">
-                    <common:CustomDataGrid
+                    <controls:DataGridEx
                             ItemsSource="{Binding Model.MySubscribe.CurrentChanel.ListVideoItems}"
                             AutoGenerateColumns="False"
                             SelectedItem="{Binding Model.MySubscribe.CurrentChanel.CurrentVideoItem}"
@@ -387,9 +387,11 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTemplateColumn SortMemberPath="ViewCount" Width="Auto" MinWidth="55">
-                                <DataGridTemplateColumn.Header>
-                                    <TextBlock Text="{Binding DataContext.Model.MySubscribe.CurrentChanel.ViewSeedColumnHeader, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" />
-                                </DataGridTemplateColumn.Header>
+                                <DataGridTemplateColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DataContext.Model.MySubscribe.CurrentChanel.ViewSeedColumnHeader, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.HeaderTemplate>
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -420,10 +422,12 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTemplateColumn SortMemberPath="Duration" Width="56" CanUserResize="False" MinWidth="56">
-                                <DataGridTemplateColumn.Header>
-                                    <TextBlock Text="{Binding DataContext.Model.MySubscribe.CurrentChanel.DurationColumnHeader, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" />
-                                </DataGridTemplateColumn.Header>
-                                <DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DataContext.Model.MySubscribe.CurrentChanel.DurationColumnHeader, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.HeaderTemplate>
+                                    <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
                                         <Setter Property="FontSize" Value="12"></Setter>
@@ -467,9 +471,11 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTemplateColumn Width="65" CanUserResize="False" MinWidth="65" SortMemberPath="TotalDl">
-                                <DataGridTemplateColumn.Header>
-                                    <TextBlock Text="{Binding DataContext.Model.MySubscribe.CurrentChanel.LastColumnHeader, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" />
-                                </DataGridTemplateColumn.Header>
+                                <DataGridTemplateColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DataContext.Model.MySubscribe.CurrentChanel.LastColumnHeader, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.HeaderTemplate>
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -479,7 +485,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Button x:Name="Button"
-                                                Command="{Binding Path = DataContext.PlayDownloadCommand,  RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
+                                                Command="{Binding Path = DataContext.PlayDownloadCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
                                                 CommandParameter="GetInternal"
                                                 BorderThickness="0.3"
                                                 ToolTip="Download"
@@ -498,16 +504,11 @@
                                                 <Setter TargetName="Button" Property="IsEnabled" Value="False"></Setter>
                                                 <Setter TargetName="Button" Property="Content" Value="{Binding TotalDl}"></Setter>
                                             </DataTrigger>
-                                            <!--<DataTrigger Binding="{Binding DataContext.Model.MySubscribe.CurrentChanel.ChanelType, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" Value="YouTube">
-                                                <Setter TargetName="ProgressBar" Property="IsEnabled" Value="True"></Setter>
-                                                <Setter TargetName="ProgressBar" Property="Visibility" Value="Visible"></Setter>
-                                                <Setter TargetName="Button" Property="IsEnabled" Value="True"></Setter>
-                                            </DataTrigger>-->
-                                            <DataTrigger Binding="{Binding IsDownLoading, Mode=TwoWay}" Value="true">
+                                            <DataTrigger Binding="{Binding IsDownLoading}" Value="true">
                                                 <Setter TargetName="ProgressBar" Property="Visibility" Value="Visible"></Setter>
                                                 <Setter TargetName="ProgressBar" Property="Minimum" Value="{Binding DataContext.Model.MySubscribe.CurrentChanel.CurrentVideoItem.MinProgress, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"></Setter>
                                                 <Setter TargetName="ProgressBar" Property="Maximum" Value="{Binding DataContext.Model.MySubscribe.CurrentChanel.CurrentVideoItem.MaxProgress, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"></Setter>
-                                                <Setter TargetName="ProgressBar" Property="Value" Value="{Binding PercentDownloaded}"></Setter>
+                                                <Setter TargetName="ProgressBar" Property="Value" Value="{Binding DataContext.Model.MySubscribe.CurrentChanel.CurrentVideoItem.PercentDownloaded, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"></Setter>
                                                 <Setter TargetName="ProgressBar" Property="Background" Value="LightGreen"></Setter>
                                             </DataTrigger>
                                         </DataTemplate.Triggers>
@@ -515,14 +516,14 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
-                    </common:CustomDataGrid>
+                    </controls:DataGridEx>
                 </TabItem>
                 <TabItem Header="Popular" Width="60">
-                    <common:CustomDataGrid
-                            ItemsSource="{Binding Model.MySubscribe.ListPopularVideoItems}"
+                    <controls:DataGridEx
+                            ItemsSource="{Binding Model.MySubscribe.SelectedForumItem.ListPopularVideoItems}"
                             AutoGenerateColumns="False"
-                            SelectedItem="{Binding Model.MySubscribe.CurrentVideoItem}"
-                            SelectedItemsList="{Binding Model.MySubscribe.SelectedListVideoItems, Mode=TwoWay}"
+                            SelectedItem="{Binding Model.MySubscribe.SelectedForumItem.CurrentVideoItem}"
+                            SelectedItemsList="{Binding Model.MySubscribe.SelectedForumItem.SelectedListVideoItems, Mode=TwoWay}"
                             CanUserResizeRows="False"
                             CanUserAddRows="False"
                             CanUserDeleteRows="False"
@@ -572,7 +573,6 @@
                             <Style TargetType="{x:Type DataGridRow}">
                                 <Setter Property="ContextMenu" Value="{StaticResource DataRowContextMenu}" />
                                 <Setter Property="BorderThickness" Value="0" />
-                                <!--<EventSetter Event="MouseDoubleClick" Handler="PlayOnClick"></EventSetter>-->
                             </Style>
                         </DataGrid.RowStyle>
                         <DataGrid.Columns>
@@ -759,18 +759,18 @@
                                 </DataGridTemplateColumn.HeaderStyle>
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Button x:Name="Button" Command="{Binding Path = DataContext.PlayDownloadCommand,  RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
+                                        <Button x:Name="Button" Command="{Binding Path=DataContext.PlayDownloadCommand,  RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
                                                 CommandParameter="PopularInternal"
                                                 BorderThickness="0.3" ToolTip="Download" Background="Transparent">
                                             <ProgressBar x:Name="ProgressBar" HorizontalAlignment="Stretch" Height="19" HorizontalContentAlignment="Stretch" Width="58"
                                         Visibility="Collapsed" />
                                         </Button>
                                         <DataTemplate.Triggers>
-                                            <DataTrigger Binding="{Binding IsDownLoading, Mode=TwoWay}" Value="true">
+                                            <DataTrigger Binding="{Binding IsDownLoading}" Value="true">
                                                 <Setter TargetName="ProgressBar" Property="Visibility" Value="Visible"></Setter>
-                                                <Setter TargetName="ProgressBar" Property="Minimum" Value="{Binding MinProgress}"></Setter>
-                                                <Setter TargetName="ProgressBar" Property="Maximum" Value="{Binding MaxProgress}"></Setter>
-                                                <Setter TargetName="ProgressBar" Property="Value" Value="{Binding PercentDownloaded}"></Setter>
+                                                <Setter TargetName="ProgressBar" Property="Minimum" Value="{Binding DataContext.Model.MySubscribe.SelectedForumItem.CurrentVideoItem.MinProgress, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"></Setter>
+                                                <Setter TargetName="ProgressBar" Property="Maximum" Value="{Binding DataContext.Model.MySubscribe.SelectedForumItem.CurrentVideoItem.MaxProgress, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"></Setter>
+                                                <Setter TargetName="ProgressBar" Property="Value" Value="{Binding DataContext.Model.MySubscribe.SelectedForumItem.CurrentVideoItem.PercentDownloaded, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"></Setter>
                                                 <Setter TargetName="ProgressBar" Property="Background" Value="LightGreen"></Setter>
                                             </DataTrigger>
                                         </DataTemplate.Triggers>
@@ -778,14 +778,14 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
-                    </common:CustomDataGrid>
+                    </controls:DataGridEx>
                 </TabItem>
                 <TabItem Header="Search" Width="60">
-                    <common:CustomDataGrid
-                            ItemsSource="{Binding Model.MySubscribe.ListSearchVideoItems}"
+                    <controls:DataGridEx
+                            ItemsSource="{Binding Model.MySubscribe.SelectedForumItem.ListSearchVideoItems}"
                             AutoGenerateColumns="False"
-                            SelectedItem="{Binding Model.MySubscribe.CurrentVideoItem}"
-                            SelectedItemsList="{Binding Model.MySubscribe.SelectedListVideoItems, Mode=TwoWay}"
+                            SelectedItem="{Binding Model.MySubscribe.SelectedForumItem.CurrentVideoItem}"
+                            SelectedItemsList="{Binding Model.MySubscribe.SelectedForumItem.SelectedListVideoItems, Mode=TwoWay}"
                             CanUserResizeRows="False"
                             CanUserAddRows="False"
                             CanUserDeleteRows="False"
@@ -901,8 +901,9 @@
                                                         </TextBox>
                                                         <ComboBox Width="80" HorizontalAlignment="Left" HorizontalContentAlignment="Stretch" VerticalAlignment="Center" Height="22" Margin="2,0,0,0"
                                                             ItemsSource="{Binding Path = DataContext.Model.MySubscribe.ServerList, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
-                                                            SelectedItem="{Binding Path=DataContext.Model.MySubscribe.SelectedForumItem, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
-                                                            DisplayMemberPath="ChanelType" />
+                                                            SelectedItem="{Binding Path = DataContext.Model.MySubscribe.SelectedForumItem, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
+                                                            DisplayMemberPath="ChanelType" 
+                                                            />
                                                         <Button Width="40" Margin="2,0,0,0" Content="OK" Command="{Binding Path=DataContext.SearchCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"></Button>
                                                     </StackPanel>
                                                 </DataTemplate>
@@ -916,11 +917,16 @@
                                             <TextBlock.ToolTip>
                                                 <TextBlock Text="{Binding Description}"></TextBlock>
                                             </TextBlock.ToolTip>
-                                    </TextBlock>
+                                            </TextBlock>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Views" SortMemberPath="ViewCount" Width="Auto" MinWidth="55">
+                            <DataGridTemplateColumn SortMemberPath="ViewCount" Width="Auto" MinWidth="55">
+                                <DataGridTemplateColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DataContext.Model.MySubscribe.SelectedForumItem.ViewSeedColumnHeader, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.HeaderTemplate>
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -933,7 +939,7 @@
                                             <TextBlock.ToolTip>
                                                 <TextBlock Text="{Binding Duration, StringFormat=Duration (sec): {0}}"></TextBlock>
                                             </TextBlock.ToolTip>
-                                    </TextBlock>
+                                            </TextBlock>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -950,8 +956,13 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Duration" SortMemberPath="Duration" Width="56" CanUserResize="False" MinWidth="56">
-                                <DataGridTemplateColumn.HeaderStyle>
+                            <DataGridTemplateColumn SortMemberPath="Duration" Width="56" CanUserResize="False" MinWidth="56">
+                                <DataGridTemplateColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DataContext.Model.MySubscribe.SelectedForumItem.DurationColumnHeader, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.HeaderTemplate>
+                                    <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
                                         <Setter Property="FontSize" Value="12"></Setter>
@@ -995,7 +1006,12 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Download" SortMemberPath="IsHasFile" Width="65" CanUserResize="False" MinWidth="65">
+                            <DataGridTemplateColumn Width="65" CanUserResize="False" MinWidth="65" SortMemberPath="TotalDl">
+                                <DataGridTemplateColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DataContext.Model.MySubscribe.SelectedForumItem.LastColumnHeader, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.HeaderTemplate>
                                 <DataGridTemplateColumn.HeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -1004,18 +1020,31 @@
                                 </DataGridTemplateColumn.HeaderStyle>
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Button x:Name="Button" Command="{Binding Path = DataContext.PlayDownloadCommand,  RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
-                                                CommandParameter="SearchInternal"
-                                                BorderThickness="0.3" ToolTip="Download" Background="Transparent">
-                                            <ProgressBar x:Name="ProgressBar" HorizontalAlignment="Stretch" Height="19" HorizontalContentAlignment="Stretch" Width="58"
-                                        Visibility="Collapsed" />
+                                        <Button x:Name="Button"
+                                                Command="{Binding Path = DataContext.PlayDownloadCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
+                                                CommandParameter="GetInternal"
+                                                BorderThickness="0.3"
+                                                ToolTip="Download"
+                                                Background="Transparent">
+                                            <ProgressBar
+                                                x:Name="ProgressBar"
+                                                HorizontalAlignment="Stretch"
+                                                Height="19"
+                                                HorizontalContentAlignment="Stretch"
+                                                Width="58"
+                                                Visibility="Collapsed" />
                                         </Button>
                                         <DataTemplate.Triggers>
-                                            <DataTrigger Binding="{Binding IsDownLoading, Mode=TwoWay}" Value="true">
+                                            <DataTrigger Binding="{Binding DataContext.Model.MySubscribe.SelectedForumItem.ChanelType, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" Value="RuTracker">
+                                                <Setter TargetName="ProgressBar" Property="Visibility" Value="Hidden"></Setter>
+                                                <Setter TargetName="Button" Property="IsEnabled" Value="False"></Setter>
+                                                <Setter TargetName="Button" Property="Content" Value="{Binding TotalDl}"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsDownLoading}" Value="true">
                                                 <Setter TargetName="ProgressBar" Property="Visibility" Value="Visible"></Setter>
-                                                <Setter TargetName="ProgressBar" Property="Minimum" Value="{Binding MinProgress}"></Setter>
-                                                <Setter TargetName="ProgressBar" Property="Maximum" Value="{Binding MaxProgress}"></Setter>
-                                                <Setter TargetName="ProgressBar" Property="Value" Value="{Binding PercentDownloaded}"></Setter>
+                                                <Setter TargetName="ProgressBar" Property="Minimum" Value="{Binding DataContext.Model.MySubscribe.SelectedForumItem.CurrentVideoItem.MinProgress, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"></Setter>
+                                                <Setter TargetName="ProgressBar" Property="Maximum" Value="{Binding DataContext.Model.MySubscribe.SelectedForumItem.CurrentVideoItem.MaxProgress, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"></Setter>
+                                                <Setter TargetName="ProgressBar" Property="Value" Value="{Binding DataContext.Model.MySubscribe.SelectedForumItem.CurrentVideoItem.PercentDownloaded, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"></Setter>
                                                 <Setter TargetName="ProgressBar" Property="Background" Value="LightGreen"></Setter>
                                             </DataTrigger>
                                         </DataTemplate.Triggers>
@@ -1023,7 +1052,7 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
-                    </common:CustomDataGrid>
+                    </controls:DataGridEx>
                 </TabItem>
                 <TabItem Header="Log" Width="60">
                     <ListBox ItemsSource="{Binding Model.LogCollection}"></ListBox>

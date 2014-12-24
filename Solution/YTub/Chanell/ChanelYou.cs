@@ -16,6 +16,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using YoutubeExtractor;
 using YTub.Common;
+using YTub.Controls;
 using YTub.Models;
 using YTub.Video;
 
@@ -27,9 +28,9 @@ namespace YTub.Chanell
 
         private readonly List<VideoItemBase> _selectedListVideoItemsList = new List<VideoItemBase>();
 
-        private TrulyObservableCollection<VideoItemBase> _listSearchVideoItems;
+        private ObservableCollectionEx<VideoItemBase> _listSearchVideoItems;
 
-        private TrulyObservableCollection<VideoItemBase> _listPopularVideoItems;
+        private ObservableCollectionEx<VideoItemBase> _listPopularVideoItems;
 
         private string _searchkey;
 
@@ -164,6 +165,7 @@ namespace YTub.Chanell
         {
             if (e.Error != null)
             {
+                TimerCommon.Dispose();
                 if (e.Error is SQLiteException)
                 {
                     MessageBox.Show(e.Error.Message, "Database exception", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -233,12 +235,14 @@ namespace YTub.Chanell
 
                     case "Popular":
 
+                        TimerCommon.Dispose();
                         _model.MySubscribe.Result = string.Format("{0} synced in {1}", _model.SelectedCountry.Key, Synctime.Duration().ToString(@"mm\:ss"));
 
                         break;
 
                     case "Search":
 
+                        TimerCommon.Dispose();
                         _model.MySubscribe.Result = string.Format("{0} searched in {1}", _searchkey, Synctime.Duration().ToString(@"mm\:ss"));
 
                         break;
@@ -270,7 +274,7 @@ namespace YTub.Chanell
 
         private void listVideoItems_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            var collection = sender as TrulyObservableCollection<VideoItemBase>;
+            var collection = sender as ObservableCollectionEx<VideoItemBase>;
             if (collection != null)
                 _model.MySubscribe.ResCount = collection.Count;
         }
@@ -302,7 +306,7 @@ namespace YTub.Chanell
                 GetVideosSync();
         }
 
-        public override void SearchItems(string key, TrulyObservableCollection<VideoItemBase> listSearchVideoItems)
+        public override void SearchItems(string key, ObservableCollectionEx<VideoItemBase> listSearchVideoItems)
         {
             InitializeTimer();
             _listSearchVideoItems = listSearchVideoItems;
@@ -312,7 +316,7 @@ namespace YTub.Chanell
                 _bgv.RunWorkerAsync("Search");
         }
 
-        public override void GetPopularItems(string key, TrulyObservableCollection<VideoItemBase> listPopularVideoItems)
+        public override void GetPopularItems(string key, ObservableCollectionEx<VideoItemBase> listPopularVideoItems)
         {
             InitializeTimer();
             _cul = key;
