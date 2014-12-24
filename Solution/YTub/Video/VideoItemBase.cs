@@ -67,7 +67,7 @@ namespace YTub.Video
             set
             {
                 _delta = value;
-                OnPropertyChanged("Delta");
+                OnPropertyChanged();
             }
         }
 
@@ -91,7 +91,7 @@ namespace YTub.Video
             set
             {
                 _minProgress = value;
-                OnPropertyChanged("MinProgress");
+                OnPropertyChanged();
             }
         }
 
@@ -101,7 +101,7 @@ namespace YTub.Video
             set
             {
                 _maxProgress = value;
-                OnPropertyChanged("MaxProgress");
+                OnPropertyChanged();
             }
         }
 
@@ -111,7 +111,7 @@ namespace YTub.Video
             set
             {
                 _percentDownloaded = value;
-                OnPropertyChanged("PercentDownloaded");
+                OnPropertyChanged();
             }
         }
 
@@ -121,7 +121,7 @@ namespace YTub.Video
             set
             {
                 _isSynced = value;
-                OnPropertyChanged("IsSynced");
+                OnPropertyChanged();
             }
         }
 
@@ -131,7 +131,7 @@ namespace YTub.Video
             set
             {
                 _isHasFile = value;
-                OnPropertyChanged("IsHasFile");
+                OnPropertyChanged();
             }
         }
 
@@ -141,7 +141,7 @@ namespace YTub.Video
             set
             {
                 _isDownloading = value;
-                OnPropertyChanged("IsDownLoading");
+                OnPropertyChanged();
             }
         }
         #endregion
@@ -188,7 +188,10 @@ namespace YTub.Video
 
         public static void Log(string text)
         {
-            Application.Current.Dispatcher.BeginInvoke((Action) (() => ViewModelLocator.MvViewModel.Model.LogCollection.Add((text))));
+            if (Application.Current.Dispatcher.CheckAccess())
+                ViewModelLocator.MvViewModel.Model.LogCollection.Add((text));
+            else
+                Application.Current.Dispatcher.BeginInvoke((Action) (() => ViewModelLocator.MvViewModel.Model.LogCollection.Add((text))));
         }
     }
 }

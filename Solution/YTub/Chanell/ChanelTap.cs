@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using YTub.Common;
+using YTub.Controls;
 using YTub.Models;
 using YTub.Video;
 
@@ -16,11 +17,18 @@ namespace YTub.Chanell
         private readonly MainWindowModel _model;
         public ChanelTap(string chaneltype, string login, string pass, string chanelname, string chanelowner, int ordernum, MainWindowModel model) : base(chaneltype, login, pass, chanelname, chanelowner, ordernum, model)
         {
+            _model = model;
+            LastColumnHeader = "Total DL";
+            ViewSeedColumnHeader = "Seeders";
+            DurationColumnHeader = "Size MB";
         }
 
         public ChanelTap(MainWindowModel model)
         {
             _model = model;
+            LastColumnHeader = "Total DL";
+            ViewSeedColumnHeader = "Seeders";
+            DurationColumnHeader = "Size MB";
         }
 
         public override CookieContainer GetSession()
@@ -74,12 +82,12 @@ namespace YTub.Chanell
             throw new NotImplementedException();
         }
 
-        public override void SearchItems(string key, TrulyObservableCollection<VideoItemBase> listSearchVideoItems)
+        public override void SearchItems(string key, ObservableCollectionEx<VideoItemBase> listSearchVideoItems)
         {
             throw new NotImplementedException();
         }
 
-        public override void GetPopularItems(string key, TrulyObservableCollection<VideoItemBase> listPopularVideoItems)
+        public override void GetPopularItems(string key, ObservableCollectionEx<VideoItemBase> listPopularVideoItems)
         {
             throw new NotImplementedException();
         }

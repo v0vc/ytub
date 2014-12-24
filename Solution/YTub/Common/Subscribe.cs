@@ -93,9 +93,7 @@ namespace YTub.Common
 
         private int _resCount;
 
-        private VideoItemBase _currentVideoItem;
-
-        private IList _selectedListVideoItems = new ArrayList();
+        private ChanelBase _selectedForumItem;
 
         #endregion
 
@@ -120,34 +118,13 @@ namespace YTub.Common
                 OnPropertyChanged("SelectedTabIndex");
             }
         }
-
-        public VideoItemBase CurrentVideoItem
-        {
-            get { return _currentVideoItem; }
-            set
-            {
-                _currentVideoItem = value;
-                OnPropertyChanged("CurrentVideoItem");
-            }
-        }
-
-        public IList SelectedListVideoItems
-        {
-            get { return _selectedListVideoItems; }
-            set
-            {
-                _selectedListVideoItems = value;
-                OnPropertyChanged("SelectedListVideoItems");
-            }
-        }
-
         public ChanelBase CurrentChanel
         {
             get { return _currentChanel; }
             set
             {
                 _currentChanel = value;
-                OnPropertyChanged("CurrentChanel");
+                OnPropertyChanged();
                 if (_currentChanel != null)
                 {
                     _model.MySubscribe.ResCount = _currentChanel.ListVideoItems.Count;
@@ -155,7 +132,15 @@ namespace YTub.Common
             }
         }
 
-        public ChanelBase SelectedForumItem { get; set; }
+        public ChanelBase SelectedForumItem
+        {
+            get { return _selectedForumItem; }
+            set
+            {
+                _selectedForumItem = value;
+                OnPropertyChanged();
+            }
+        }
 
         public ChanelBase FilterForumItem
         {
@@ -208,10 +193,6 @@ namespace YTub.Common
             }
         }
 
-        public TrulyObservableCollection<VideoItemBase> ListPopularVideoItems { get; set; }
-
-        public TrulyObservableCollection<VideoItemBase> ListSearchVideoItems { get; set; }
-
         public string TitleFilter
         {
             get { return _titleFilter; }
@@ -257,8 +238,6 @@ namespace YTub.Common
             ChanelDb = Path.Combine(dir, Dbfile);
             ChanelList = new ObservableCollection<ChanelBase>();
             ChanelListToBind = new ObservableCollection<ChanelBase>();
-            ListPopularVideoItems = new TrulyObservableCollection<VideoItemBase>();
-            ListSearchVideoItems = new TrulyObservableCollection<VideoItemBase>();
             SevenZipBase.SetLibraryPath(Path.Combine(dir, "7z.dll"));
             var fn = new FileInfo(ChanelDb);
             if (fn.Exists)
@@ -296,8 +275,8 @@ namespace YTub.Common
                 };
                 DownloadPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             }
-            SelectedForumItem = ServerList.First(x=>x.ChanelType == "YouTube");
-            FilterForumItem = ServerList.First(x => x.ChanelType == "All");
+            SelectedForumItem = ServerList.First(x=>x is ChanelYou);
+            FilterForumItem = ServerList.First(x => x is ChanelEmpty);
             _bgv.DoWork += _bgv_DoWork;
             _bgv.RunWorkerCompleted += _bgv_RunWorkerCompleted;
         }
@@ -312,28 +291,26 @@ namespace YTub.Common
                 return;
 
             IList lsyou;
-            IList lsrt;
-            IList lstap;
             switch (obj.ToString())
             {
                 case "Search":
 
                     ChanelBase cnanel;
-                    lsyou = SelectedListVideoItems.OfType<VideoItemYou>().Select(item => item).ToList();
+                    lsyou = SelectedForumItem.SelectedListVideoItems.OfType<VideoItemYou>().Select(item => item).ToList();
                     if (lsyou.Count > 0)
                     {
                         cnanel = new ChanelYou(_model);
                         cnanel.DownloadItem(lsyou);
                     }
-                        
-                    lsrt = SelectedListVideoItems.OfType<VideoItemRt>().Select(item => item).ToList();
+
+                    IList lsrt = SelectedForumItem.SelectedListVideoItems.OfType<VideoItemRt>().Select(item => item).ToList();
                     if (lsrt.Count > 0)
                     {
                         cnanel = new ChanelRt(_model);
                         cnanel.DownloadItem(lsrt);
                     }
 
-                    lstap = SelectedListVideoItems.OfType<VideoItemTap>().Select(item => item).ToList();
+                    IList lstap = SelectedForumItem.SelectedListVideoItems.OfType<VideoItemTap>().Select(item => item).ToList();
                     if (lstap.Count > 0)
                     {
                         cnanel = new ChanelTap(_model);
@@ -346,7 +323,7 @@ namespace YTub.Common
 
                     var chanelpop = new ChanelYou(_model);
 
-                    chanelpop.DownloadItem(SelectedListVideoItems);
+                    chanelpop.DownloadItem(SelectedForumItem.SelectedListVideoItems);
 
                     break;
 
@@ -359,9 +336,9 @@ namespace YTub.Common
                 case "SearchPlay":
                 case "PopularPlay":
 
-                    if (CurrentVideoItem is VideoItemYou)
+                    if (SelectedForumItem.CurrentVideoItem is VideoItemYou)
                     {
-                        var item = CurrentVideoItem as VideoItemYou;
+                        var item = SelectedForumItem.CurrentVideoItem as VideoItemYou;
                         item.RunFile(item.IsHasFile ? "Local" : "Online");
 
                     }
@@ -391,7 +368,7 @@ namespace YTub.Common
                 case "PopularInternal":
                 case "SearchInternal":
 
-                    lsyou = SelectedListVideoItems.OfType<VideoItemYou>().Select(item => item).ToList();
+                    lsyou = SelectedForumItem.SelectedListVideoItems.OfType<VideoItemYou>().Select(item => item).ToList();
                     if (lsyou.Count > 0)
                     {
                         cnanel = new ChanelYou(_model);
@@ -447,7 +424,7 @@ namespace YTub.Common
         public void AddChanell()
         {
             var ordernum = _model.MySubscribe.ChanelList.Count;
-            var item = _model.MySubscribe.CurrentVideoItem;
+            var item = _model.MySubscribe.SelectedForumItem.CurrentVideoItem;
             if (!_model.MySubscribe.ChanelList.Select(z => z.ChanelOwner).Contains(item.VideoOwner))
             {
                 ChanelBase chanel = null;
@@ -527,42 +504,39 @@ namespace YTub.Common
 
         public void GetPopularVideos(string culture)
         {
-            ListPopularVideoItems.Clear();
-            var chanell = new ChanelYou(_model);
-            chanell.GetPopularItems(culture, ListPopularVideoItems);
+            SelectedForumItem.ListPopularVideoItems.Clear();
+            if (SelectedForumItem is ChanelYou)
+            {
+                (SelectedForumItem as ChanelYou).GetPopularItems(culture, SelectedForumItem.ListPopularVideoItems);
+            }
+            else
+            {
+                var chanell = new ChanelYou(_model);
+                chanell.GetPopularItems(culture, SelectedForumItem.ListPopularVideoItems);    
+            }
         }
 
         public void SearchItems(object obj)
         {
             if (string.IsNullOrEmpty(SearchKey))
                 return;
-            ListSearchVideoItems.Clear();
-            switch (SelectedForumItem.ChanelType)
+
+            SelectedForumItem.ListSearchVideoItems.Clear();
+            if (SelectedForumItem is ChanelYou)
             {
-                case "YouTube":
+                (SelectedForumItem as ChanelYou).SearchItems(SearchKey, SelectedForumItem.ListSearchVideoItems);
+            }
 
-                    var chanelYou = SelectedForumItem as ChanelYou;
-                    if (chanelYou != null)
-                        chanelYou.SearchItems(SearchKey, ListSearchVideoItems);
+            if (SelectedForumItem is ChanelRt)
+            {
+                var chanel = SelectedForumItem as ChanelRt;
+                chanel.IsFull = true;
+                chanel.SearchItems(SearchKey, chanel.ListSearchVideoItems);
+            }
 
-                    break;
-
-                case "RuTracker":
-
-                    var chanelRt = SelectedForumItem as ChanelRt;
-                    if (chanelRt != null)
-                    {
-                        chanelRt.IsFull = true;
-                        chanelRt.SearchItems(SearchKey, ListSearchVideoItems);
-                    }
-
-                    break;
-
-                case "Tapochek":
-                    break;
-
-                case "All":
-                    break;
+            if (SelectedForumItem is ChanelTap)
+            {
+                
             }
         }
 
@@ -632,7 +606,9 @@ namespace YTub.Common
             }
 
             if (ChanelList.Any())
+            {
                 CurrentChanel = ChanelList[0];
+            }
         }
 
         private void _bgv_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -751,23 +727,23 @@ namespace YTub.Common
             {
                 if (_filterlist.Any())
                 {
-                    ListPopularVideoItems.Clear();
+                    SelectedForumItem.ListPopularVideoItems.Clear();
                     foreach (VideoItemBase item in _filterlist)
                     {
                         if (item.Title.Contains(TitleFilter))
-                            ListPopularVideoItems.Add(item);
+                            SelectedForumItem.ListPopularVideoItems.Add(item);
                     }
                 }
             }
             else
             {
                 if (!_filterlist.Any())
-                    _filterlist.AddRange(ListPopularVideoItems);
-                ListPopularVideoItems.Clear();
+                    _filterlist.AddRange(SelectedForumItem.ListPopularVideoItems);
+                SelectedForumItem.ListPopularVideoItems.Clear();
                 foreach (VideoItemBase item in _filterlist)
                 {
                     if (item.Title.ToLower().Contains(TitleFilter.ToLower()))
-                        ListPopularVideoItems.Add(item);
+                        SelectedForumItem.ListPopularVideoItems.Add(item);
                 }
             }
         }

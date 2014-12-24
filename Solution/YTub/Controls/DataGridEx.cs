@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace YTub.Common
+namespace YTub.Controls
 {
-    public class CustomDataGrid : DataGrid
+    public class DataGridEx : DataGrid
     {
 
-        public CustomDataGrid()
+        public DataGridEx()
         {
             this.SelectionChanged += CustomDataGrid_SelectionChanged;
         }
@@ -30,7 +25,7 @@ namespace YTub.Common
         }
 
         public static readonly DependencyProperty SelectedItemsListProperty =
-                DependencyProperty.Register("SelectedItemsList", typeof(IList), typeof(CustomDataGrid), new PropertyMetadata(null));
+                DependencyProperty.Register("SelectedItemsList", typeof(IList), typeof(DataGridEx), new PropertyMetadata(null));
 
         #endregion
     }

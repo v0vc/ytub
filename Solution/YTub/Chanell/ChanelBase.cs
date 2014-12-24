@@ -14,6 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using YTub.Common;
+using YTub.Controls;
 using YTub.Models;
 using YTub.Video;
 
@@ -73,7 +74,7 @@ namespace YTub.Chanell
             set
             {
                 _login = value;
-                OnPropertyChanged("Login");
+                OnPropertyChanged();
             }
         }
 
@@ -83,7 +84,7 @@ namespace YTub.Chanell
             set
             {
                 _password = value;
-                OnPropertyChanged("Password");
+                OnPropertyChanged();
             }
         }
 
@@ -107,7 +108,7 @@ namespace YTub.Chanell
             set
             {
                 _lastColumnHeader = value;
-                OnPropertyChanged("LastColumnHeader");
+                OnPropertyChanged();
             }
         }
 
@@ -117,7 +118,7 @@ namespace YTub.Chanell
             set
             {
                 _viewSeedColumnHeader = value;
-                OnPropertyChanged("ViewSeedColumnHeader");
+                OnPropertyChanged();
             }
         }
 
@@ -127,7 +128,7 @@ namespace YTub.Chanell
             set
             {
                 _durationColumnHeader = value;
-                OnPropertyChanged("DurationColumnHeader");
+                OnPropertyChanged();
             }
         }
 
@@ -145,7 +146,11 @@ namespace YTub.Chanell
 
         public bool IsFull { get; set; }
 
-        public TrulyObservableCollection<VideoItemBase> ListVideoItems { get; set; }
+        public ObservableCollectionEx<VideoItemBase> ListVideoItems { get; set; }
+
+        public ObservableCollectionEx<VideoItemBase> ListPopularVideoItems { get; set; }
+
+        public ObservableCollectionEx<VideoItemBase> ListSearchVideoItems { get; set; }
 
         public IList SelectedListVideoItems
         {
@@ -153,7 +158,7 @@ namespace YTub.Chanell
             set
             {
                 _selectedListVideoItems = value;
-                OnPropertyChanged("SelectedListVideoItems");
+                OnPropertyChanged();
             }
         }
 
@@ -163,7 +168,7 @@ namespace YTub.Chanell
             set
             {
                 _currentVideoItem = value;
-                OnPropertyChanged("CurrentVideoItem");
+                OnPropertyChanged();
             }
         }
 
@@ -173,7 +178,7 @@ namespace YTub.Chanell
             set
             {
                 _isFavorite = value;
-                OnPropertyChanged("IsFavorite");
+                OnPropertyChanged();
             }
         }
 
@@ -183,7 +188,7 @@ namespace YTub.Chanell
             set
             {
                 _titleFilter = value;
-                OnPropertyChanged("TitleFilter");
+                OnPropertyChanged();
                 Filter();
             }
         }
@@ -201,7 +206,9 @@ namespace YTub.Chanell
             ChanelName = chanelname;
             ChanelOwner = chanelowner;
             OrderNum = ordernum;
-            ListVideoItems = new TrulyObservableCollection<VideoItemBase>();
+            ListVideoItems = new ObservableCollectionEx<VideoItemBase>();
+            ListPopularVideoItems = new ObservableCollectionEx<VideoItemBase>();
+            ListSearchVideoItems = new ObservableCollectionEx<VideoItemBase>();
             Bgvdb.DoWork += _bgvdb_DoWork;
             Bgvdb.RunWorkerCompleted += _bgvdb_RunWorkerCompleted;
             var fn = new FileInfo(Subscribe.ChanelDb);
@@ -215,7 +222,7 @@ namespace YTub.Chanell
 
         private void ListVideoItems_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            var collection = sender as TrulyObservableCollection<VideoItemBase>;
+            var collection = sender as ObservableCollectionEx<VideoItemBase>;
             if (collection != null)
                 Model.MySubscribe.ResCount = collection.Count;
         }
@@ -241,9 +248,9 @@ namespace YTub.Chanell
 
         public abstract void DownloadVideoInternal(IList list);
 
-        public abstract void SearchItems(string key, TrulyObservableCollection<VideoItemBase> listSearchVideoItems);
+        public abstract void SearchItems(string key, ObservableCollectionEx<VideoItemBase> listSearchVideoItems);
 
-        public abstract void GetPopularItems(string key, TrulyObservableCollection<VideoItemBase> listPopularVideoItems);
+        public abstract void GetPopularItems(string key, ObservableCollectionEx<VideoItemBase> listPopularVideoItems);
 
         #endregion
 
