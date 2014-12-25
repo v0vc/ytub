@@ -6,6 +6,12 @@ Use Releases to get compiled version.
 
 ![Main Window](https://raw.githubusercontent.com/v0vc/Ytub/master/Screens/main.png)
 
+![Popular](https://raw.githubusercontent.com/v0vc/Ytub/master/Screens/popular.png)
+
+![Search YouTube](https://raw.githubusercontent.com/v0vc/Ytub/master/Screens/search_you.png)
+
+![Search RuTracker](https://raw.githubusercontent.com/v0vc/Ytub/master/Screens/search_rt.png)
+
 ![Settings](https://raw.githubusercontent.com/v0vc/Ytub/master/Screens/settings.png)
 
-![Popular](https://raw.githubusercontent.com/v0vc/Ytub/master/Screens/popular.png)
+
