@@ -133,14 +133,13 @@
     <Compile Include="Chanell\ChanelRt.cs" />
     <Compile Include="Chanell\ChanelTap.cs" />
     <Compile Include="Chanell\ChanelYou.cs" />
+    <Compile Include="Common\UIHelpers.cs" />
     <Compile Include="Controls\DataGridEx.cs" />
     <Compile Include="Common\FileHelper.cs" />
-    <Compile Include="Common\UIHelpers.cs" />
     <Compile Include="Video\VideoItemBase.cs" />
     <Compile Include="Video\VideoItemRt.cs" />
     <Compile Include="Video\VideoItemTap.cs" />
     <Compile Include="Video\VideoItemYou.cs" />
-    <Compile Include="Common\VS2012WindowStyle.cs" />
     <Compile Include="Common\WebClientEx.cs">
       <SubType>Component</SubType>
     </Compile>

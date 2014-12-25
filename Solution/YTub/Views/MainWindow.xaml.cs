@@ -1,18 +1,10 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
-using YoutubeExtractor;
 using YTub.Chanell;
 using YTub.Common;
-using YTub.Video;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 
 namespace YTub.Views

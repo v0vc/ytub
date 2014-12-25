@@ -24,6 +24,8 @@ namespace YTub.Models
 {
     public class SettingsModel : INotifyPropertyChanged
     {
+        #region Fields
+
         private string _dirpath;
 
         private string _mpcpath;
@@ -47,17 +49,24 @@ namespace YTub.Models
         private string _youheader;
 
         private string _ffheader;
+
         private bool _isAsync;
 
-        public SettingsView View { get; set; }
+        #endregion
+
+        #region Commands
+
         public RelayCommand SaveCommand { get; set; }
 
         public RelayCommand OpenDirCommand { get; set; }
 
         public RelayCommand UpdateFileCommand { get; set; }
 
-        #region Fields
+        #endregion
 
+        #region Properties
+
+        public SettingsView View { get; set; }
         public List<KeyValuePair<string, string>> Countries { get; set; }
 
         public KeyValuePair<string, string> SelectedCountry { get; set; }
@@ -70,7 +79,7 @@ namespace YTub.Models
             set
             {
                 _dirpath = value;
-                OnPropertyChanged("DirPath");
+                OnPropertyChanged();
             }
         }
 
@@ -80,7 +89,7 @@ namespace YTub.Models
             set
             {
                 _result = value;
-                OnPropertyChanged("Result");
+                OnPropertyChanged();
             }
         }
 
@@ -90,7 +99,7 @@ namespace YTub.Models
             set
             {
                 _mpcpath = value;
-                OnPropertyChanged("MpcPath");
+                OnPropertyChanged();
             }
         }
 
@@ -100,7 +109,7 @@ namespace YTub.Models
             set
             {
                 _youdlpath = value;
-                OnPropertyChanged("YoudlPath");
+                OnPropertyChanged();
             }
         }
 
@@ -110,7 +119,7 @@ namespace YTub.Models
             set
             {
                 _isSyncOnStart = value;
-                OnPropertyChanged("IsSyncOnStart");
+                OnPropertyChanged();
             }
         }
 
@@ -120,7 +129,7 @@ namespace YTub.Models
             set
             {
                 _isOnlyFavorites = value;
-                OnPropertyChanged("IsOnlyFavorites");
+                OnPropertyChanged();
             }
         }
 
@@ -130,7 +139,7 @@ namespace YTub.Models
             set
             {
                 _isAsync = value;
-                OnPropertyChanged("IsAsync");
+                OnPropertyChanged();
             }
         }
 
@@ -140,7 +149,7 @@ namespace YTub.Models
             set
             {
                 _isPopular = value;
-                OnPropertyChanged("IsPopular");
+                OnPropertyChanged();
             }
         }
 
@@ -150,7 +159,7 @@ namespace YTub.Models
             set
             {
                 _prValue = value;
-                OnPropertyChanged("PrValue");
+                OnPropertyChanged();
             }
         }
 
@@ -160,7 +169,7 @@ namespace YTub.Models
             set
             {
                 _isPrVisible = value;
-                OnPropertyChanged("IsPrVisible");
+                OnPropertyChanged();
             }
         }
 
@@ -170,7 +179,7 @@ namespace YTub.Models
             set
             {
                 _ffmpegpath = value;
-                OnPropertyChanged("FfmpegPath");
+                OnPropertyChanged();
             }
         }
 
@@ -180,7 +189,7 @@ namespace YTub.Models
             set
             {
                 _youheader = value;
-                OnPropertyChanged("YouHeader");
+                OnPropertyChanged();
             }
         }
 
@@ -190,7 +199,7 @@ namespace YTub.Models
             set
             {
                 _ffheader = value;
-                OnPropertyChanged("FfHeader");
+                OnPropertyChanged();
             }
         }
 

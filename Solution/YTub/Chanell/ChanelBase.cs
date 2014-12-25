@@ -98,7 +98,7 @@ namespace YTub.Chanell
             set
             {
                 _chanelName = value;
-                OnPropertyChanged("ChanelName");
+                OnPropertyChanged();
             }
         }
 
@@ -140,7 +140,7 @@ namespace YTub.Chanell
             set
             {
                 _isReady = value;
-                OnPropertyChanged("IsReady");
+                OnPropertyChanged();
             }
         }
 

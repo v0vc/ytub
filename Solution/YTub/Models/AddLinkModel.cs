@@ -16,9 +16,13 @@ namespace YTub.Models
 {
     public class AddLinkModel :INotifyPropertyChanged
     {
+        public RelayCommand GoCommand { get; set; }
+
         private string _link;
 
         private bool _isAudio;
+
+        #region Properties
 
         public AddLinkView View { get; set; }
 
@@ -27,12 +31,10 @@ namespace YTub.Models
             get { return _link; }
             set
             {
-                _link = value; 
-                OnPropertyChanged("Link");
+                _link = value;
+                OnPropertyChanged();
             }
         }
-
-        public RelayCommand GoCommand { get; set; }
 
         public bool IsAudio
         {
@@ -40,9 +42,11 @@ namespace YTub.Models
             set
             {
                 _isAudio = value;
-                OnPropertyChanged("IsAudio");
+                OnPropertyChanged();
             }
         }
+
+        #endregion
 
         public AddLinkModel(AddLinkView view)
         {
