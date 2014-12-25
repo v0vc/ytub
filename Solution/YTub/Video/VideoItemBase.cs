@@ -20,6 +20,8 @@ namespace YTub.Video
         } 
         #endregion
 
+        #region Fields
+
         private bool _isSynced;
 
         private bool _isHasFile;
@@ -36,7 +38,9 @@ namespace YTub.Video
 
         private bool _isDownloading;
 
-        #region Fields
+        #endregion
+
+        #region Properties
         public int Num { get; set; }
 
         public string Title { get; set; }

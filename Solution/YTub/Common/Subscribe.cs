@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using SevenZip;
 using YTub.Chanell;
+using YTub.Controls;
 using YTub.Models;
 using YTub.Video;
 using YTub.Views;
@@ -105,7 +106,7 @@ namespace YTub.Common
             set
             {
                 _resCount = value;
-                OnPropertyChanged("ResCount");
+                OnPropertyChanged();
             }
         }
 
@@ -115,9 +116,10 @@ namespace YTub.Common
             set
             {
                 _selectedTabIndex = value;
-                OnPropertyChanged("SelectedTabIndex");
+                OnPropertyChanged();
             }
         }
+
         public ChanelBase CurrentChanel
         {
             get { return _currentChanel; }
@@ -148,7 +150,7 @@ namespace YTub.Common
             set
             {
                 _filterForumItem = value;
-                OnPropertyChanged("FilterForumItem");
+                OnPropertyChanged();
                 FilterChannel();
             }
         }
@@ -167,7 +169,7 @@ namespace YTub.Common
             set
             {
                 _selectedListChanels = value;
-                OnPropertyChanged("SelectedListChanels");
+                OnPropertyChanged();
             }
         }
 
@@ -177,7 +179,7 @@ namespace YTub.Common
             set
             {
                 _result = value;
-                OnPropertyChanged("Result");
+                OnPropertyChanged();
             }
         }
 
@@ -187,7 +189,7 @@ namespace YTub.Common
             set
             {
                 _isOnlyFavorites = value;
-                OnPropertyChanged("IsOnlyFavorites");
+                OnPropertyChanged();
                 if (ChanelList.Any())
                     FilterChannel();
             }
@@ -199,7 +201,7 @@ namespace YTub.Common
             set
             {
                 _titleFilter = value;
-                OnPropertyChanged("TitleFilter");
+                OnPropertyChanged();
                 FilterVideos();
             }
         }
@@ -210,7 +212,7 @@ namespace YTub.Common
             set
             {
                 _searchKey = value;
-                OnPropertyChanged("SearchKey");
+                OnPropertyChanged();
             }
         }
 
@@ -220,7 +222,7 @@ namespace YTub.Common
             set
             {
                 _chanelFilter = value;
-                OnPropertyChanged("ChanelFilter");
+                OnPropertyChanged();
                 FilterChannel();
             }
         }
