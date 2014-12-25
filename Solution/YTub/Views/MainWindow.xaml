@@ -507,9 +507,9 @@
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding IsDownLoading}" Value="true">
                                                 <Setter TargetName="ProgressBar" Property="Visibility" Value="Visible"></Setter>
-                                                <Setter TargetName="ProgressBar" Property="Minimum" Value="{Binding DataContext.Model.MySubscribe.CurrentChanel.CurrentVideoItem.MinProgress, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"></Setter>
-                                                <Setter TargetName="ProgressBar" Property="Maximum" Value="{Binding DataContext.Model.MySubscribe.CurrentChanel.CurrentVideoItem.MaxProgress, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"></Setter>
-                                                <Setter TargetName="ProgressBar" Property="Value" Value="{Binding DataContext.Model.MySubscribe.CurrentChanel.CurrentVideoItem.PercentDownloaded, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"></Setter>
+                                                <Setter TargetName="ProgressBar" Property="Minimum" Value="{Binding MinProgress}" />
+                                                <Setter TargetName="ProgressBar" Property="Maximum" Value="{Binding MaxProgress}" />
+                                                <Setter TargetName="ProgressBar" Property="Value" Value="{Binding PercentDownloaded}" />
                                                 <Setter TargetName="ProgressBar" Property="Background" Value="LightGreen"></Setter>
                                             </DataTrigger>
                                         </DataTemplate.Triggers>
@@ -769,9 +769,9 @@
                                         <DataTemplate.Triggers>
                                             <DataTrigger Binding="{Binding IsDownLoading}" Value="true">
                                                 <Setter TargetName="ProgressBar" Property="Visibility" Value="Visible"></Setter>
-                                                <Setter TargetName="ProgressBar" Property="Minimum" Value="{Binding DataContext.Model.MySubscribe.SelectedForumItem.CurrentVideoItem.MinProgress, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"></Setter>
-                                                <Setter TargetName="ProgressBar" Property="Maximum" Value="{Binding DataContext.Model.MySubscribe.SelectedForumItem.CurrentVideoItem.MaxProgress, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"></Setter>
-                                                <Setter TargetName="ProgressBar" Property="Value" Value="{Binding DataContext.Model.MySubscribe.SelectedForumItem.CurrentVideoItem.PercentDownloaded, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"></Setter>
+                                                <Setter TargetName="ProgressBar" Property="Minimum" Value="{Binding MinProgress}" />
+                                                <Setter TargetName="ProgressBar" Property="Maximum" Value="{Binding MaxProgress}" />
+                                                <Setter TargetName="ProgressBar" Property="Value" Value="{Binding PercentDownloaded}" />
                                                 <Setter TargetName="ProgressBar" Property="Background" Value="LightGreen"></Setter>
                                             </DataTrigger>
                                         </DataTemplate.Triggers>
@@ -1043,9 +1043,9 @@
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding IsDownLoading}" Value="true">
                                                 <Setter TargetName="ProgressBar" Property="Visibility" Value="Visible"></Setter>
-                                                <Setter TargetName="ProgressBar" Property="Minimum" Value="{Binding DataContext.Model.MySubscribe.SelectedForumItem.CurrentVideoItem.MinProgress, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"></Setter>
-                                                <Setter TargetName="ProgressBar" Property="Maximum" Value="{Binding DataContext.Model.MySubscribe.SelectedForumItem.CurrentVideoItem.MaxProgress, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"></Setter>
-                                                <Setter TargetName="ProgressBar" Property="Value" Value="{Binding DataContext.Model.MySubscribe.SelectedForumItem.CurrentVideoItem.PercentDownloaded, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"></Setter>
+                                                <Setter TargetName="ProgressBar" Property="Minimum" Value="{Binding MinProgress}" />
+                                                <Setter TargetName="ProgressBar" Property="Maximum" Value="{Binding MaxProgress}" />
+                                                <Setter TargetName="ProgressBar" Property="Value" Value="{Binding PercentDownloaded}" />
                                                 <Setter TargetName="ProgressBar" Property="Background" Value="LightGreen"></Setter>
                                             </DataTrigger>
                                         </DataTemplate.Triggers>
