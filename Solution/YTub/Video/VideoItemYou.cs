@@ -134,5 +134,10 @@ namespace YTub.Video
             }
             return fn.Exists;
         }
+
+        public override double GetTorrentSize(string input)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

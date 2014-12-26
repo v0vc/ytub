@@ -49,8 +49,74 @@ namespace YTub.Common
             }
         }
 
+        public static void CreateDb(string dbfile)
+        {
+            Task t = Task.Run(() =>
+            {
+                var fnyoudl = new FileInfo(Path.Combine(AppDir, "youtube-dl", "youtube-dl.exe"));
+                var fnffmpeg = new FileInfo(Path.Combine(AppDir, "ffmpeg", "ffmpeg.exe"));
+                SQLiteConnection.CreateFile(dbfile);
+                var lstcom = new List<string>();
+                var zap = string.Format(@"CREATE TABLE {0} (v_id TEXT PRIMARY KEY,
+                                                        chanelowner TEXT,
+                                                        chanelname TEXT,
+                                                        servername TEXT,
+                                                        ordernum INT,
+                                                        isfavorite INT,
+                                                        url TEXT,
+                                                        title TEXT,
+                                                        viewcount INT,
+                                                        previewcount INT,
+                                                        duration INT,
+                                                        published DATETIME,
+                                                        description TEXT,
+                                                        cleartitle TEXT)", TableVideos);
+                lstcom.Add(zap);
+                var zapdir = string.Format(@"CREATE TABLE {0} (savepath TEXT, 
+                                                            pathtompc TEXT, 
+                                                            synconstart INT, 
+                                                            pathtoyoudl TEXT, 
+                                                            pathtoffmpeg TEXT, 
+                                                            isonlyfavor INT, 
+                                                            ispopular INT,
+                                                            asyncdl INT,
+                                                            culture TEXT,
+                                                            rtlogin TEXT,
+                                                            rtpassword TEXT,
+                                                            taplogin TEXT,
+                                                            tappassword TEXT)",
+                        TableSettings);
+                lstcom.Add(zapdir);
+                string insdir;
+                if (fnyoudl.Exists & fnffmpeg.Exists)
+                {
+                    insdir = string.Format(@"INSERT INTO '{0}' ('savepath', 'synconstart', 'isonlyfavor', 'ispopular', 'asyncdl', 'pathtoyoudl', 'pathtoffmpeg', 'culture') 
+                                                VALUES ('{1}', '0', '0', '0', '1', '{2}', '{3}', 'RU')",
+                                                TableSettings, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), fnyoudl.FullName, fnffmpeg.FullName);
+                }
+                else
+                {
+                    insdir = string.Format(@"INSERT INTO '{0}' ('savepath', 'synconstart', 'isonlyfavor', 'ispopular', 'asyncdl', 'culture') 
+                                                VALUES ('{1}', '0', '0', '0', '1', 'RU')",
+                                                TableSettings, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+                }
+                lstcom.Add(insdir);
+                using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
+                    foreach (string com in lstcom)
+                    {
+                        using (var sqlcommand = new SQLiteCommand(com, sqlcon))
+                        {
+                            sqlcon.Open();
+                            sqlcommand.ExecuteNonQuery();
+                            sqlcon.Close();
+                        }
+                    }
+            });
+            t.Wait();
+        }
+
         public static void InsertRecord(string dbfile, string id, string chanelowner, string chanelname, string servername, int ordernum, int isfavorite,
-            string url, string title, int viewcount, int previewcount, int duration, DateTime published,
+            string url, string title, int viewcount, int previewcount, double duration, DateTime published,
             string description)
         {
             Task t = Task.Run(() =>
@@ -411,70 +477,5 @@ namespace YTub.Common
             t.Wait();
         }
 
-        public static void CreateDb(string dbfile)
-        {
-            Task t = Task.Run(() =>
-            {
-                var fnyoudl = new FileInfo(Path.Combine(AppDir, "youtube-dl", "youtube-dl.exe"));
-                var fnffmpeg = new FileInfo(Path.Combine(AppDir, "ffmpeg", "ffmpeg.exe"));
-                SQLiteConnection.CreateFile(dbfile);
-                var lstcom = new List<string>();
-                var zap = string.Format(@"CREATE TABLE {0} (v_id TEXT PRIMARY KEY,
-                                                        chanelowner TEXT,
-                                                        chanelname TEXT,
-                                                        servername TEXT,
-                                                        ordernum INT,
-                                                        isfavorite INT,
-                                                        url TEXT,
-                                                        title TEXT,
-                                                        viewcount INT,
-                                                        previewcount INT,
-                                                        duration INT,
-                                                        published DATETIME,
-                                                        description TEXT,
-                                                        cleartitle TEXT)", TableVideos);
-                lstcom.Add(zap);
-                var zapdir = string.Format(@"CREATE TABLE {0} (savepath TEXT, 
-                                                            pathtompc TEXT, 
-                                                            synconstart INT, 
-                                                            pathtoyoudl TEXT, 
-                                                            pathtoffmpeg TEXT, 
-                                                            isonlyfavor INT, 
-                                                            ispopular INT,
-                                                            asyncdl INT,
-                                                            culture TEXT,
-                                                            rtlogin TEXT,
-                                                            rtpassword TEXT,
-                                                            taplogin TEXT,
-                                                            tappassword TEXT)",
-                        TableSettings);
-                lstcom.Add(zapdir);
-                string insdir;
-                if (fnyoudl.Exists & fnffmpeg.Exists)
-                {
-                    insdir = string.Format(@"INSERT INTO '{0}' ('savepath', 'synconstart', 'isonlyfavor', 'ispopular', 'asyncdl', 'pathtoyoudl', 'pathtoffmpeg', 'culture') 
-                                                VALUES ('{1}', '0', '0', '0', '1', '{2}', '{3}', 'RU')", 
-                                                TableSettings, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), fnyoudl.FullName, fnffmpeg.FullName);
-                }
-                else
-                {
-                    insdir = string.Format(@"INSERT INTO '{0}' ('savepath', 'synconstart', 'isonlyfavor', 'ispopular', 'asyncdl', 'culture') 
-                                                VALUES ('{1}', '0', '0', '0', '1', 'RU')",
-                                                TableSettings, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));    
-                }
-                lstcom.Add(insdir);
-                using (var sqlcon = new SQLiteConnection(string.Format("Data Source={0};Version=3;FailIfMissing=True", dbfile)))
-                foreach (string com in lstcom)
-                {
-                    using (var sqlcommand = new SQLiteCommand(com, sqlcon))
-                    {
-                        sqlcon.Open();
-                        sqlcommand.ExecuteNonQuery();
-                        sqlcon.Close();
-                    }
-                }
-            });
-            t.Wait();
-        }
     }
 }

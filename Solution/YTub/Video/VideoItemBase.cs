@@ -75,7 +75,7 @@ namespace YTub.Video
             }
         }
 
-        public int Duration { get; set; }
+        public double Duration { get; set; }
 
         public string VideoLink { get; set; }
 
@@ -86,6 +86,8 @@ namespace YTub.Video
         public string Region { get; set; }
 
         public string ServerName { get; set; }
+
+        public string HostBase { get; set; }
 
         public DateTime Published { get; set; }
 
@@ -176,6 +178,8 @@ namespace YTub.Video
 
         public abstract bool IsFileExist();
 
+        public abstract double GetTorrentSize(string input);
+
         public static string MakeValidFileName(string name)
         {
             string regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
@@ -196,6 +200,13 @@ namespace YTub.Video
                 ViewModelLocator.MvViewModel.Model.LogCollection.Add((text));
             else
                 Application.Current.Dispatcher.BeginInvoke((Action) (() => ViewModelLocator.MvViewModel.Model.LogCollection.Add((text))));
+        }
+
+        public static string ScrubHtml(string value)
+        {
+            var step1 = Regex.Replace(value, @"<[^>]+>|&nbsp;", "").Trim();
+            var step2 = Regex.Replace(step1, @"\s{2,}", " ");
+            return step2.Trim();
         }
     }
 }

@@ -538,7 +538,9 @@ namespace YTub.Common
 
             if (SelectedForumItem is ChanelTap)
             {
-                
+                var chanel = SelectedForumItem as ChanelTap;
+                chanel.IsFull = true;
+                chanel.SearchItems(SearchKey, chanel.ListSearchVideoItems);
             }
         }
 

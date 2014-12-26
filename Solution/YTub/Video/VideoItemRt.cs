@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Web;
 using HtmlAgilityPack;
 using YTub.Common;
 
@@ -14,16 +16,19 @@ namespace YTub.Video
 
         public VideoItemRt(DbDataRecord record) : base(record)
         {
+            HostBase = "rutracker.org";
             TotalDl = (int) record["previewcount"];
         }
 
         public VideoItemRt(HtmlNode node)
         {
+            HostBase = "rutracker.org";
             ServerName = "RuTracker";
             var counts = node.Descendants("a").Where(d =>d.Attributes.Contains("class") && d.Attributes["class"].Value.Equals("med tLink hl-tags bold"));
             foreach (HtmlNode htmlNode in counts)
             {
-                Title = htmlNode.InnerText;
+                //Title = ScrubHtml(htmlNode.InnerText).Replace("&quot;", @"""");
+                Title = HttpUtility.HtmlDecode(htmlNode.InnerText);
                 ClearTitle = MakeValidFileName(Title);
                 break;
             }
@@ -35,7 +40,7 @@ namespace YTub.Video
                 var sp = VideoLink.Split('=');
                 if (sp.Length == 2)
                     VideoID = sp[1];
-                Duration = GetTorrentSize(htmlNode.InnerText);
+                Duration = GetTorrentSize(ScrubHtml(htmlNode.InnerText));
                 
                 break;
             }
@@ -111,33 +116,43 @@ namespace YTub.Video
             return false;
         }
 
+        public override sealed double GetTorrentSize(string input)
+        {
+            double res = 0;
+            var sp = input.Split('&');
+            if (sp.Length == 2)
+            {
+                var size = sp[0].Trim();
+                if (size.Contains("GB"))
+                {
+                    if (double.TryParse(size.Replace("GB", string.Empty), NumberStyles.Number, CultureInfo.InvariantCulture, out res))
+                    {
+                        return res * 1000;
+                    }
+                }
+                if (size.Contains("MB"))
+                {
+                    if (double.TryParse(size.Replace("MB", string.Empty), NumberStyles.Number, CultureInfo.InvariantCulture, out res))
+                    {
+                        return res;
+                    }
+                }
+                if (size.Contains("KB"))
+                {
+                    if (double.TryParse(size.Replace("MB", string.Empty), NumberStyles.Number, CultureInfo.InvariantCulture, out res))
+                    {
+                        return res / 1000;
+                    }
+                }
+            }
+            return res;
+        }
+
         public string MakeTorrentFileName(bool isFullName)
         {
             if (isFullName)
                 return string.Format("{0}.torrent", ClearTitle);
-            return string.Format("[rutracker.org].t{0}.torrent", VideoID);
-        }
-
-        private static int GetTorrentSize(string input)
-        {
-            double res = 0;
-            var sp = input.Split(';');
-            if (sp.Length == 3)
-            {
-                var size = sp[0].Replace("&nbsp", string.Empty).Replace('.', ',');
-                if (double.TryParse(size, out res))
-                {
-                    var sp2 = sp[1].Split(' ');
-                    if (sp2.Length == 2)
-                    {
-                        if (sp2[0] == "GB")
-                            res = res*1000;
-                        else
-                            return (int) res;
-                    }
-                }
-            }
-            return (int) res;
+            return string.Format("[{0}].t{1}.torrent", HostBase, VideoID);
         }
     }
 }
