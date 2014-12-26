@@ -146,6 +146,26 @@ namespace YTub.Chanell
 
         public bool IsFull { get; set; }
 
+        public string Cname { get; set; }
+
+        public string Prefix { get; set; }
+
+        public string Searchkey { get; set; }
+
+        public string LoginUrl { get; set; }
+
+        public string UserUrl { get; set; }
+
+        public string SearchUrl { get; set; }
+
+        public string TopicUrl { get; set; }
+
+        public string IndexUrl { get; set; }
+
+        public string HostUrl { get; set; }
+
+        public string HostBase { get; set; }
+
         public ObservableCollectionEx<VideoItemBase> ListVideoItems { get; set; }
 
         public ObservableCollectionEx<VideoItemBase> ListPopularVideoItems { get; set; }
@@ -496,6 +516,15 @@ namespace YTub.Chanell
                         OrderNum, 0, item.VideoLink, item.Title, item.ViewCount, rt.TotalDl, item.Duration,
                         item.Published, item.Description);
                 }
+
+                if (item is VideoItemTap)
+                {
+                    var tap = item as VideoItemTap;
+                    Sqllite.InsertRecord(Subscribe.ChanelDb, item.VideoID, ChanelOwner, clearname, ChanelType,
+                        OrderNum, 0, item.VideoLink, item.Title, item.ViewCount, tap.TotalDl, item.Duration,
+                        item.Published, item.Description);
+                }
+
             }
         }
 

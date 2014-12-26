@@ -505,6 +505,11 @@
                                                 <Setter TargetName="Button" Property="IsEnabled" Value="False"></Setter>
                                                 <Setter TargetName="Button" Property="Content" Value="{Binding TotalDl}"></Setter>
                                             </DataTrigger>
+                                            <DataTrigger Binding="{Binding DataContext.Model.MySubscribe.CurrentChanel.ChanelType, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" Value="Tapochek">
+                                                <Setter TargetName="ProgressBar" Property="Visibility" Value="Hidden"></Setter>
+                                                <Setter TargetName="Button" Property="IsEnabled" Value="False"></Setter>
+                                                <Setter TargetName="Button" Property="Content" Value="{Binding TotalDl}"></Setter>
+                                            </DataTrigger>
                                             <DataTrigger Binding="{Binding IsDownLoading}" Value="true">
                                                 <Setter TargetName="ProgressBar" Property="Visibility" Value="Visible"></Setter>
                                                 <Setter TargetName="ProgressBar" Property="Minimum" Value="{Binding MinProgress}" />
@@ -1037,6 +1042,11 @@
                                         </Button>
                                         <DataTemplate.Triggers>
                                             <DataTrigger Binding="{Binding DataContext.Model.MySubscribe.SelectedForumItem.ChanelType, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" Value="RuTracker">
+                                                <Setter TargetName="ProgressBar" Property="Visibility" Value="Hidden"></Setter>
+                                                <Setter TargetName="Button" Property="IsEnabled" Value="False"></Setter>
+                                                <Setter TargetName="Button" Property="Content" Value="{Binding TotalDl}"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding DataContext.Model.MySubscribe.SelectedForumItem.ChanelType, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" Value="Tapochek">
                                                 <Setter TargetName="ProgressBar" Property="Visibility" Value="Hidden"></Setter>
                                                 <Setter TargetName="Button" Property="IsEnabled" Value="False"></Setter>
                                                 <Setter TargetName="Button" Property="Content" Value="{Binding TotalDl}"></Setter>
