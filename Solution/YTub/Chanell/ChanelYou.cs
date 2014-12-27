@@ -193,7 +193,15 @@ namespace YTub.Chanell
                         {
                             foreach (VideoItemBase item in ListVideoItems)
                             {
-                                item.IsHasFile = item.IsFileExist();
+                                if (Application.Current.Dispatcher.CheckAccess())
+                                {
+                                    item.IsHasFile = item.IsFileExist(); 
+                                }
+                                else
+                                {
+                                    VideoItemBase item1 = item;
+                                    Application.Current.Dispatcher.Invoke(() => item1.IsHasFile = item1.IsFileExist());
+                                }
                             }
                         }
                         else
@@ -288,7 +296,7 @@ namespace YTub.Chanell
             InitializeTimer();
 
             if (IsFull)
-                ListVideoItems.Clear();
+                Application.Current.Dispatcher.Invoke(() => ListVideoItems.Clear());
             _bgv.RunWorkerAsync("Get");
         }
 
